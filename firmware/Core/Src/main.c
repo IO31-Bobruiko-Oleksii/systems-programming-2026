@@ -102,7 +102,9 @@ int main(void)
   MX_TIM3_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  char boot_msg[] = "Heliostat boot OK\r\n";
+  HAL_UART_Transmit(&huart2, (uint8_t*)boot_msg, sizeof(boot_msg) - 1, HAL_MAX_DELAY);
+  uint32_t tick_count = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -112,6 +114,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    char tick_msg[32];
+    int len = snprintf(tick_msg, sizeof(tick_msg), "tick %lu\r\n", (unsigned long)tick_count++);
+    HAL_UART_Transmit(&huart2, (uint8_t*)tick_msg, len, HAL_MAX_DELAY);
+    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
