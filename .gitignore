@@ -1,0 +1,15 @@
+build/
+*.o
+*.d
+*.map
+*.elf
+*.bin
+*.hex
+.mxproject
+.settings/
+.metadata/
+.wokwi/
+docs/screenshots/last-run-serial.log
+.DS_Store
+*.swp
+.env
