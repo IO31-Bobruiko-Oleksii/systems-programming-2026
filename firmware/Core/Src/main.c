@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,6 +105,55 @@ int main(void)
   char boot_msg[] = "Heliostat boot OK\r\n";
   HAL_UART_Transmit(&huart2, (uint8_t*)boot_msg, sizeof(boot_msg) - 1, HAL_MAX_DELAY);
   uint32_t tick_count = 0;
+  
+  if (HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK) {
+    char *cal_err = "ADC1 calibration FAIL\r\n";
+    HAL_UART_Transmit(&huart2, (uint8_t*)cal_err, strlen(cal_err), HAL_MAX_DELAY);
+  } else {
+    char *cal_ok = "ADC1 calibration OK\r\n";
+    HAL_UART_Transmit(&huart2, (uint8_t*)cal_ok, strlen(cal_ok), HAL_MAX_DELAY);
+}  
+  // ADC1
+  uint32_t adc_values[4] = {0};
+  HAL_StatusTypeDef adc_status = HAL_ADC_Start(&hadc1);
+  if (adc_status == HAL_OK) {
+    for (int i = 0; i < 4 && adc_status == HAL_OK; i++) {
+      adc_status = HAL_ADC_PollForConversion(&hadc1, 1000);
+      if (adc_status == HAL_OK) adc_values[i] = HAL_ADC_GetValue(&hadc1);
+    }
+    HAL_ADC_Stop(&hadc1);
+  }
+  char adc_msg[64];
+  int adc_len = (adc_status == HAL_OK)
+    ? snprintf(adc_msg, sizeof(adc_msg), "ADC1 OK: %lu %lu %lu %lu\r\n",
+               adc_values[0], adc_values[1], adc_values[2], adc_values[3])
+    : snprintf(adc_msg, sizeof(adc_msg), "ADC1 FAIL (status=%d)\r\n", (int)adc_status);
+  HAL_UART_Transmit(&huart2, (uint8_t*)adc_msg, adc_len, HAL_MAX_DELAY);
+
+  // SPI1
+  uint8_t spi_tx = 0xFF, spi_rx = 0x00;
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET); // CS low
+  HAL_StatusTypeDef spi_status = HAL_SPI_TransmitReceive(&hspi1, &spi_tx, &spi_rx, 1, 100);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);   // CS high
+  const char *spi_msg = (spi_status == HAL_OK) ? "SPI1 OK\r\n" : "SPI1 FAIL\r\n";
+  HAL_UART_Transmit(&huart2, (uint8_t*)spi_msg, (uint16_t)strlen(spi_msg), HAL_MAX_DELAY);
+
+  // TIM3 PWM
+  uint32_t tim_clk = HAL_RCC_GetPCLK1Freq();
+  uint32_t psc = (tim_clk / 1000000U) - 1U;
+  __HAL_TIM_SET_PRESCALER(&htim3, psc);
+  __HAL_TIM_SET_AUTORELOAD(&htim3, 19999U);
+  HAL_TIM_GenerateEvent(&htim3, TIM_EVENTSOURCE_UPDATE);
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 1500U); 
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 1500U);
+
+  HAL_StatusTypeDef pwm1_status = HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_StatusTypeDef pwm2_status = HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  char pwm_msg[56];
+  int pwm_len = snprintf(pwm_msg, sizeof(pwm_msg), "TIM3 PWM %s (tim_clk=%lu psc=%lu)\r\n",
+                          (pwm1_status == HAL_OK && pwm2_status == HAL_OK) ? "OK" : "FAIL",
+                          (unsigned long)tim_clk, (unsigned long)psc);
+  HAL_UART_Transmit(&huart2, (uint8_t*)pwm_msg, pwm_len, HAL_MAX_DELAY);
   /* USER CODE END 2 */
 
   /* Infinite loop */

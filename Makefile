@@ -11,7 +11,7 @@ build: image
 		make -C firmware all
 
 flash: build
-	wokwi-cli --timeout 15000 --serial-log-file docs/screenshots/last-run-serial.log --expect-text "Heliostat boot OK"
+	wokwi-cli --timeout 15000 --serial-log-file docs/screenshots/last-run-serial.log --expect-text "TIM3 PWM"
 
 monitor:
 	wokwi-cli --timeout 0
