@@ -168,6 +168,17 @@ int main(void)
 
   HAL_StatusTypeDef pwm1_status = HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_StatusTypeDef pwm2_status = HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  char gpio_msg[96];
+  int gpio_len = snprintf(gpio_msg, sizeof(gpio_msg),
+      "TIM3 CCMR1=%04lX | GPIOC MODER=%08lX AFRL=%08lX\r\n",
+      (unsigned long)TIM3->CCMR1, (unsigned long)GPIOC->MODER,
+      (unsigned long)GPIOC->AFR[0]);
+  HAL_UART_Transmit(&huart2, (uint8_t*)gpio_msg, gpio_len, HAL_MAX_DELAY);
+  char tim_msg[80];
+  int tim_len = snprintf(tim_msg, sizeof(tim_msg),
+      "TIM3 regs: CCER=%04lX CCR1=%lu CCR2=%lu\r\n",
+      (unsigned long)TIM3->CCER, (unsigned long)TIM3->CCR1, (unsigned long)TIM3->CCR2);
+  HAL_UART_Transmit(&huart2, (uint8_t*)tim_msg, tim_len, HAL_MAX_DELAY);
   char pwm_msg[56];
   int pwm_len = snprintf(pwm_msg, sizeof(pwm_msg), "TIM3 PWM %s (tim_clk=%lu psc=%lu)\r\n",
                           (pwm1_status == HAL_OK && pwm2_status == HAL_OK) ? "OK" : "FAIL",
@@ -451,9 +462,9 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET);

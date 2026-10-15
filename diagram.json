@@ -21,7 +21,7 @@
     [ "nucleo:PB1", "pot3:SIG", "green", [ "h0" ] ],
     [ "nucleo:PB2", "pot4:SIG", "green", [ "h0" ] ],
     [ "servo1:PWM", "nucleo:PC6", "green", [ "h0" ] ],
-    [ "servo2:PWM", "nucleo:PC14", "green", [ "h0" ] ],
+    [ "servo2:PWM", "nucleo:PC7", "green", [ "h0" ] ],
     [ "sd1:SCK", "nucleo:PA5", "green", [ "h0" ] ],
     [ "sd1:DO", "nucleo:PA6", "green", [ "h0" ] ],
     [ "sd1:DI", "nucleo:PA7", "green", [ "h0" ] ],
@@ -46,8 +46,8 @@
     ["nucleo:PB9",  "logic1:D3", "gray", []],
     ["nucleo:PA2",  "logic1:D4", "gray", []],
     ["nucleo:PC6",  "logic1:D5", "gray", []],
-    ["nucleo:PC14", "logic1:D6", "gray", []],
-    ["nucleo:GND.5","logic1:GND","black",[]]
+    ["nucleo:PC7",  "logic1:D6", "gray", []],
+    ["nucleo:GND.5",  "logic1:GND","black",[]]
   ],
   "dependencies": {}
 }
