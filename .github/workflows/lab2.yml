@@ -1,0 +1,38 @@
+on:
+  push:
+  pull_request:
+
+jobs:
+  host-tests:
+    name: Layer check and host unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: make check (dependency rule + unit tests with fakes)
+        run: make check
+
+  firmware:
+    name: Firmware build (Docker toolchain image)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: make build
+        run: |
+          set -o pipefail
+          make build 2>&1 | tee build.log
+      - name: Fail on compiler warnings
+        run: |
+          if grep -E '\.[ch]:[0-9]+:[0-9]+: warning:' build.log; then
+            echo "compiler warnings found"
+            exit 1
+          fi
+          echo "no compiler warnings"
+      - name: Memory use
+        run: grep -B1 -A1 'text.*data.*bss' build.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: |
+            firmware/build/firmware.elf
+            firmware/build/firmware.hex
+            firmware/build/firmware.bin
