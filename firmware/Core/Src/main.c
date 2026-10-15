@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include "plat_pwm.h"
 #include "servo.h"
+#include "plat_adc.h"
+#include "pots.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,23 +70,6 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-  static HAL_StatusTypeDef adc_read_one(uint32_t channel, uint32_t *out)
-  {
-    static const uint32_t all[4] = { ADC_CHANNEL_0, ADC_CHANNEL_1,
-                                   ADC_CHANNEL_18, ADC_CHANNEL_19 };
-    ADC_ChannelConfTypeDef cfg = {0};
-    cfg.SamplingTime = ADC_SAMPLINGTIME_COMMON_1;  /* use the same value MX_ADC1_Init sets */
-    for (int i = 0; i < 4; i++) {
-      cfg.Channel = all[i];
-      cfg.Rank = (all[i] == channel) ? ADC_RANK_CHANNEL_NUMBER : ADC_RANK_NONE;
-      if (HAL_ADC_ConfigChannel(&hadc1, &cfg) != HAL_OK) return HAL_ERROR;
-    }
-    HAL_StatusTypeDef st = HAL_ADC_Start(&hadc1);
-    if (st == HAL_OK) st = HAL_ADC_PollForConversion(&hadc1, 100);
-    if (st == HAL_OK) *out = HAL_ADC_GetValue(&hadc1);
-    HAL_ADC_Stop(&hadc1);
-    return st;
-  }
 
 /* USER CODE END 0 */
 
@@ -126,7 +111,7 @@ int main(void)
   HAL_UART_Transmit(&huart2, (uint8_t*)boot_msg, sizeof(boot_msg) - 1, HAL_MAX_DELAY);
   uint32_t tick_count = 0;
   
-  if (HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK) {
+  if (plat_adc_init() != PLAT_OK) {
     char *cal_err = "ADC1 calibration FAIL\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t*)cal_err, strlen(cal_err), HAL_MAX_DELAY);
   } else {
@@ -134,19 +119,14 @@ int main(void)
     HAL_UART_Transmit(&huart2, (uint8_t*)cal_ok, strlen(cal_ok), HAL_MAX_DELAY);
 }  
   // ADC1
-  uint32_t adc_values[4] = {0};
+  pots_t pots = { { 0U, 0U, 0U, 0U } };
   int adc_fail_at = -1;
-  HAL_StatusTypeDef adc_status = HAL_OK;
-  static const uint32_t adc_ch[4] = { ADC_CHANNEL_0, ADC_CHANNEL_1,
-                                      ADC_CHANNEL_18, ADC_CHANNEL_19 };
-  for (int i = 0; i < 4; i++) {
-    adc_status = adc_read_one(adc_ch[i], &adc_values[i]);
-    if (adc_status != HAL_OK) { adc_fail_at = i; break; }
-  }
+  plat_status_t adc_status = pots_read_all(&pots, &adc_fail_at);
   char adc_msg[64];
-  int adc_len = (adc_status == HAL_OK)
-    ? snprintf(adc_msg, sizeof(adc_msg), "ADC1 OK: %lu %lu %lu %lu\r\n",
-               adc_values[0], adc_values[1], adc_values[2], adc_values[3])
+  int adc_len = (adc_status == PLAT_OK)
+    ? snprintf(adc_msg, sizeof(adc_msg), "ADC1 OK: %u %u %u %u\r\n",
+               (unsigned)pots.raw[0], (unsigned)pots.raw[1],
+               (unsigned)pots.raw[2], (unsigned)pots.raw[3])
     : snprintf(adc_msg, sizeof(adc_msg), "ADC1 FAIL (status=%d at=%d)\r\n",
                (int)adc_status, adc_fail_at);
   HAL_UART_Transmit(&huart2, (uint8_t*)adc_msg, adc_len, HAL_MAX_DELAY);
