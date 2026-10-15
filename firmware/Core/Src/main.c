@@ -27,6 +27,8 @@
 #include "servo.h"
 #include "plat_adc.h"
 #include "pots.h"
+#include "plat_spi.h"
+#include "sdcard.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -132,13 +134,33 @@ int main(void)
   HAL_UART_Transmit(&huart2, (uint8_t*)adc_msg, adc_len, HAL_MAX_DELAY);
 
   // SPI1
-  uint8_t spi_tx = 0xFF, spi_rx = 0x00;
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET); // CS low
-  HAL_StatusTypeDef spi_status = HAL_SPI_TransmitReceive(&hspi1, &spi_tx, &spi_rx, 1, 100);
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);   // CS high
-  const char *spi_msg = (spi_status == HAL_OK) ? "SPI1 OK\r\n" : "SPI1 FAIL\r\n";
+  static const char *const sd_type_name[] = { "NONE", "V1", "V2", "V2HC" };
+  static uint8_t sd_block[SDCARD_BLOCK_SIZE];
+  sdcard_t sd = { SD_TYPE_NONE };
+  char sd_msg[64];
+  int sd_len;
+  plat_status_t spi_status = plat_spi_init();
+  const char *spi_msg = (spi_status == PLAT_OK) ? "SPI1 OK\r\n" : "SPI1 FAIL\r\n";
   HAL_UART_Transmit(&huart2, (uint8_t*)spi_msg, (uint16_t)strlen(spi_msg), HAL_MAX_DELAY);
 
+  plat_status_t sd_status = sdcard_init(&sd);
+  sd_len = (sd_status == PLAT_OK)
+    ? snprintf(sd_msg, sizeof(sd_msg), "SD init OK type=%s\r\n", sd_type_name[sd.type])
+    : snprintf(sd_msg, sizeof(sd_msg), "SD init FAIL (status=%d)\r\n", (int)sd_status);
+  HAL_UART_Transmit(&huart2, (uint8_t*)sd_msg, sd_len, HAL_MAX_DELAY);
+
+  if (sd_status == PLAT_OK) {
+    sd_status = sdcard_read_block(&sd, 0U, sd_block);
+    if (sd_status != PLAT_OK) {
+      sd_len = snprintf(sd_msg, sizeof(sd_msg), "SD block0 FAIL (status=%d)\r\n", (int)sd_status);
+    } else {
+      sd_len = snprintf(sd_msg, sizeof(sd_msg), "SD block0 %s sig=%02X%02X\r\n",
+                        sdcard_boot_signature_ok(sd_block) ? "OK" : "BADSIG",
+                        (unsigned)sd_block[510], (unsigned)sd_block[511]);
+    }
+    HAL_UART_Transmit(&huart2, (uint8_t*)sd_msg, sd_len, HAL_MAX_DELAY);
+  }
+  
     // TIM3 PWM and servos
   servo_t servo1, servo2;
   plat_status_t pwm_status = plat_pwm_init();
