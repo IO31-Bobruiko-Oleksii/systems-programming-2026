@@ -9,6 +9,7 @@ OUT=build
 # "<test source without .c>|<code under test and fakes it links against>"
 TESTS=(
   "test_servo|../firmware/devices/src/servo.c fakes/fake_pwm.c"
+ "test_pots|../firmware/devices/src/pots.c fakes/fake_adc.c"
 )
 
 rm -rf "$OUT"
