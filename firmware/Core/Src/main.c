@@ -23,6 +23,8 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
+#include "plat_pwm.h"
+#include "servo.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -157,32 +159,19 @@ int main(void)
   const char *spi_msg = (spi_status == HAL_OK) ? "SPI1 OK\r\n" : "SPI1 FAIL\r\n";
   HAL_UART_Transmit(&huart2, (uint8_t*)spi_msg, (uint16_t)strlen(spi_msg), HAL_MAX_DELAY);
 
-  // TIM3 PWM
-  uint32_t tim_clk = HAL_RCC_GetPCLK1Freq();
-  uint32_t psc = (tim_clk / 1000000U) - 1U;
-  __HAL_TIM_SET_PRESCALER(&htim3, psc);
-  __HAL_TIM_SET_AUTORELOAD(&htim3, 19999U);
-  HAL_TIM_GenerateEvent(&htim3, TIM_EVENTSOURCE_UPDATE);
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 1500U); 
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 1500U);
-
-  HAL_StatusTypeDef pwm1_status = HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-  HAL_StatusTypeDef pwm2_status = HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-  char gpio_msg[96];
-  int gpio_len = snprintf(gpio_msg, sizeof(gpio_msg),
-      "TIM3 CCMR1=%04lX | GPIOC MODER=%08lX AFRL=%08lX\r\n",
-      (unsigned long)TIM3->CCMR1, (unsigned long)GPIOC->MODER,
-      (unsigned long)GPIOC->AFR[0]);
-  HAL_UART_Transmit(&huart2, (uint8_t*)gpio_msg, gpio_len, HAL_MAX_DELAY);
-  char tim_msg[80];
-  int tim_len = snprintf(tim_msg, sizeof(tim_msg),
-      "TIM3 regs: CCER=%04lX CCR1=%lu CCR2=%lu\r\n",
-      (unsigned long)TIM3->CCER, (unsigned long)TIM3->CCR1, (unsigned long)TIM3->CCR2);
-  HAL_UART_Transmit(&huart2, (uint8_t*)tim_msg, tim_len, HAL_MAX_DELAY);
-  char pwm_msg[56];
+    // TIM3 PWM and servos
+  servo_t servo1, servo2;
+  plat_status_t pwm_status = plat_pwm_init();
+  if (pwm_status == PLAT_OK) {
+    pwm_status = servo_init(&servo1, PLAT_PWM_CH_SERVO1);
+  }
+  if (pwm_status == PLAT_OK) {
+    pwm_status = servo_init(&servo2, PLAT_PWM_CH_SERVO2);
+  }
+  char pwm_msg[64];
   int pwm_len = snprintf(pwm_msg, sizeof(pwm_msg), "TIM3 PWM %s (tim_clk=%lu psc=%lu)\r\n",
-                          (pwm1_status == HAL_OK && pwm2_status == HAL_OK) ? "OK" : "FAIL",
-                          (unsigned long)tim_clk, (unsigned long)psc);
+                         (pwm_status == PLAT_OK) ? "OK" : "FAIL",
+                         (unsigned long)HAL_RCC_GetPCLK1Freq(), (unsigned long)TIM3->PSC);
   HAL_UART_Transmit(&huart2, (uint8_t*)pwm_msg, pwm_len, HAL_MAX_DELAY);
   /* USER CODE END 2 */
 
