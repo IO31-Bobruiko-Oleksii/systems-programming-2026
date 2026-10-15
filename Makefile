@@ -22,3 +22,9 @@ clean:
 .PHONY: test
 test:
 	@tests/run.sh
+
+.PHONY: check-deps check
+check-deps:
+	@scripts/check_deps.sh
+
+check: check-deps test
