@@ -1,0 +1,5 @@
+name: 'boot: start-up self-test, every bus once'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 60ms

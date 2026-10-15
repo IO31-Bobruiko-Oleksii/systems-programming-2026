@@ -1,0 +1,11 @@
+name: 'console: help, unknown command, over-long line'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - write-serial: "help\n"
+  - wait-serial: 'CMD help OK commands=help,selftest,adc,servo,sd'
+  - write-serial: "foo\n"
+  - wait-serial: 'CMD foo FAIL reason=unknown'
+  - write-serial: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
+  - wait-serial: 'CMD ? FAIL reason=too-long'
+  - delay: 5ms

@@ -1,0 +1,13 @@
+name: 'servo: pulse width at 0, 180 and 45 degrees'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - write-serial: "servo 1 0\n"
+  - wait-serial: 'CMD servo OK ch=1 angle=0 pulse_us=1000'
+  - delay: 60ms
+  - write-serial: "servo 1 180\n"
+  - wait-serial: 'CMD servo OK ch=1 angle=180 pulse_us=2000'
+  - delay: 60ms
+  - write-serial: "servo 2 45\n"
+  - wait-serial: 'CMD servo OK ch=2 angle=45 pulse_us=1250'
+  - delay: 60ms

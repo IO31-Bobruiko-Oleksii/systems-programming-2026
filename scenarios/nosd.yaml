@@ -1,0 +1,5 @@
+name: 'nosd: anomaly, MISO wire of the card cut (scenarios/nosd.diagram.json)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=4 failed=1'
+  - delay: 20ms

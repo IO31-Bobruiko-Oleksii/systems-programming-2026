@@ -6,16 +6,33 @@ extern ADC_HandleTypeDef hadc1;
 
 #define ADC_POLL_TIMEOUT_MS  100U
 
+#define ADC_MARKER_PORT  GPIOB
+#define ADC_MARKER_PIN   GPIO_PIN_3
+
 static const uint32_t adc_channel[PLAT_ADC_CHANNELS] = {
     ADC_CHANNEL_0, ADC_CHANNEL_1, ADC_CHANNEL_18, ADC_CHANNEL_19
 };
 
+static void marker_init(void)
+{
+    GPIO_InitTypeDef gpio = {0};
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    HAL_GPIO_WritePin(ADC_MARKER_PORT, ADC_MARKER_PIN, GPIO_PIN_RESET);
+    gpio.Pin = ADC_MARKER_PIN;
+    gpio.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio.Pull = GPIO_NOPULL;
+    gpio.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(ADC_MARKER_PORT, &gpio);
+}
+
 plat_status_t plat_adc_init(void)
 {
+    marker_init();
     return (HAL_ADCEx_Calibration_Start(&hadc1) == HAL_OK) ? PLAT_OK : PLAT_ERR_BUS;
 }
 
-plat_status_t plat_adc_read(uint8_t channel, uint16_t *raw)
+static plat_status_t convert(uint8_t channel, uint16_t *raw)
 {
     ADC_ChannelConfTypeDef cfg = {0};
     HAL_StatusTypeDef st;
@@ -47,4 +64,14 @@ plat_status_t plat_adc_read(uint8_t channel, uint16_t *raw)
         return PLAT_OK;
     }
     return (st == HAL_TIMEOUT) ? PLAT_ERR_TIMEOUT : PLAT_ERR_BUS;
+}
+
+plat_status_t plat_adc_read(uint8_t channel, uint16_t *raw)
+{
+    plat_status_t status;
+
+    HAL_GPIO_WritePin(ADC_MARKER_PORT, ADC_MARKER_PIN, GPIO_PIN_SET);
+    status = convert(channel, raw);
+    HAL_GPIO_WritePin(ADC_MARKER_PORT, ADC_MARKER_PIN, GPIO_PIN_RESET);
+    return status;
 }

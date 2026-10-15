@@ -1,0 +1,8 @@
+name: 'sdread: single-block read of block 0 over SPI at 6 MHz'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 5ms
+  - write-serial: "sd read 0\n"
+  - wait-serial: 'CMD sd-read OK block=0 sig=55AA'
+  - delay: 5ms

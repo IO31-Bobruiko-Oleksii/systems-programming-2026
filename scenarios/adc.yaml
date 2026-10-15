@@ -1,0 +1,8 @@
+name: 'adc: one console conversion of all four channels, D7 marks each read'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 5ms
+  - write-serial: "adc\n"
+  - wait-serial: 'CMD adc OK raw=1025,2050,3074,4095'
+  - delay: 5ms

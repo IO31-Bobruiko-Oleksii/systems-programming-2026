@@ -47,6 +47,7 @@
     ["nucleo:PA2",  "logic1:D4", "gray", []],
     ["nucleo:PC6",  "logic1:D5", "gray", []],
     ["nucleo:PC7",  "logic1:D6", "gray", []],
+    ["nucleo:PB3",  "logic1:D7", "gray", []],
     ["nucleo:GND.5",  "logic1:GND","black",[]]
   ],
   "dependencies": {}

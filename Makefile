@@ -28,3 +28,7 @@ check-deps:
 	@scripts/check_deps.sh
 
 check: check-deps test
+
+.PHONY: capture
+capture:
+	scripts/capture.sh $(NAME)
