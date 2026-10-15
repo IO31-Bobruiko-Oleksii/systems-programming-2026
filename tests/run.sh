@@ -10,6 +10,7 @@ OUT=build
 TESTS=(
   "test_servo|../firmware/devices/src/servo.c fakes/fake_pwm.c"
  "test_pots|../firmware/devices/src/pots.c fakes/fake_adc.c"
+ "test_sdcard|../firmware/devices/src/sdcard.c fakes/fake_sdcard.c"
 )
 
 rm -rf "$OUT"
