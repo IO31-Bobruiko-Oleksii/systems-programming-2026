@@ -18,3 +18,7 @@ monitor:
 
 clean:
 	rm -rf firmware/build
+
+.PHONY: test
+test:
+	@tests/run.sh

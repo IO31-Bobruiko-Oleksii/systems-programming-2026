@@ -12,4 +12,4 @@ build/
 docs/screenshots/last-run-serial.log
 .DS_Store
 *.swp
-.env
+.envtests/build/
