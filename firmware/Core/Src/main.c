@@ -21,14 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <string.h>
-#include <stdio.h>
-#include "plat_pwm.h"
-#include "servo.h"
-#include "plat_adc.h"
-#include "pots.h"
-#include "plat_spi.h"
-#include "sdcard.h"
+#include "plat_uart.h"
+#include "app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +50,7 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+static app_t app;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,72 +103,10 @@ int main(void)
   MX_TIM3_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  char boot_msg[] = "Heliostat boot OK\r\n";
-  HAL_UART_Transmit(&huart2, (uint8_t*)boot_msg, sizeof(boot_msg) - 1, HAL_MAX_DELAY);
-  uint32_t tick_count = 0;
-  
-  if (plat_adc_init() != PLAT_OK) {
-    char *cal_err = "ADC1 calibration FAIL\r\n";
-    HAL_UART_Transmit(&huart2, (uint8_t*)cal_err, strlen(cal_err), HAL_MAX_DELAY);
-  } else {
-    char *cal_ok = "ADC1 calibration OK\r\n";
-    HAL_UART_Transmit(&huart2, (uint8_t*)cal_ok, strlen(cal_ok), HAL_MAX_DELAY);
-}  
-  // ADC1
-  pots_t pots = { { 0U, 0U, 0U, 0U } };
-  int adc_fail_at = -1;
-  plat_status_t adc_status = pots_read_all(&pots, &adc_fail_at);
-  char adc_msg[64];
-  int adc_len = (adc_status == PLAT_OK)
-    ? snprintf(adc_msg, sizeof(adc_msg), "ADC1 OK: %u %u %u %u\r\n",
-               (unsigned)pots.raw[0], (unsigned)pots.raw[1],
-               (unsigned)pots.raw[2], (unsigned)pots.raw[3])
-    : snprintf(adc_msg, sizeof(adc_msg), "ADC1 FAIL (status=%d at=%d)\r\n",
-               (int)adc_status, adc_fail_at);
-  HAL_UART_Transmit(&huart2, (uint8_t*)adc_msg, adc_len, HAL_MAX_DELAY);
-
-  // SPI1
-  static const char *const sd_type_name[] = { "NONE", "V1", "V2", "V2HC" };
-  static uint8_t sd_block[SDCARD_BLOCK_SIZE];
-  sdcard_t sd = { SD_TYPE_NONE };
-  char sd_msg[64];
-  int sd_len;
-  plat_status_t spi_status = plat_spi_init();
-  const char *spi_msg = (spi_status == PLAT_OK) ? "SPI1 OK\r\n" : "SPI1 FAIL\r\n";
-  HAL_UART_Transmit(&huart2, (uint8_t*)spi_msg, (uint16_t)strlen(spi_msg), HAL_MAX_DELAY);
-
-  plat_status_t sd_status = sdcard_init(&sd);
-  sd_len = (sd_status == PLAT_OK)
-    ? snprintf(sd_msg, sizeof(sd_msg), "SD init OK type=%s\r\n", sd_type_name[sd.type])
-    : snprintf(sd_msg, sizeof(sd_msg), "SD init FAIL (status=%d)\r\n", (int)sd_status);
-  HAL_UART_Transmit(&huart2, (uint8_t*)sd_msg, sd_len, HAL_MAX_DELAY);
-
-  if (sd_status == PLAT_OK) {
-    sd_status = sdcard_read_block(&sd, 0U, sd_block);
-    if (sd_status != PLAT_OK) {
-      sd_len = snprintf(sd_msg, sizeof(sd_msg), "SD block0 FAIL (status=%d)\r\n", (int)sd_status);
-    } else {
-      sd_len = snprintf(sd_msg, sizeof(sd_msg), "SD block0 %s sig=%02X%02X\r\n",
-                        sdcard_boot_signature_ok(sd_block) ? "OK" : "BADSIG",
-                        (unsigned)sd_block[510], (unsigned)sd_block[511]);
-    }
-    HAL_UART_Transmit(&huart2, (uint8_t*)sd_msg, sd_len, HAL_MAX_DELAY);
-  }
-  
-    // TIM3 PWM and servos
-  servo_t servo1, servo2;
-  plat_status_t pwm_status = plat_pwm_init();
-  if (pwm_status == PLAT_OK) {
-    pwm_status = servo_init(&servo1, PLAT_PWM_CH_SERVO1);
-  }
-  if (pwm_status == PLAT_OK) {
-    pwm_status = servo_init(&servo2, PLAT_PWM_CH_SERVO2);
-  }
-  char pwm_msg[64];
-  int pwm_len = snprintf(pwm_msg, sizeof(pwm_msg), "TIM3 PWM %s (tim_clk=%lu psc=%lu)\r\n",
-                         (pwm_status == PLAT_OK) ? "OK" : "FAIL",
-                         (unsigned long)HAL_RCC_GetPCLK1Freq(), (unsigned long)TIM3->PSC);
-  HAL_UART_Transmit(&huart2, (uint8_t*)pwm_msg, pwm_len, HAL_MAX_DELAY);
+  static const char banner[] = "Heliostat boot OK\r\n";
+  (void)plat_uart_write((const uint8_t *)banner, sizeof banner - 1U);
+  app_init(&app);
+  (void)app_selftest(&app);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -184,10 +116,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    char tick_msg[32];
-    int len = snprintf(tick_msg, sizeof(tick_msg), "tick %lu\r\n", (unsigned long)tick_count++);
-    HAL_UART_Transmit(&huart2, (uint8_t*)tick_msg, len, HAL_MAX_DELAY);
-    HAL_Delay(1000);
+        app_poll(&app);
   }
   /* USER CODE END 3 */
 }

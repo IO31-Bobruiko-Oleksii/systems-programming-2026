@@ -11,7 +11,7 @@ build: image
 		make -C firmware -f build.mk all
 
 flash: build
-	wokwi-cli --timeout 15000 --serial-log-file docs/screenshots/last-run-serial.log --expect-text "TIM3 PWM"
+	wokwi-cli --timeout 15000 --serial-log-file docs/screenshots/last-run-serial.log --expect-text "SELFTEST END total=5 passed=5 failed=0"
 
 monitor:
 	wokwi-cli --timeout 0
