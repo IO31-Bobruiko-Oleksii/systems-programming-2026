@@ -1,0 +1,61 @@
+capture nosd.vcd  sha256 6722874b3bf476c5  duration 52.187 ms  timestamps on a 25 ns grid
+edges per channel: D0=736  D1=51  D2=0  D3=3  D4=1569  D5=4  D6=4  D7=8
+
+UART D4: 248 bytes, framing errors 0, fitted bit time 8669.4 ns = 115348 baud (+0.13 % vs 115200; BRR 104 at 12 MHz gives 115385 baud)
+  frame start to frame start inside a line: median 93.925 us = 10.83 bit times (10.00 would be back to back)
+     1.8957 ..    3.6754 ms  Heliostat boot OK
+     4.2806 ..    6.7204 ms  SELFTEST BEGIN version=1
+     8.0950 ..   11.9486 ms  SELFTEST adc OK raw=1025,2050,3074,4095
+    11.9776 ..   13.5694 ms  SELFTEST spi OK
+    17.4176 ..   20.8954 ms  SELFTEST sd FAIL step=init status=3
+    21.3181 ..   24.5111 ms  SELFTEST servo1 OK pulse_us=1500
+    24.9373 ..   28.1303 ms  SELFTEST servo2 OK pulse_us=1500
+    28.6193 ..   32.3790 ms  SELFTEST END total=5 passed=4 failed=1
+
+PWM D5 (servo 1, TIM3_CH1 PC6): 2 pulses
+  rise   23.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise   43.9243 ms  width 1500.000 us  period to next - us
+PWM D6 (servo 2, TIM3_CH2 PC7): 2 pulses
+  rise   23.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise   43.9243 ms  width 1500.000 us  period to next - us
+
+ADC marker D7 (PB3): 4 pulses
+  burst at 6.6596 ms: 4 conversions, widths 139.825, 139.925, 139.925, 139.925 us, gaps 7.250, 7.250, 7.250 us, burst length 581.35 us
+
+CS D3 (PB9): initial 0, falling edges [14.7526] ms, rising edges [3.8473, 17.0243] ms
+MISO D2 (PA6): 0 edges, initial 0
+SPI: 46 bytes, 35 with CS low
+  CS high: 11 bytes of clocks (MOSI all FF: True), at 13.5694, 13.6899, 13.8130, 13.9336, 14.0541, 14.1747, 14.2953, 14.4160, 14.5366, 14.6571, 17.0560 ms
+  CS low window 1: 14.7971 .. 16.9421 ms, 35 bytes, SCK period 2667.9 ns = 374.8 kHz, byte-to-byte gap median 20.43 us (max 114.42 us)
+      14.7971 ms  CMD0   GO_IDLE_STATE      arg=00000000 crc=95  -> R1=00 (ready), 0 idle byte(s) before it
+      15.2491 ms  CMD0   GO_IDLE_STATE      arg=00000000 crc=95  -> R1=00 (ready), 0 idle byte(s) before it
+      15.7010 ms  CMD0   GO_IDLE_STATE      arg=00000000 crc=95  -> R1=00 (ready), 0 idle byte(s) before it
+      16.1554 ms  CMD0   GO_IDLE_STATE      arg=00000000 crc=95  -> R1=00 (ready), 0 idle byte(s) before it
+      16.6073 ms  CMD0   GO_IDLE_STATE      arg=00000000 crc=95  -> R1=00 (ready), 0 idle byte(s) before it
+    note: MISO is 0x00 in every byte of this window, nothing drives the line (no card); the R1=00 above is not an answer from a card
+    MOSI[0:35] 40 00 00 00 00 95 FF 40 00 00 00 00 95 FF 40 00 00 00 00 95 FF 40 00 00 00 00 95 FF 40 00 00 00 00 95 FF
+    MISO[0:35] 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+=== sigrok-cli: UART on D4, 115200 8N1, one line per packet ending in LF
+=== numbers = first sample .. last sample, 1 sample = 250 ns (vcd downsample 250)
+7617-14667 uart-1: Heliostat boot OK[0D][0A]
+17157-26847 uart-1: SELFTEST BEGIN version=1[0D][0A]
+32414-47760 uart-1: SELFTEST adc OK raw=1025,2050,3074,4095[0D][0A]
+47945-54243 uart-1: SELFTEST spi OK[0D][0A]
+69705-83547 uart-1: SELFTEST sd FAIL step=init status=3[0D][0A]
+85307-98010 uart-1: SELFTEST servo1 OK pulse_us=1500[0D][0A]
+99784-112487 uart-1: SELFTEST servo2 OK pulse_us=1500[0D][0A]
+114512-129482 uart-1: SELFTEST END total=5 passed=4 failed=1[0D][0A]
+
+=== sigrok-cli: SPI mode 0 (D0 SCK, D1 MOSI, D2 MISO, D3 CS low), one line per CS-low transfer
+=== numbers = first sample .. last sample, 1 sample = 25 ns (vcd downsample 25)
+--- MOSI
+0-153893 spi-1: 
+590105-680971 spi-1: 40 00 00 00 00 95 FF 40 00 00 00 00 95 FF 40 00 00 00 00 95 FF 40 00 00 00 00 95 FF 40 00 00 00 00 95 FF
+--- MISO
+0-153893 spi-1: 
+590105-680971 spi-1: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+=== cross-check: scripts/vcd_tool.py against sigrok-cli (byte streams)
+UART: this tool 248 bytes, sigrok-cli 248 bytes, identical: True
+SPI (CS low): this tool 35 bytes, sigrok-cli MOSI 35 / MISO 35, identical: True

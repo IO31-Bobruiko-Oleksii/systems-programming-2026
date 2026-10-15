@@ -1,0 +1,95 @@
+capture servo.vcd  sha256 77126b0e0bc608d8  duration 242.180 ms  timestamps on a 25 ns grid
+edges per channel: D0=9392  D1=57  D2=74  D3=5  D4=2305  D5=22  D6=22  D7=8
+
+UART D4: 372 bytes, framing errors 0, fitted bit time 8669.4 ns = 115348 baud (+0.13 % vs 115200; BRR 104 at 12 MHz gives 115385 baud)
+  frame start to frame start inside a line: median 93.925 us = 10.83 bit times (10.00 would be back to back)
+     1.8957 ..    3.6754 ms  Heliostat boot OK
+     4.2806 ..    6.7204 ms  SELFTEST BEGIN version=1
+     8.0950 ..   11.9486 ms  SELFTEST adc OK raw=1025,2050,3074,4095
+    11.9776 ..   13.5694 ms  SELFTEST spi OK
+    30.6496 ..   33.9398 ms  SELFTEST sd OK type=V2HC sig=55AA
+    34.3627 ..   37.5565 ms  SELFTEST servo1 OK pulse_us=1500
+    37.9827 ..   41.1762 ms  SELFTEST servo2 OK pulse_us=1500
+    41.6606 ..   45.4214 ms  SELFTEST END total=5 passed=5 failed=0
+    46.9534 ..   50.8046 ms  CMD servo OK ch=1 angle=0 pulse_us=1000
+   112.6743 ..  116.7151 ms  CMD servo OK ch=1 angle=180 pulse_us=2000
+   178.4253 ..  182.3724 ms  CMD servo OK ch=2 angle=45 pulse_us=1250
+
+PWM D5 (servo 1, TIM3_CH1 PC6): 11 pulses
+  rise   23.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise   43.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise   63.9243 ms  width 1000.000 us  period to next 20000.000 us
+  rise   83.9243 ms  width 1000.000 us  period to next 20000.000 us
+  rise  103.9243 ms  width 1000.000 us  period to next 20000.000 us
+  rise  123.9243 ms  width 2000.000 us  period to next 20000.000 us
+  rise  143.9243 ms  width 2000.000 us  period to next 20000.000 us
+  rise  163.9243 ms  width 2000.000 us  period to next 20000.000 us
+  rise  183.9243 ms  width 2000.000 us  period to next 20000.000 us
+  rise  203.9243 ms  width 2000.000 us  period to next 20000.000 us
+  rise  223.9243 ms  width 2000.000 us  period to next - us
+PWM D6 (servo 2, TIM3_CH2 PC7): 11 pulses
+  rise   23.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise   43.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise   63.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise   83.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise  103.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise  123.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise  143.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise  163.9243 ms  width 1500.000 us  period to next 20000.000 us
+  rise  183.9243 ms  width 1250.000 us  period to next 20000.000 us
+  rise  203.9243 ms  width 1250.000 us  period to next 20000.000 us
+  rise  223.9243 ms  width 1250.000 us  period to next - us
+
+ADC marker D7 (PB3): 4 pulses
+  burst at 6.6596 ms: 4 conversions, widths 139.825, 139.925, 139.925, 139.925 us, gaps 7.250, 7.250, 7.250 us, burst length 581.35 us
+
+CS D3 (PB9): initial 0, falling edges [14.7526, 18.306] ms, rising edges [3.8473, 18.1424, 29.965] ms
+MISO D2 (PA6): 74 edges, initial 1
+SPI: 587 bytes, 575 with CS low
+  CS high: 12 bytes of clocks (MOSI all FF: True), at 13.5694, 13.6899, 13.8130, 13.9336, 14.0541, 14.1747, 14.2953, 14.4160, 14.5366, 14.6571, 18.1741, 29.9968 ms
+  CS low window 1: 14.7971 .. 18.0615 ms, 48 bytes, SCK period 2667.9 ns = 374.8 kHz, byte-to-byte gap median 20.43 us (max 119.67 us)
+      14.7971 ms  CMD0   GO_IDLE_STATE      arg=00000000 crc=95  -> R1=01 (idle), 1 idle byte(s) before it
+      15.3734 ms  CMD8   SEND_IF_COND       arg=000001AA crc=87  -> R1=01 (idle), 1 idle byte(s) before it
+                  R7=000001AA  voltage-accepted=1  check-pattern=AA
+      16.2005 ms  CMD55  APP_CMD            arg=00000000 crc=01  -> R1=01 (idle), 1 idle byte(s) before it
+      16.7772 ms  ACMD41 SD_SEND_OP_COND    arg=40000000 crc=01  -> R1=00 (ready), 1 idle byte(s) before it
+      17.3545 ms  CMD58  READ_OCR           arg=00000000 crc=01  -> R1=00 (ready), 1 idle byte(s) before it
+                  OCR=C0FF8000  power-up-done=1  CCS(SDHC)=1
+    MOSI[0:48] 40 00 00 00 00 95 FF FF 48 00 00 01 AA 87 FF FF FF FF FF FF 77 00 00 00 00 01 FF FF 69 40 00 00 00 01 FF FF 7A 00 00 00 00 01 FF FF FF FF FF FF
+    MISO[0:48] 00 FF FF FF FF FF FF 01 FF FF FF FF FF FF FF 01 00 00 01 AA FF FF FF FF FF FF FF 01 FF FF FF FF FF FF FF 00 FF FF FF FF FF FF FF 00 C0 FF 80 00
+  CS low window 2: 18.3495 .. 29.8901 ms, 527 bytes, SCK period 167.9 ns = 5957.4 kHz, byte-to-byte gap median 16.93 us (max 107.17 us)
+      18.3495 ms  CMD17  READ_SINGLE_BLOCK  arg=00000000 crc=01  -> R1=00 (ready), 1 idle byte(s) before it
+                  data token FE at 19.1667 ms after 4 idle byte(s); 512 data bytes 19.2725..29.7647 ms
+                  CRC16 received=B062 computed=B062 OK; bytes 510..511 = 55AA
+                  MBR partition 1: type 04, first LBA 63, 16321 sectors
+    MOSI[0:48] 51 00 00 00 00 01 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+    MISO[0:48] FF FF FF FF FF FF FF 00 FF FF FF FF FE 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+=== sigrok-cli: UART on D4, 115200 8N1, one line per packet ending in LF
+=== numbers = first sample .. last sample, 1 sample = 250 ns (vcd downsample 250)
+7617-14667 uart-1: Heliostat boot OK[0D][0A]
+17157-26847 uart-1: SELFTEST BEGIN version=1[0D][0A]
+32414-47760 uart-1: SELFTEST adc OK raw=1025,2050,3074,4095[0D][0A]
+47945-54243 uart-1: SELFTEST spi OK[0D][0A]
+122633-135725 uart-1: SELFTEST sd OK type=V2HC sig=55AA[0D][0A]
+137486-150192 uart-1: SELFTEST servo1 OK pulse_us=1500[0D][0A]
+151965-164670 uart-1: SELFTEST servo2 OK pulse_us=1500[0D][0A]
+166677-181651 uart-1: SELFTEST END total=5 passed=5 failed=0[0D][0A]
+187848-203184 uart-1: CMD servo OK ch=1 angle=0 pulse_us=1000[0D][0A]
+450732-466826 uart-1: CMD servo OK ch=1 angle=180 pulse_us=2000[0D][0A]
+713736-729455 uart-1: CMD servo OK ch=2 angle=45 pulse_us=1250[0D][0A]
+
+=== sigrok-cli: SPI mode 0 (D0 SCK, D1 MOSI, D2 MISO, D3 CS low), one line per CS-low transfer
+=== numbers = first sample .. last sample, 1 sample = 25 ns (vcd downsample 25)
+--- MOSI
+0-153893 spi-1: 
+590105-725695 spi-1: 40 00 00 00 00 95 FF FF 48 00 00 01 AA 87 FF FF FF FF FF FF 77 00 00 00 00 01 FF FF 69 40 00 00 00 01 FF FF 7A 00 00 00 00 01 FF FF FF FF FF FF
+732239-1198601 spi-1: 51 00 00 00 00 01 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+--- MISO
+0-153893 spi-1: 
+590105-725695 spi-1: 00 FF FF FF FF FF FF 01 FF FF FF FF FF FF FF 01 00 00 01 AA FF FF FF FF FF FF FF 01 FF FF FF FF FF FF FF 00 FF FF FF FF FF FF FF 00 C0 FF 80 00
+732239-1198601 spi-1: FF FF FF FF FF FF FF 00 FF FF FF FF FE 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 04 FE 3F 01 3F 00 00 00 C1 3F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 55 AA B0 62
+
+=== cross-check: scripts/vcd_tool.py against sigrok-cli (byte streams)
+UART: this tool 372 bytes, sigrok-cli 372 bytes, identical: True
+SPI (CS low): this tool 575 bytes, sigrok-cli MOSI 575 / MISO 575, identical: True

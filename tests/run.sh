@@ -12,6 +12,7 @@ TESTS=(
   "test_pots|../firmware/devices/src/pots.c fakes/fake_adc.c"
   "test_sdcard|../firmware/devices/src/sdcard.c fakes/fake_sdcard.c"
   "test_app|../firmware/app/src/app.c ../firmware/devices/src/servo.c ../firmware/devices/src/pots.c ../firmware/devices/src/sdcard.c fakes/fake_uart.c fakes/fake_pwm.c fakes/fake_adc.c fakes/fake_sdcard.c"
+  "test_sd_replay|../firmware/devices/src/sdcard.c fakes/replay_spi.c"
 )
 
 rm -rf "$OUT"
