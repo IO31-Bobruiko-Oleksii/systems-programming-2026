@@ -3,14 +3,15 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 CC="${CC:-cc}"
-CFLAGS="-std=c11 -Wall -Wextra -Werror -g -O0 -I. -Ifakes -I../firmware/devices/inc -I../firmware/platform/inc"
+CFLAGS="-std=c11 -Wall -Wextra -Werror -g -O0 -I. -Ifakes -I../firmware/app/inc -I../firmware/devices/inc -I../firmware/platform/inc"
 OUT=build
 
 # "<test source without .c>|<code under test and fakes it links against>"
 TESTS=(
   "test_servo|../firmware/devices/src/servo.c fakes/fake_pwm.c"
- "test_pots|../firmware/devices/src/pots.c fakes/fake_adc.c"
- "test_sdcard|../firmware/devices/src/sdcard.c fakes/fake_sdcard.c"
+  "test_pots|../firmware/devices/src/pots.c fakes/fake_adc.c"
+  "test_sdcard|../firmware/devices/src/sdcard.c fakes/fake_sdcard.c"
+  "test_app|../firmware/app/src/app.c ../firmware/devices/src/servo.c ../firmware/devices/src/pots.c ../firmware/devices/src/sdcard.c fakes/fake_uart.c fakes/fake_pwm.c fakes/fake_adc.c fakes/fake_sdcard.c"
 )
 
 rm -rf "$OUT"

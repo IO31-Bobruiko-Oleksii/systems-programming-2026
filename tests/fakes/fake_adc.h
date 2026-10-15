@@ -10,6 +10,7 @@
 void    fake_adc_reset(void);
 void    fake_adc_set_raw(uint8_t channel, uint16_t raw);
 void    fake_adc_fail_channel(uint8_t channel, plat_status_t status);
+void    fake_adc_fail_init(plat_status_t status);
 size_t  fake_adc_calls(void);
 uint8_t fake_adc_channel_at(size_t index);
 

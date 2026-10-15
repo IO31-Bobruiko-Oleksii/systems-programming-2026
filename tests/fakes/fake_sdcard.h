@@ -19,6 +19,7 @@ void fake_sd_set_read_r1(uint8_t r1);
 void fake_sd_set_read_token(uint8_t token);
 void fake_sd_set_block(uint32_t index, const uint8_t *data512);
 void fake_sd_fail_transfer(unsigned call_index, plat_status_t status);
+void fake_sd_fail_spi_init(plat_status_t status);
 
 size_t           fake_sd_cmd_count(void);
 const uint8_t   *fake_sd_frame_at(size_t index);

@@ -18,6 +18,7 @@ static struct {
     uint8_t  block_data[BLOCK];
     long     fail_call;
     plat_status_t fail_status;
+    plat_status_t init_status;
 
     uint8_t  spi_mode;
     uint8_t  idle;
@@ -229,11 +230,16 @@ static uint8_t card_byte(uint8_t in)
     return 0xFFU;
 }
 
+void fake_sd_fail_spi_init(plat_status_t status)
+{
+    m.init_status = status;
+}
+
 plat_status_t plat_spi_init(void)
 {
     m.cs = 0U;
     m.speed = PLAT_SPI_SPEED_SLOW;
-    return PLAT_OK;
+    return m.init_status;
 }
 
 plat_status_t plat_spi_set_speed(plat_spi_speed_t speed)
