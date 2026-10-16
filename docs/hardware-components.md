@@ -20,11 +20,11 @@
 | Field | Value | Datasheet page |
 |---|---|---|
 | Datasheet | [SG92R](http://www.wecl.com.hk/distribution/PDF/Robotics_IoT/58-01-9024.pdf) | full sheet (1 page) |
-| Interface | PWM, 50 Hz (20 ms period), 1000–2000 nanosecond pulse width, 1500 nanosecond neutral | — |
+| Interface | PWM, 50 Hz (20 ms period), 1000–2000 us pulse width, 1500 us neutral | — |
 | Operating voltage | 4.8–6 V | — |
 | Torque / speed | 34.72 oz*in at 4.8V / 0.10 s per 60 degrees at 4.8V | — |
 | Rotation range | 180 degrees | — |
-| Pinout / wiring | `servo{1,2}:V+`→`5V` (shared), `servo{1,2}:GND`→`GND` (shared), `servo1:PWM`→`PC6` (azimuth, `TIM3_CH1`), `servo2:PWM`→`PC14` (elevation, `TIM3_CH2`) | — |
+| Pinout / wiring | `servo{1,2}:V+`→`5V` (shared), `servo{1,2}:GND`→`GND` (shared), `servo1:PWM`→`PC6` (azimuth, `TIM3_CH1`), `servo2:PWM`→`PC7` (elevation, `TIM3_CH2`) | — |
 | Power | ~650 mA | — |
 
 ## W25Q64 SPI flash — target component
@@ -38,4 +38,20 @@
 | Pinout / wiring (real chip) | `VCC` 3V3, `GND`, `CS`, `CLK`, `DI`(MOSI), `DO`(MISO), `WP#`, `HOLD#` | p.22 |
 | Wokwi wiring | `sd1:VCC`→`3V3`, `sd1:GND`→`GND`, `sd1:CS`→`PB9`, `sd1:SCK`→`PA5`, `sd1:DI`→`PA7` (MOSI), `sd1:DO`→`PA6` (MISO), `sd1:CD`→ unconnected | — |
 | Wokwi part reference | [wokwi-microsd-card](https://docs.wokwi.com/parts/wokwi-microsd-card) | — |
-| Power | active ~4 mA / standby ~1 nanoA | p.4 |
+| Power | active ~4 mA / standby ~1 uA | p.4 |
+
+## Logic analyzer (`wokwi-logic-analyzer`, id `logic1`) — simulation only
+Replaces a Saleae-class analyzer. Eight channels, buffer 1 000 000 samples, trigger off; `wokwi-cli --vcd-file` writes the capture at the end of a run (`make capture NAME=<name>`).
+
+| Channel | Pin | Signal |
+|---|---|---|
+| D0 | PA5 | SPI1 SCK |
+| D1 | PA7 | SPI1 MOSI |
+| D2 | PA6 | SPI1 MISO |
+| D3 | PB9 | SD chip select |
+| D4 | PA2 | USART2 TX |
+| D5 | PC6 | servo 1 PWM |
+| D6 | PC7 | servo 2 PWM |
+| D7 | PB3 | ADC timing marker (firmware output, high while one ADC call runs) |
+
+Results: [captures/analysis.md](captures/analysis.md).
