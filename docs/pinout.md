@@ -2,7 +2,7 @@
 
 Heliostat controller, LR2. Board: NUCLEO-C031C6 (STM32C031C6, Cortex-M0+), simulated in Wokwi.
 
-Sources: DS13867 Rev 4 (STM32C031x4/x6 datasheet), RM0490 (reference manual), UM2953 (Nucleo-64 board manual, MB1717), generated code in `firmware/Core/Src/`. Values marked *(assumed)* do not come from a datasheet. Items marked TODO are collected in section 6.
+Sources: DS13867 Rev 4 (STM32C031x4/x6 datasheet), RM0490 (reference manual), UM2953 (Nucleo-64 board manual, MB1717), generated code in `firmware/Core/Src/`. Values marked *(assumed)* do not come from a datasheet. The checks against the documents and the open findings are in section 6.
 
 ## 1. Pin table
 
@@ -47,7 +47,7 @@ HSI 48 MHz, HSIDIV /4 -> SYSCLK 12 MHz -> AHB /1 -> HCLK 12 MHz -> APB1 /1 -> PC
 | USART2 | PCLK1 12 MHz | 115200 baud, 8N1, oversampling 16, no flow control | BRR = 12 000 000 / 115 200 = 104; actual 115 385 baud (+0.16 %); one byte = 86.8 us |
 | SPI1 | PCLK 12 MHz | master, mode 0 (CPOL 0, CPHA first edge), 8 bit, MSB first, software NSS (PB9), prescaler /2 | SCK 6 MHz. SD initialisation needs 100..400 kHz: prescaler /32 gives 375 kHz, used by `sdcard.c` through `plat_spi_set_speed()` until the card is initialised, then /2. Measured in the captures: 374.8 kHz and 5957 kHz ([captures/analysis.md](captures/analysis.md), section 4.4) |
 | TIM3 | 12 MHz | PSC = tim_clk / 1 MHz - 1 = 11, ARR = 19999, set at run time (the CubeMX values PSC 0 / ARR 65535 are placeholders overwritten in code) | tick 1 us, period 20 ms (50 Hz), CCR 1500 = 1.5 ms neutral pulse, servo range 1000..2000 counts |
-| ADC1 | PCLK/1 = 12 MHz | 12 bit, right aligned, software trigger, one channel per conversion, sampling time 1.5 cycles | conversion = 1.5 + 12.5 = 14 cycles = 1.17 us; 1 LSB = 3.3 V / 4096 = 0.81 mV |
+| ADC1 | PCLK/1 = 12 MHz | 12 bit, right aligned, software trigger, one channel per conversion, sampling time 1.5 cycles (125 ns; see section 6.3, item 5, for real hardware) | conversion = 1.5 + 12.5 = 14 cycles = 1.17 us; 1 LSB = 3.3 V / 4096 = 0.81 mV |
 | SysTick | HCLK | 1 kHz HAL tick | `HAL_Delay` resolution 1 ms |
 
 ## 3. Power budget
@@ -56,7 +56,7 @@ Limits from UM2953 (section 6.5, Table 7): USB supply 500 mA after enumeration (
 
 | Rail | Consumer | Typical | Worst case | Basis |
 |---|---|---|---|---|
-| 3V3 | STM32C031C6 at 12 MHz | TODO | TODO | DS13867 Table 28 (Run mode from flash) |
+| 3V3 | STM32C031C6 at 12 MHz | 1.45 mA | 2.70 mA | DS13867 Table 28, fHCLK 12 MHz from HSI48/HSIDIV, code from flash, all peripherals disabled: typical at 25 degC and 3.0 V, maximum at 125 degC and 3.6 V |
 | 3V3 | 4 x potentiometer | 1.3 mA | 1.3 mA | 4 x 3.3 V / 10 kOhm *(assumed 10 kOhm)* |
 | 3V3 | microSD, SPI mode | 20 mA *(assumed)* | 100 mA *(assumed)* | SD default-speed ceiling; confirm with the card datasheet |
 | 5V | 2 x micro servo, idle | 20 mA *(assumed)* | | 10 mA each, SG90-class servo |
@@ -65,7 +65,7 @@ Limits from UM2953 (section 6.5, Table 7): USB supply 500 mA after enumeration (
 
 Result:
 
-- 3V3 rail: worst case about 100 mA plus the MCU, well under 500 mA. Acceptable.
+- 3V3 rail: worst case about 104 mA (SD card 100 mA assumed, MCU 2.70 mA, potentiometers 1.3 mA), a margin of about 390 mA under 500 mA. Table 28 is for all peripherals disabled; the enabled peripherals add to it, but the margin is far larger. Acceptable.
 - 5V rail: two moving servos already use about 400 mA of the 500 mA USB budget; a stall needs 1300 mA. Not acceptable from the board's 5V pin on real hardware. On hardware the servos need a separate 5 V supply with a common ground. In the Wokwi simulation the 5V pin is used because the simulator does not model supply current.
 
 ## 4. Rejected layouts
@@ -147,5 +147,5 @@ DS13867 is the STM32C031x4/x6 datasheet, UM2953 the Nucleo-64 board manual (MB17
 1. **PB9 starts low.** CubeMX generates `MX_GPIO_Init()` with the output level of PB9 set to low, so the chip select is low from the start of the program until `plat_spi_init()` drives it high, 3.85 ms after reset. The card model in the simulator drives MISO low during that time ([captures/analysis.md](captures/analysis.md), section 8.2). The fix is the CubeMX setting "GPIO output level: High" for PB9. It is not applied; the captures in `captures/` were recorded before it and describe the current firmware.
 2. **5V rail.** Two servos cannot run from the board's 5V pin on real hardware (section 3). The real build needs a separate 5 V supply with a common ground. The simulator does not model supply current.
 3. **What the simulator cannot show.** Solder bridges, the crystal on PC14 and PC15, the supply current and the sampling capacitor of the ADC are not modelled. Items 4 to 7 of section 6.1, the power budget and the ADC source impedance are therefore checked in the documents only. On hardware: read the bridges on the board, measure the supply current of the servo rail with a multimeter in series, and compare the ADC reading of a high-impedance source at 1.5 and at a longer sampling time.
-4. **MCU run current (open).** TODO: DS13867 Table 28 (Current consumption in Run mode from flash memory at different die temperatures). Enter the typical and the maximum value for 12 MHz in the power table of section 3.
-5. **ADC source impedance (open).** TODO: DS13867 Table 55 (Maximum ADC RAIN). Compare the value for 1.5 sampling cycles at 12 MHz with the source impedance of a potentiometer (up to 2.5 kOhm at mid travel for 10 kOhm).
+4. **MCU run current.** DS13867 Table 28 (Current consumption in Run mode from flash memory at different die temperatures), block fHCLK = fHSI48/HSIDIV, row 12 MHz, all peripherals disabled, evaluated by characterization (not tested in production): typical 1.45 mA at 25 degC and 1.50 mA at 85 degC (VDD 3.0 V); maximum 1.70 mA at 25 degC and 2.70 mA at 125 degC (VDD 3.6 V). Section 3 uses 1.45 mA and 2.70 mA.
+5. **ADC source impedance (design consequence for real hardware).** DS13867 Table 55 (Maximum ADC RAIN) is given for an ADC clock of 35 MHz and lists the sampling time in nanoseconds, so it has to be applied by time, not by the number of cycles. At 12 MHz one cycle is 83.3 ns, so the configured 1.5 cycles are 125 ns. For 12 bit the table gives 680 Ohm at 100 ns and 2200 Ohm at 214 ns; 125 ns lies between the two rows, so only 680 Ohm is guaranteed. A 10 kOhm potentiometer (assumed value) has up to 2.5 kOhm source impedance at mid travel, which is above that. The simulator does not model the sampling capacitor, so Wokwi returns exact values; on real hardware the sampling time must be raised. Up to 2.5 kOhm the table requires at least 357 ns (the 4700 Ohm row); the first available setting at or above that is 7.5 cycles, 625 ns at 12 MHz (3.5 cycles, 292 ns, is not enough). Up to 10 kOhm, for example a photoresistor divider, it requires at least 1129 ns (the 15000 Ohm row); the first available setting is 19.5 cycles, 1.625 us (12.5 cycles, 1.04 us, is not enough). The price is a longer conversion, 20 cycles = 1.67 us (7.5) or 32 cycles = 2.67 us (19.5) instead of 14 cycles = 1.17 us, which does not matter for a slowly changing light measurement.
