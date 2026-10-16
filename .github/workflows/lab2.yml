@@ -10,6 +10,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: make check (dependency rule + unit tests with fakes)
         run: make check
+      - name: make coverage (gcov, line coverage of devices and app, gate 90 %)
+        run: make coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: tests/build-cov/report/*.gcov
 
   firmware:
     name: Firmware build (Docker toolchain image)
