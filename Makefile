@@ -32,3 +32,7 @@ check: check-deps test
 .PHONY: capture
 capture:
 	scripts/capture.sh $(NAME)
+
+.PHONY: coverage
+coverage:
+	@tests/coverage.sh
