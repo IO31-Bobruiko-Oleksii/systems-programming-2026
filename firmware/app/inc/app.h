@@ -8,6 +8,7 @@
 #include "sdcard.h"
 #include "tracker.h"
 #include "perf.h"
+#include "logger.h"
 
 
 #define APP_LINE_MAX         48U
@@ -34,6 +35,10 @@ typedef struct {
     uint32_t button_accepted;
     uint32_t button_ignored;
     perf_stat_t stow_latency;
+    perf_clock_t clock;
+    logger_t logger;
+    perf_stat_t log_flush;
+    uint8_t  log_on;
     char     line[APP_LINE_MAX + 1U];
     uint8_t  line_len;
     uint8_t  line_overflow;

@@ -58,7 +58,7 @@ except `selftest`, which prints the report first.
 
 | Command | Reply on success | Reply on failure |
 |---|---|---|
-| `help` | `CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button` | none |
+| `help` | `CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log` | none |
 | `selftest` | the report from section 1, then `CMD selftest OK failed=0` | the report, then `CMD selftest FAIL failed=<n>` |
 | `adc` | `CMD adc OK raw=<a>,<b>,<c>,<d>` | `CMD adc FAIL status=<s> at=<n>` |
 | `servo <1\|2> <0..180>` | `CMD servo OK ch=<c> angle=<deg> pulse_us=<us>` (1000 us at 0, 2000 us at 180) | `CMD servo FAIL reason=usage`, `reason=range` (angle above 180) or `status=<s>` |
@@ -73,10 +73,20 @@ except `selftest`, which prints the report first.
 | `stow` | `CMD stow OK az=<a> tilt=<t>`: moves to the safe position and holds it | `CMD stow FAIL status=<s>` |
 | `resume` | `CMD resume OK`: tracking continues | none |
 | `button` | `CMD button OK edges=<n> accepted=<n> ignored=<n>`: falling edges seen on the pushbutton pin, presses that stowed the panel, edges that were ignored (inside the 200 ms lockout or part of the same press) | `CMD button FAIL status=<s>` if the pin could not be started |
+| `log` | `CMD log OK on=<0\|1> seq=<n> stored=<n> blocks=<n> dropped=<n> errors=<n> flushes=<n> flush_max_us=<us>`: log switch, records accepted, records on the card, full blocks written, records lost because the buffer was full, failed writes, block writes done, longest block write | none |
+| `log on`, `log off` | `CMD log OK on=<0\|1>`: starts or stops recording tracking events (off after reset) | `CMD log FAIL reason=usage` |
+| `log flush` | `CMD log-flush OK stored=<n> blocks=<n> us=<us>`: writes the records that are not yet on the card now | `CMD log-flush FAIL status=<s>` |
+| `log get <n>` | `CMD log-get OK n=<n> t_ms=<ms> raw=<a>,<b>,<c>,<d> az=<a> tilt=<t> flags=<f> ok=<0\|1>`: record number n read back from the card, `ok=1` if its check word is right | `CMD log-get FAIL reason=usage`, `reason=range stored=<n>` or `step=<init\|read> status=<s>` |
 | anything else | none | `CMD <word> FAIL reason=unknown` |
 | a line longer than 48 characters | none | `CMD ? FAIL reason=too-long` |
 
 Besides replies the firmware prints event lines on its own. `EVT stow t_us=<t> lat_us=<l>` follows a pushbutton press (falling edge on PB5) that has stowed the panel: `t_us` is the time of the edge in microseconds on the free-running time base (a 32-bit cycle counter that wraps every 357.9 s), `lat_us` the time from the edge until both servo outputs were written. `EVT stow FAIL status=<s>` means a servo write failed. A press less than 200 ms after the last accepted one is ignored and only counted.
+
+## 2.1 Event log on the SD card (FR-05)
+
+With `log on` every tracking run that moved a servo or parked the panel, and every accepted stow press, adds a 32-byte record to a 512-byte buffer in RAM. The buffer is written to the card when it holds 16 records, or when its oldest record not yet on the card is 10 s old (a partial block is rewritten in place when more records arrive). The log area is 4096 blocks from block 8192; when it is full new records are dropped and counted. A write that fails is not repeated for 1 s and the records stay in RAM. Writing a block blocks the main loop for about 13 ms, the longest single operation in the loop.
+
+Record layout, little endian: bytes 0-3 record number, 4-7 time in ms since the tracking task started, 8-15 the four raw ADC values (top-left, top-right, bottom-left, bottom-right), 16 azimuth in degrees, 17 tilt in degrees, 18 flags (1 azimuth moved, 2 tilt moved, 4 parked, 8 stow press), 19-27 zero, 28-31 check word (sum of bytes 0-27 xor `0xA5A5A5A5`). Record n is in block 8192 + n / 16 at offset 32 * (n % 16).
 
 ## 3. How it is checked
 

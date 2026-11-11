@@ -149,6 +149,65 @@ static void test_format_rejects_bad_arguments(void)
     CHECK_EQ(strcmp(text, "STAT name=? n=0 min_us=0 avg_us=0 max_us=0"), 0);
 }
 
+static void test_clock_counts_milliseconds_and_keeps_the_remainder(void)
+{
+    perf_clock_t c;
+
+    perf_clock_init(&c, 1000U);
+    CHECK_EQ(perf_clock_advance(&c, 1000U + 5000U, HZ), 0U);
+    CHECK_EQ(perf_clock_advance(&c, 1000U + 10000U, HZ), 0U);
+    CHECK_EQ(perf_clock_advance(&c, 1000U + 15000U, HZ), 1U);
+    CHECK_EQ(c.rem, 3000U);
+    CHECK_EQ(perf_clock_advance(&c, 1000U + 15000U + 9000U, HZ), 2U);
+    CHECK_EQ(c.rem, 0U);
+    CHECK_EQ(perf_clock_advance(&c, 1000U + 15000U + 9000U + 12U * 12000U, HZ), 14U);
+}
+
+static void test_clock_does_not_drift_over_many_short_steps(void)
+{
+    perf_clock_t c;
+    uint32_t now = 0U;
+    unsigned i;
+
+    perf_clock_init(&c, now);
+    for (i = 0U; i < 20000U; i++) {
+        now += 600000U / 7U;
+        (void)perf_clock_advance(&c, now, HZ);
+    }
+    CHECK_EQ(c.ms, (uint32_t)(((uint64_t)20000U * (600000U / 7U)) / 12000U));
+}
+
+static void test_clock_survives_the_counter_wrap_and_runs_past_it(void)
+{
+    perf_clock_t c;
+    uint32_t now = 0xFFFFFF00U;
+    uint32_t ms;
+    unsigned i;
+
+    perf_clock_init(&c, now);
+    now += 600000U;
+    ms = perf_clock_advance(&c, now, HZ);
+    CHECK_EQ(ms, 50U);
+    for (i = 0U; i < 8000U; i++) {
+        now += 600000U;
+        ms = perf_clock_advance(&c, now, HZ);
+    }
+    CHECK_EQ(ms, 50U + 8000U * 50U);
+}
+
+static void test_clock_with_a_useless_frequency_stands_still_and_null_is_harmless(void)
+{
+    perf_clock_t c;
+
+    perf_clock_init(&c, 0U);
+    CHECK_EQ(perf_clock_advance(&c, 5000U, 999U), 0U);
+    CHECK_EQ(c.last, 5000U);
+    CHECK_EQ(perf_clock_advance(&c, 5000U + 12000U, HZ), 1U);
+    perf_clock_init(NULL, 0U);
+    CHECK_EQ(perf_clock_advance(NULL, 0U, HZ), 0U);
+}
+
+
 int main(void)
 {
     RUN(test_compose_counts_ticks_and_the_position_inside_the_tick);
@@ -164,5 +223,9 @@ int main(void)
     RUN(test_format_of_an_empty_stat_shows_zeros);
     RUN(test_format_reports_the_needed_length_when_the_buffer_is_small);
     RUN(test_format_rejects_bad_arguments);
+    RUN(test_clock_counts_milliseconds_and_keeps_the_remainder);
+    RUN(test_clock_does_not_drift_over_many_short_steps);
+    RUN(test_clock_survives_the_counter_wrap_and_runs_past_it);
+    RUN(test_clock_with_a_useless_frequency_stands_still_and_null_is_harmless);
     return REPORT();
 }

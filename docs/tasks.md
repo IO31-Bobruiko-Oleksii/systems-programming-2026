@@ -14,7 +14,7 @@ core clock 12 MHz), see the report for what that means.
 | T2 | Track: differences of opposite pairs, dead zone, move the servos | FR-02, FR-03, FR-04 | after T1 | 50 ms | servo pulse width updated within 25 ms after the nominal release of T1 |
 | T3 | Park: all four channels dark for 20 samples in a row, then move to the safe position | FR-06 | inside T2 | 50 ms | park command at most 1.1 s after the light disappears |
 | T4 | Console: receive and execute a command line | FR-07 | UART byte | one byte per 86.8 us at 115200 8N1 | no byte lost; reply within 100 ms after the line terminator |
-| T5 | Log: store a record when a servo moved, write full 512-byte blocks to the SD card | FR-05 | tracking step that moved a servo | at most one record per 50 ms | a block is written within 10 s after its first record |
+| T5 | Log: store a record when a servo moved or the panel parked or stowed, write 512-byte blocks to the SD card from block 8192 | FR-05 | tracking step that moved a servo, accepted stow press | at most one record per 50 ms (plus one per stow press) | a block is written within 10 s after its first record; a write blocks the loop for about 13 ms |
 | T6 | Self-test of ADC, PWM, SPI, UART | FR-08 | once after reset | once | main loop running within 1 s after reset |
 | E1 | Stow request: pushbutton drives the panel to the safe position (extension of FR-06) | FR-06 | falling edge on the button pin | at least 200 ms between requests | servo pulse width updated within 10 ms after the edge; pulse on the servo output changes within 30 ms after the edge |
 

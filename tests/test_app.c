@@ -212,7 +212,7 @@ static void test_selftest_can_run_again(void)
 static void test_cmd_help(void)
 {
     start();
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log" EOL);
 }
 
 static void test_cmd_unknown(void)
@@ -901,10 +901,336 @@ static void test_cmd_button_reports_the_counters(void)
     CHECK_STR(run("button\n"), "CMD button OK edges=2 accepted=1 ignored=1" EOL);
 }
 
+static void log_on(void)
+{
+    CHECK_STR(run("log on\n"), "CMD log OK on=1" EOL);
+}
+
+static void run_n(unsigned from, unsigned to)
+{
+    unsigned i;
+
+    for (i = from; i <= to; i++) {
+        tick(i * PERIOD);
+    }
+}
+
+static void test_cmd_log_starts_off_and_reports_empty_counters(void)
+{
+    start_tracking();
+    CHECK_STR(run("log\n"),
+              "CMD log OK on=0 seq=0 stored=0 blocks=0 dropped=0 errors=0 flushes=0"
+              " flush_max_us=0" EOL);
+}
+
+static void test_cmd_log_switches_on_and_off_and_rejects_bad_forms(void)
+{
+    start_tracking();
+    log_on();
+    CHECK_EQ(app.log_on, 1);
+    CHECK_STR(run("log off\n"), "CMD log OK on=0" EOL);
+    CHECK_EQ(app.log_on, 0);
+    CHECK_STR(run("log x\n"), "CMD log FAIL reason=usage" EOL);
+    CHECK_STR(run("log get\n"), "CMD log FAIL reason=usage" EOL);
+    CHECK_STR(run("log on off\n"), "CMD log FAIL reason=usage" EOL);
+    CHECK_STR(run("log flush now\n"), "CMD log FAIL reason=usage" EOL);
+}
+
+static void test_nothing_is_logged_while_the_log_is_off(void)
+{
+    start_tracking();
+    run_n(1U, 5U);
+    CHECK_EQ(app.tracker.az, 95);
+    CHECK_EQ(logger_total(&app.logger), 0);
+    CHECK_EQ(fake_sd_write_count(), 0);
+}
+
+static void test_a_run_that_moves_a_servo_stores_one_record(void)
+{
+    logger_record_t r;
+
+    start_tracking();
+    log_on();
+    tick(PERIOD);
+    CHECK_EQ(logger_total(&app.logger), 1);
+    CHECK_EQ(logger_decode(app.logger.buf, &r), 1);
+    CHECK_EQ(r.seq, 0);
+    CHECK_EQ(r.t_ms, 50);
+    CHECK_EQ(r.raw[0], 1025);
+    CHECK_EQ(r.raw[1], 2050);
+    CHECK_EQ(r.raw[2], 3074);
+    CHECK_EQ(r.raw[3], 4095);
+    CHECK_EQ(r.az, 91);
+    CHECK_EQ(r.tilt, 89);
+    CHECK_EQ(r.flags, LOGGER_F_AZ | LOGGER_F_TILT);
+    CHECK_STR(fake_uart_output(), "CMD log OK on=1" EOL);
+}
+
+static void test_a_run_that_moves_nothing_stores_nothing(void)
+{
+    start_tracking();
+    log_on();
+    set_all_light(2000U);
+    run_n(1U, 5U);
+    CHECK_EQ(app.track_runs, 5);
+    CHECK_EQ(logger_total(&app.logger), 0);
+}
+
+static void test_the_time_stamp_keeps_counting_past_the_wrap_of_the_cycle_counter(void)
+{
+    logger_record_t r;
+    uint32_t t;
+
+    start();
+    fake_time_set(0xFFFF0000U);
+    app_start(&app);
+    log_on();
+    t = 0xFFFF0000U + PERIOD;
+    tick(t);
+    CHECK_EQ(logger_decode(app.logger.buf, &r), 1);
+    CHECK_EQ(r.t_ms, 50);
+    tick(t + PERIOD);
+    CHECK_EQ(logger_decode(app.logger.buf + LOGGER_RECORD_SIZE, &r), 1);
+    CHECK_EQ(r.t_ms, 100);
+}
+
+static void test_the_sixteenth_record_writes_the_block_in_the_same_pass(void)
+{
+    start_tracking();
+    log_on();
+    run_n(1U, 15U);
+    CHECK_EQ(fake_sd_write_count(), 0);
+    run_n(16U, 16U);
+    CHECK_EQ(fake_sd_write_count(), 1);
+    CHECK_EQ(fake_sd_stored_index(), 8192);
+    CHECK_EQ(app.logger.blocks, 1);
+    CHECK_EQ(app.log_flush.count, 1);
+    run_n(17U, 32U);
+    CHECK_EQ(fake_sd_write_count(), 2);
+    CHECK_EQ(fake_sd_stored_index(), 8193);
+    CHECK_STR(run("log\n"),
+              "CMD log OK on=1 seq=32 stored=32 blocks=2 dropped=0 errors=0 flushes=2"
+              " flush_max_us=0" EOL);
+}
+
+static void test_a_run_to_the_end_stops_gives_ninety_records_and_then_the_log_goes_quiet(void)
+{
+    start_tracking();
+    log_on();
+    run_n(1U, 120U);
+    CHECK_EQ(app.tracker.az, 180);
+    CHECK_EQ(app.tracker.tilt, 0);
+    CHECK_EQ(logger_total(&app.logger), 90);
+    CHECK_EQ(logger_stored(&app.logger), 80);
+    CHECK_EQ(app.logger.blocks, 5);
+    CHECK_STR(run("log flush\n"), "CMD log-flush OK stored=90 blocks=5 us=0" EOL);
+    CHECK_STR(run("log get 89\n"),
+              "CMD log-get OK n=89 t_ms=4500 raw=1025,2050,3074,4095 az=180 tilt=0 flags=3 ok=1" EOL);
+    CHECK_STR(run("log get 90\n"), "CMD log-get FAIL reason=range stored=90" EOL);
+}
+
+static void test_a_lone_record_is_written_when_it_is_ten_seconds_old(void)
+{
+    start_tracking();
+    log_on();
+    tick(PERIOD);
+    set_all_light(2000U);
+    run_n(2U, 200U);
+    CHECK_EQ(logger_total(&app.logger), 1);
+    CHECK_EQ(fake_sd_write_count(), 0);
+    run_n(201U, 201U);
+    CHECK_EQ(fake_sd_write_count(), 1);
+    CHECK_EQ(logger_stored(&app.logger), 1);
+    run_n(202U, 260U);
+    CHECK_EQ(fake_sd_write_count(), 1);
+}
+
+static void test_nothing_is_written_while_the_log_is_off_even_if_records_are_waiting(void)
+{
+    start_tracking();
+    log_on();
+    tick(PERIOD);
+    CHECK_STR(run("log off\n"), "CMD log OK on=0" EOL);
+    set_all_light(2000U);
+    run_n(2U, 260U);
+    CHECK_EQ(logger_total(&app.logger), 1);
+    CHECK_EQ(fake_sd_write_count(), 0);
+    CHECK_EQ(app.logger.errors, 0);
+    CHECK_STR(run("log on\n"), "CMD log OK on=1" EOL);
+    run_n(261U, 261U);
+    CHECK_EQ(fake_sd_write_count(), 1);
+}
+
+static void test_flushing_an_empty_log_does_not_touch_the_card_or_the_statistics(void)
+{
+    start_tracking();
+    CHECK_STR(run("log flush\n"), "CMD log-flush OK stored=0 blocks=0 us=0" EOL);
+    CHECK_EQ(fake_sd_transfer_calls(), 0);
+    CHECK_EQ(app.log_flush.count, 0);
+}
+
+static void test_the_flush_time_is_measured_with_the_cycle_counter(void)
+{
+    start_tracking();
+    log_on();
+    fake_time_set_step(1200U);
+    run_n(1U, 16U);
+    fake_time_set_step(0U);
+    CHECK_EQ(app.log_flush.count, 1);
+    CHECK(app.log_flush.max > 0U);
+    CHECK_EQ(app.log_flush.max, app.log_flush.min);
+}
+
+static void test_parking_is_logged_even_when_the_servos_do_not_move(void)
+{
+    logger_record_t r;
+
+    start_tracking();
+    log_on();
+    set_all_light(0U);
+    run_n(1U, 19U);
+    CHECK_EQ(logger_total(&app.logger), 0);
+    run_n(20U, 20U);
+    CHECK_EQ(logger_total(&app.logger), 1);
+    CHECK_EQ(logger_decode(app.logger.buf, &r), 1);
+    CHECK_EQ(r.flags, LOGGER_F_PARK);
+    CHECK_EQ(r.az, 90);
+}
+
+static void test_a_stow_press_is_logged_with_the_edge_time_of_the_reaction(void)
+{
+    logger_record_t r;
+
+    start_tracking();
+    log_on();
+    tick(PERIOD);
+    CHECK_EQ(logger_total(&app.logger), 1);
+    press_at(PERIOD + 1200000U, PERIOD + 1200000U + 600U);
+    CHECK_EQ(logger_total(&app.logger), 2);
+    CHECK_EQ(logger_decode(app.logger.buf + LOGGER_RECORD_SIZE, &r), 1);
+    CHECK_EQ(r.seq, 1);
+    CHECK_EQ(r.t_ms, 150);
+    CHECK_EQ(r.az, 90);
+    CHECK_EQ(r.tilt, 90);
+    CHECK_EQ(r.flags, LOGGER_F_STOW | LOGGER_F_AZ | LOGGER_F_TILT);
+}
+
+static void test_a_press_is_not_logged_while_the_log_is_off_or_when_the_servo_fails(void)
+{
+    start_tracking();
+    press_at(PERIOD, PERIOD + 600U);
+    CHECK_EQ(logger_total(&app.logger), 0);
+
+    start_tracking();
+    log_on();
+    fake_pwm_fail_call(2U, PLAT_ERR_BUS);
+    press_at(PERIOD, PERIOD + 600U);
+    CHECK_STR(fake_uart_output(), "EVT stow FAIL status=3" EOL);
+    CHECK_EQ(logger_total(&app.logger), 0);
+}
+
+static void test_cmd_log_flush_writes_a_partial_block_and_reports_the_time(void)
+{
+    start_tracking();
+    log_on();
+    run_n(1U, 3U);
+    fake_time_set_step(0U);
+    CHECK_STR(run("log flush\n"), "CMD log-flush OK stored=3 blocks=0 us=0" EOL);
+    CHECK_EQ(fake_sd_write_count(), 1);
+    CHECK_EQ(fake_sd_stored_index(), 8192);
+    CHECK_STR(run("log flush\n"), "CMD log-flush OK stored=3 blocks=0 us=0" EOL);
+    CHECK_EQ(fake_sd_write_count(), 1);
+}
+
+static void test_cmd_log_flush_reports_card_failures(void)
+{
+    start_tracking();
+    log_on();
+    run_n(1U, 3U);
+    fake_sd_set_write_r1(0x04U);
+    CHECK_STR(run("log flush\n"), "CMD log-flush FAIL status=3" EOL);
+    CHECK_EQ(app.logger.errors, 1);
+    CHECK_EQ(logger_stored(&app.logger), 0);
+
+    start_tracking();
+    log_on();
+    run_n(1U, 3U);
+    fake_sd_set_silent(1U);
+    CHECK_STR(run("log flush\n"), "CMD log-flush FAIL status=2" EOL);
+    CHECK_EQ(app.logger.errors, 1);
+}
+
+static void test_a_missing_card_is_retried_once_a_second_not_in_every_pass(void)
+{
+    unsigned calls;
+
+    start_tracking();
+    log_on();
+    fake_sd_set_silent(1U);
+    run_n(1U, 16U);
+    CHECK_EQ(app.logger.errors, 1);
+    calls = fake_sd_transfer_calls();
+    run_n(17U, 35U);
+    CHECK_EQ(app.logger.errors, 1);
+    CHECK_EQ(fake_sd_transfer_calls(), calls);
+    run_n(36U, 36U);
+    CHECK_EQ(app.logger.errors, 2);
+    CHECK(fake_sd_transfer_calls() > calls);
+    CHECK_EQ(app.track_runs, 36);
+
+    fake_sd_set_silent(0U);
+    run_n(37U, 56U);
+    CHECK_EQ(app.logger.errors, 2);
+    CHECK_EQ(app.logger.blocks, 1);
+    CHECK_EQ(app.logger.dropped, 40);
+    run_n(57U, 57U);
+    CHECK_EQ(logger_total(&app.logger), 17);
+}
+
+static void test_cmd_log_get_reads_a_stored_record_back_from_the_card(void)
+{
+    start_tracking();
+    log_on();
+    run_n(1U, 16U);
+    CHECK_STR(run("log get 0\n"),
+              "CMD log-get OK n=0 t_ms=50 raw=1025,2050,3074,4095 az=91 tilt=89 flags=3 ok=1" EOL);
+    CHECK_STR(run("log get 15\n"),
+              "CMD log-get OK n=15 t_ms=800 raw=1025,2050,3074,4095 az=106 tilt=74 flags=3 ok=1" EOL);
+}
+
+static void test_cmd_log_get_refuses_what_is_not_on_the_card(void)
+{
+    start_tracking();
+    log_on();
+    run_n(1U, 5U);
+    CHECK_STR(run("log get 0\n"), "CMD log-get FAIL reason=range stored=0" EOL);
+    CHECK_STR(run("log flush\n"), "CMD log-flush OK stored=5 blocks=0 us=0" EOL);
+    CHECK_STR(run("log get 5\n"), "CMD log-get FAIL reason=range stored=5" EOL);
+    CHECK_STR(run("log get -1\n"), "CMD log-get FAIL reason=usage" EOL);
+    CHECK_STR(run("log get x\n"), "CMD log-get FAIL reason=usage" EOL);
+}
+
+static void test_cmd_log_get_reports_card_and_check_errors(void)
+{
+    start_tracking();
+    log_on();
+    run_n(1U, 16U);
+    fake_sd_set_read_token(0x08U);
+    CHECK_STR(run("log get 1\n"), "CMD log-get FAIL step=read status=3" EOL);
+    fake_sd_set_read_token(0xFEU);
+    fake_sd_set_block(8192U, card_block);
+    CHECK_STR(run("log get 1\n"),
+              "CMD log-get OK n=1 t_ms=336398079 raw=8731,12329,15927,19525 az=83 tilt=90"
+              " flags=97 ok=0" EOL);
+    app.sd.type = SD_TYPE_NONE;
+    fake_sd_set_silent(1U);
+    CHECK_STR(run("log get 1\n"), "CMD log-get FAIL step=init status=2" EOL);
+}
+
 static void test_line_crlf_terminator_runs_the_command_once(void)
 {
     start();
-    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button" EOL);
+    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log" EOL);
 }
 
 static void test_line_empty_and_blank_lines_are_ignored(void)
@@ -950,7 +1276,7 @@ static void test_line_length_limit_and_recovery(void)
     CHECK_STR(run(longest), expected);
 
     CHECK_STR(run(too_long), "CMD ? FAIL reason=too-long" EOL);
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log" EOL);
 }
 
 static void test_null_and_oversized_arguments_are_harmless(void)
@@ -1035,6 +1361,27 @@ int main(void)
     RUN(test_a_servo_failure_during_the_stow_is_reported);
     RUN(test_reaction_times_are_collected_for_every_accepted_press);
     RUN(test_cmd_button_reports_the_counters);
+    RUN(test_cmd_log_starts_off_and_reports_empty_counters);
+    RUN(test_cmd_log_switches_on_and_off_and_rejects_bad_forms);
+    RUN(test_nothing_is_logged_while_the_log_is_off);
+    RUN(test_a_run_that_moves_a_servo_stores_one_record);
+    RUN(test_a_run_that_moves_nothing_stores_nothing);
+    RUN(test_the_time_stamp_keeps_counting_past_the_wrap_of_the_cycle_counter);
+    RUN(test_the_sixteenth_record_writes_the_block_in_the_same_pass);
+    RUN(test_a_run_to_the_end_stops_gives_ninety_records_and_then_the_log_goes_quiet);
+    RUN(test_a_lone_record_is_written_when_it_is_ten_seconds_old);
+    RUN(test_nothing_is_written_while_the_log_is_off_even_if_records_are_waiting);
+    RUN(test_flushing_an_empty_log_does_not_touch_the_card_or_the_statistics);
+    RUN(test_the_flush_time_is_measured_with_the_cycle_counter);
+    RUN(test_parking_is_logged_even_when_the_servos_do_not_move);
+    RUN(test_a_stow_press_is_logged_with_the_edge_time_of_the_reaction);
+    RUN(test_a_press_is_not_logged_while_the_log_is_off_or_when_the_servo_fails);
+    RUN(test_cmd_log_flush_writes_a_partial_block_and_reports_the_time);
+    RUN(test_cmd_log_flush_reports_card_failures);
+    RUN(test_a_missing_card_is_retried_once_a_second_not_in_every_pass);
+    RUN(test_cmd_log_get_reads_a_stored_record_back_from_the_card);
+    RUN(test_cmd_log_get_refuses_what_is_not_on_the_card);
+    RUN(test_cmd_log_get_reports_card_and_check_errors);
     RUN(test_cmd_sd_init_runs_the_whole_sequence_each_time);
     RUN(test_cmd_sd_usage);
     RUN(test_line_crlf_terminator_runs_the_command_once);

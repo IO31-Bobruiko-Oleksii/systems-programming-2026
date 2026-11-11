@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "app.h"
+#include "logger.h"
 #include "plat_adc.h"
 #include "plat_button.h"
 #include "plat_pwm.h"
@@ -61,11 +62,14 @@ void app_init(app_t *app)
     }
     tracker_init(&app->tracker);
     perf_stat_init(&app->stow_latency, "stow");
+    logger_init(&app->logger);
+    perf_stat_init(&app->log_flush, "logflush");
     app->button_init = plat_button_init();    
 }
 
 void app_start(app_t *app)
 {
+    uint32_t now;
     if (app == NULL) {
         return;
     }
@@ -73,7 +77,9 @@ void app_start(app_t *app)
     if (app->track_period == 0U) {
         return;
     }
-    app->track_next = plat_time_cycles() + app->track_period;
+    now = plat_time_cycles();
+    app->track_next = now + app->track_period;
+    perf_clock_init(&app->clock, now);
     app->tracking = 1U;
 }
 
@@ -210,7 +216,7 @@ static int parse_uint(const char *s, uint32_t max, uint32_t *out)
 
 static void cmd_help(void)
 {
-    say("CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button" EOL);
+    say("CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log" EOL);
 }
 
 static void cmd_selftest(app_t *app)
@@ -406,6 +412,59 @@ static plat_status_t apply_servos(app_t *app)
     return (az != PLAT_OK) ? az : tilt;
 }
 
+static uint8_t result_flags(tracker_result_t r)
+{
+    uint8_t flags = 0U;
+
+    if (r.az_changed != 0U) {
+        flags |= LOGGER_F_AZ;
+    }
+    if (r.tilt_changed != 0U) {
+        flags |= LOGGER_F_TILT;
+    }
+    if (r.parked_now != 0U) {
+        flags |= LOGGER_F_PARK;
+    }
+    return flags;
+}
+
+static void log_note(app_t *app, uint8_t flags)
+{
+    if (app->log_on == 0U || flags == 0U) {
+        return;
+    }
+    (void)logger_add(&app->logger, app->clock.ms, app->pots.raw, app->tracker.az,
+                     app->tracker.tilt, flags);
+}
+
+static plat_status_t log_flush_now(app_t *app)
+{
+    uint32_t t0;
+    plat_status_t st;
+
+    if (logger_total(&app->logger) == logger_stored(&app->logger)) {
+        return PLAT_OK;
+    }
+    st = sd_ensure_init(app);
+    if (st != PLAT_OK) {
+        logger_failed(&app->logger, app->clock.ms);
+        return st;
+    }
+    t0 = plat_time_cycles();
+    st = logger_flush(&app->logger, &app->sd, app->clock.ms);
+    if (st == PLAT_OK) {
+        perf_stat_add(&app->log_flush, plat_time_cycles() - t0);
+    }
+    return st;
+}
+
+static void log_poll(app_t *app)
+{
+    if (app->log_on != 0U && logger_due(&app->logger, app->clock.ms) != 0) {
+        (void)log_flush_now(app);
+    }
+}
+
 static void track_task(app_t *app)
 {
     int at = -1;
@@ -415,7 +474,7 @@ static void track_task(app_t *app)
         st = pots_read_all(&app->pots, &at);
     }
     if (st == PLAT_OK) {
-        (void)tracker_update(&app->tracker, app->pots.raw);
+        log_note(app, result_flags(tracker_update(&app->tracker, app->pots.raw)));
         st = apply_servos(app);
     }
     app->track_runs++;
@@ -437,11 +496,13 @@ static void track_poll(app_t *app)
     if ((int32_t)(now - app->track_next) < 0) {
         return;
     }
+    (void)perf_clock_advance(&app->clock, now, plat_time_hz());
     late = now - app->track_next;
     skipped = late / app->track_period;
     app->track_missed += skipped;
     app->track_next += (skipped + 1U) * app->track_period;
     track_task(app);
+    log_poll(app);
 }
 
 static void cmd_track(const app_t *app)
@@ -520,7 +581,9 @@ static void button_poll(app_t *app)
     uint32_t count = plat_button_take(&first);
     uint32_t hz;
     uint32_t lockout;
+    uint32_t now;
     uint32_t cycles;
+    tracker_result_t moved;
     plat_status_t st;
 
     if (count == 0U) {
@@ -536,9 +599,10 @@ static void button_poll(app_t *app)
     app->button_accepted++;
     app->button_ignored += count - 1U;
     app->button_last = first;
-    (void)tracker_stow(&app->tracker);
+    moved = tracker_stow(&app->tracker);
     st = apply_servos(app);
-    cycles = plat_time_cycles() - first;
+    now = plat_time_cycles();
+    cycles = now - first;
     if (st != PLAT_OK) {
         say("EVT stow FAIL status=%d" EOL, (int)st);
         return;
@@ -546,6 +610,8 @@ static void button_poll(app_t *app)
     perf_stat_add(&app->stow_latency, cycles);
     say("EVT stow t_us=%lu lat_us=%lu" EOL, (unsigned long)perf_cycles_to_us(first, hz),
         (unsigned long)perf_cycles_to_us(cycles, hz));
+    (void)perf_clock_advance(&app->clock, now, hz);
+    log_note(app, (uint8_t)(result_flags(moved) | LOGGER_F_STOW));
 }
 
 static void cmd_button(const app_t *app)
@@ -556,6 +622,84 @@ static void cmd_button(const app_t *app)
     }
     say("CMD button OK edges=%lu accepted=%lu ignored=%lu" EOL, (unsigned long)app->button_edges,
         (unsigned long)app->button_accepted, (unsigned long)app->button_ignored);
+}
+
+static void cmd_log_status(const app_t *app)
+{
+    const logger_t *lg = &app->logger;
+
+    say("CMD log OK on=%u seq=%lu stored=%lu blocks=%lu dropped=%lu errors=%lu flushes=%lu"
+        " flush_max_us=%lu" EOL,
+        (unsigned)app->log_on, (unsigned long)logger_total(lg), (unsigned long)logger_stored(lg),
+        (unsigned long)lg->blocks, (unsigned long)lg->dropped, (unsigned long)lg->errors,
+        (unsigned long)app->log_flush.count,
+        (unsigned long)perf_cycles_to_us(app->log_flush.max, plat_time_hz()));
+}
+
+static void cmd_log_flush(app_t *app)
+{
+    uint32_t t0 = plat_time_cycles();
+    plat_status_t st = log_flush_now(app);
+    uint32_t cycles = plat_time_cycles() - t0;
+
+    if (st != PLAT_OK) {
+        say("CMD log-flush FAIL status=%d" EOL, (int)st);
+        return;
+    }
+    say("CMD log-flush OK stored=%lu blocks=%lu us=%lu" EOL,
+        (unsigned long)logger_stored(&app->logger), (unsigned long)app->logger.blocks,
+        (unsigned long)perf_cycles_to_us(cycles, plat_time_hz()));
+}
+
+static void cmd_log_get(app_t *app, const char *arg)
+{
+    logger_record_t r;
+    uint32_t n;
+    int valid = 0;
+    plat_status_t st;
+
+    if (parse_uint(arg, UINT32_MAX, &n) != 0) {
+        say("CMD log-get FAIL reason=usage" EOL);
+        return;
+    }
+    if (n >= logger_stored(&app->logger)) {
+        say("CMD log-get FAIL reason=range stored=%lu" EOL,
+            (unsigned long)logger_stored(&app->logger));
+        return;
+    }
+    st = sd_ensure_init(app);
+    if (st != PLAT_OK) {
+        say("CMD log-get FAIL step=init status=%d" EOL, (int)st);
+        return;
+    }
+    st = logger_read(&app->sd, n, app->block, &r, &valid);
+    if (st != PLAT_OK) {
+        say("CMD log-get FAIL step=read status=%d" EOL, (int)st);
+        return;
+    }
+    say("CMD log-get OK n=%lu t_ms=%lu raw=%u,%u,%u,%u az=%u tilt=%u flags=%u ok=%d" EOL,
+        (unsigned long)n, (unsigned long)r.t_ms, (unsigned)r.raw[0], (unsigned)r.raw[1],
+        (unsigned)r.raw[2], (unsigned)r.raw[3], (unsigned)r.az, (unsigned)r.tilt,
+        (unsigned)r.flags, valid);
+}
+
+static void cmd_log(app_t *app, unsigned argc, char *argv[])
+{
+    if (argc == 1U) {
+        cmd_log_status(app);
+    } else if (argc == 2U && strcmp(argv[1], "on") == 0) {
+        app->log_on = 1U;
+        say("CMD log OK on=1" EOL);
+    } else if (argc == 2U && strcmp(argv[1], "off") == 0) {
+        app->log_on = 0U;
+        say("CMD log OK on=0" EOL);
+    } else if (argc == 2U && strcmp(argv[1], "flush") == 0) {
+        cmd_log_flush(app);
+    } else if (argc == 3U && strcmp(argv[1], "get") == 0) {
+        cmd_log_get(app, argv[2]);
+    } else {
+        say("CMD log FAIL reason=usage" EOL);
+    }
 }
 
 void app_execute(app_t *app, const char *line)
@@ -596,6 +740,8 @@ void app_execute(app_t *app, const char *line)
         cmd_resume(app);
     } else if (strcmp(argv[0], "button") == 0) {
         cmd_button(app);
+    } else if (strcmp(argv[0], "log") == 0) {
+        cmd_log(app, argc, argv);
     } else {
         say("CMD %s FAIL reason=unknown" EOL, argv[0]);
     }

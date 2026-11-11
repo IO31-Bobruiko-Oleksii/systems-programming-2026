@@ -34,6 +34,38 @@ uint32_t perf_cycles_to_us(uint32_t cycles, uint32_t hz)
     return (uint32_t)(((uint64_t)cycles * 1000000U + hz / 2U) / hz);
 }
 
+void perf_clock_init(perf_clock_t *c, uint32_t now)
+{
+    if (c == NULL) {
+        return;
+    }
+    c->last = now;
+    c->rem = 0U;
+    c->ms = 0U;
+}
+
+uint32_t perf_clock_advance(perf_clock_t *c, uint32_t now, uint32_t hz)
+{
+    uint32_t per_ms = hz / 1000U;
+    uint32_t delta;
+
+    if (c == NULL) {
+        return 0U;
+    }
+    delta = now - c->last;
+    c->last = now;
+    if (per_ms == 0U) {
+        return c->ms;
+    }
+    c->ms += delta / per_ms;
+    c->rem += delta % per_ms;
+    if (c->rem >= per_ms) {
+        c->ms++;
+        c->rem -= per_ms;
+    }
+    return c->ms;
+}
+
 int perf_stat_format(const perf_stat_t *s, uint32_t hz, char *buf, size_t size)
 {
     uint32_t avg = 0U;
