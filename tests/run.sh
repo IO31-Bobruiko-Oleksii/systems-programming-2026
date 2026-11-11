@@ -10,6 +10,7 @@ OUT=build
 TESTS=(
   "test_servo|../firmware/devices/src/servo.c fakes/fake_pwm.c"
   "test_perf|../firmware/devices/src/perf.c"  
+  "test_tracker|../firmware/devices/src/tracker.c"
   "test_pots|../firmware/devices/src/pots.c fakes/fake_adc.c"
   "test_sdcard|../firmware/devices/src/sdcard.c fakes/fake_sdcard.c"
   "test_app|../firmware/app/src/app.c ../firmware/devices/src/servo.c ../firmware/devices/src/pots.c ../firmware/devices/src/sdcard.c ../firmware/devices/src/perf.c fakes/fake_uart.c fakes/fake_pwm.c fakes/fake_adc.c fakes/fake_sdcard.c fakes/fake_time.c"
