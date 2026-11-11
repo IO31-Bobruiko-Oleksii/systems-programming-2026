@@ -1,0 +1,22 @@
+name: 'stats: the measurement command prints task times, loop period, load, counters and memory (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 25ms
+  - write-serial: "stats reset\n"
+  - wait-serial: 'CMD stats-reset OK'
+  - delay: 2998ms
+  - write-serial: "stats\n"
+  - wait-serial: 'STAT name=loop n='
+  - wait-serial: 'STAT name=sense n=60 '
+  - wait-serial: 'STAT name=track n=60 '
+  - wait-serial: 'STAT name=late n=60 '
+  - wait-serial: 'STAT name=period n=60 '
+  - wait-serial: 'STAT name=cmd n=1 '
+  - wait-serial: 'STAT name=logflush n=0 '
+  - wait-serial: 'STAT name=stow n=0 '
+  - wait-serial: 'STAT load window_ms='
+  - wait-serial: 'STAT count runs=60 missed=0 rx_bytes=6 rx_errors=0 passes='
+  - wait-serial: 'STAT mem ram=12288 static='
+  - wait-serial: 'CMD stats OK'
+  - delay: 5ms

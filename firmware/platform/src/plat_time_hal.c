@@ -15,11 +15,11 @@ uint32_t plat_time_cycles(void)
     uint32_t val;
 
     do {
-        tick = HAL_GetTick();
+        tick = uwTick;
         pend = SCB->ICSR & SCB_ICSR_PENDSTSET_Msk;
         val = SysTick->VAL;
         pend_again = SCB->ICSR & SCB_ICSR_PENDSTSET_Msk;
-        tick_again = HAL_GetTick();
+        tick_again = uwTick;
     } while (tick != tick_again || pend != pend_again);
 
     return plat_time_compose(tick, SysTick->LOAD + 1U, val, pend != 0U);

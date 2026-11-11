@@ -19,17 +19,35 @@
 #define APP_STOW_LOCKOUT_MS  200U
 
 typedef struct {
+    perf_stat_t sense;
+    perf_stat_t track;
+    perf_stat_t late;
+    perf_stat_t period;
+    perf_stat_t cmd;
+    uint64_t    busy;
+    uint32_t    start_ms;
+    uint32_t    missed0;
+    uint32_t    track_last;
+    uint32_t    rx_errors;
+} app_meter_t;
+
+typedef struct {
+    uint32_t track_next;
+    uint32_t pass_last;
+    uint32_t passes;
+    uint32_t pass_min;
+    uint32_t pass_max;
+    uint32_t rx_bytes;
+    uint8_t  tracking;
     pots_t   pots;
     servo_t  servo[2];
     sdcard_t sd;
     uint8_t  block[SDCARD_BLOCK_SIZE];
     tracker_t tracker;
     uint32_t track_period;
-    uint32_t track_next;
     uint32_t track_runs;
     uint32_t track_missed;
     uint32_t track_errors;
-    uint8_t  tracking;
     uint32_t button_last;
     uint32_t button_edges;
     uint32_t button_accepted;
@@ -39,6 +57,7 @@ typedef struct {
     logger_t logger;
     perf_stat_t log_flush;
     uint8_t  log_on;
+    app_meter_t meter;
     char     line[APP_LINE_MAX + 1U];
     uint8_t  line_len;
     uint8_t  line_overflow;

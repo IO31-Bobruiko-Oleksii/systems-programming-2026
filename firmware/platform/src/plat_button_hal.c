@@ -38,10 +38,14 @@ void EXTI4_15_IRQHandler(void)
 
 uint32_t plat_button_take(uint32_t *first_edge_cycles)
 {
-    uint32_t primask = __get_PRIMASK();
+    uint32_t primask;
     uint32_t count;
     uint32_t first;
 
+    if (edge_count == 0U) {
+        return 0U;
+    }
+    primask = __get_PRIMASK();
     __disable_irq();
     count = edge_count;
     first = edge_first;

@@ -26,6 +26,13 @@ void fake_uart_feed(const char *text)
     }
 }
 
+void fake_uart_feed_error(void)
+{
+    if (in_tail < FAKE_UART_IN_CAPACITY) {
+        in[in_tail++] = (char)0xFF;
+    }
+}
+
 size_t fake_uart_in_pending(void)
 {
     return in_tail - in_head;
@@ -66,5 +73,8 @@ plat_status_t plat_uart_read_byte(uint8_t *byte, uint32_t timeout_ms)
         return PLAT_ERR_TIMEOUT;
     }
     *byte = (uint8_t)in[in_head++];
+    if (*byte == 0xFFU) {
+        return PLAT_ERR_BUS;
+    }
     return PLAT_OK;
 }

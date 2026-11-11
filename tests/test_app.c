@@ -9,6 +9,7 @@
 #include "fake_sdcard.h"
 #include "fake_time.h"
 #include "fake_button.h"
+#include "fake_mem.h"
 
 #define CHECK_STR(actual, expected) \
     do { \
@@ -44,6 +45,7 @@ static void world(void)
     fake_sd_reset();
     fake_time_reset();
     fake_button_reset();
+    fake_mem_reset();
     fake_adc_set_raw(0U, 1025U);
     fake_adc_set_raw(1U, 2050U);
     fake_adc_set_raw(2U, 3074U);
@@ -212,7 +214,7 @@ static void test_selftest_can_run_again(void)
 static void test_cmd_help(void)
 {
     start();
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats" EOL);
 }
 
 static void test_cmd_unknown(void)
@@ -370,7 +372,7 @@ static void test_cmd_time_reports_the_cost_of_one_reading(void)
     start();
     fake_time_set_step(5U);
     CHECK_STR(run("time\n"), "CMD time OK hz=12000000 read_cycles=5 backsteps=0" EOL);
-    CHECK_EQ(fake_time_calls(), 40000);
+    CHECK_EQ(fake_time_calls(), 40002);
 }
 
 static void test_cmd_time_counts_readings_that_go_backwards(void)
@@ -1227,10 +1229,282 @@ static void test_cmd_log_get_reports_card_and_check_errors(void)
     CHECK_STR(run("log get 1\n"), "CMD log-get FAIL step=init status=2" EOL);
 }
 
+static void stats_step(uint32_t at, uint32_t step)
+{
+    fake_time_set(at);
+    fake_time_set_step(step);
+    app_poll(&app);
+    fake_time_set_step(0U);
+}
+
+static void test_every_tracking_pass_records_the_gap_since_the_previous_one(void)
+{
+    start_tracking();
+    tick(1000U);
+    tick(1500U);
+    tick(4500U);
+    CHECK_EQ(app.passes, 3);
+    CHECK_EQ(app.pass_min, 500);
+    CHECK_EQ(app.pass_max, 3000);
+}
+
+static void test_the_first_gap_and_the_first_period_start_at_app_start(void)
+{
+    start();
+    fake_time_set(1000000U);
+    app_start(&app);
+    tick(1000000U + PERIOD);
+    CHECK_EQ(app.pass_max, PERIOD);
+    CHECK_EQ(app.meter.period.min, PERIOD);
+}
+
+static void test_the_loop_line_shows_the_shortest_the_average_and_the_longest_pass(void)
+{
+    start_tracking();
+    tick(120000U);
+    tick(180000U);
+    tick(480000U);
+    fake_uart_clear_output();
+    app_execute(&app, "stats");
+    CHECK(strstr(fake_uart_output(), "STAT name=loop n=3 min_us=5000 avg_us=13333 max_us=25000" EOL) != NULL);
+}
+
+static void test_passes_are_not_counted_before_tracking_has_started(void)
+{
+    start();
+    tick(1000U);
+    tick(2000U);
+    CHECK_EQ(app.passes, 0);
+    CHECK_EQ(app.pass_max, 0);
+}
+
+static void test_the_start_lateness_and_the_real_period_of_each_run_are_recorded(void)
+{
+    start_tracking();
+    tick(PERIOD + 30U);
+    tick(2U * PERIOD + 10U);
+    CHECK_EQ(app.meter.late.count, 2);
+    CHECK_EQ(app.meter.late.min, 10);
+    CHECK_EQ(app.meter.late.max, 30);
+    CHECK_EQ(app.meter.late.sum, 40);
+    CHECK_EQ(app.meter.period.count, 2);
+    CHECK_EQ(app.meter.period.min, PERIOD - 20U);
+    CHECK_EQ(app.meter.period.max, PERIOD + 30U);
+    tick(5U * PERIOD);
+    CHECK_EQ(app.meter.late.max, 2U * PERIOD);
+    CHECK_EQ(app.track_missed, 2);
+}
+
+static void test_sense_and_track_times_are_read_from_the_cycle_counter(void)
+{
+    start_tracking();
+    stats_step(PERIOD, 100U);
+    CHECK_EQ(app.meter.sense.count, 1);
+    CHECK_EQ(app.meter.sense.min, 100);
+    CHECK_EQ(app.meter.sense.max, 100);
+    CHECK_EQ(app.meter.track.count, 1);
+    CHECK_EQ(app.meter.track.min, 300);
+    CHECK_EQ(app.meter.track.max, 300);
+    CHECK_EQ(app.meter.busy, 300);
+}
+
+static void test_a_failed_conversion_leaves_the_sense_statistic_alone(void)
+{
+    start_tracking();
+    fake_adc_fail_channel(1U, PLAT_ERR_TIMEOUT);
+    tick(PERIOD);
+    CHECK_EQ(app.track_errors, 1);
+    CHECK_EQ(app.meter.sense.count, 0);
+    CHECK_EQ(app.meter.track.count, 1);
+}
+
+static void test_a_dead_converter_is_not_timed_at_all(void)
+{
+    world();
+    fake_adc_fail_init(PLAT_ERR_BUS);
+    app_init(&app);
+    app_start(&app);
+    tick(PERIOD);
+    CHECK_EQ(app.track_errors, 1);
+    CHECK_EQ(app.meter.sense.count, 0);
+}
+
+static void test_a_command_is_timed_and_counts_as_busy_time(void)
+{
+    start_tracking();
+    fake_time_set_step(50U);
+    run("help\n");
+    fake_time_set_step(0U);
+    CHECK_EQ(app.meter.cmd.count, 1);
+    CHECK_EQ(app.meter.cmd.min, 50);
+    CHECK_EQ(app.meter.cmd.max, 50);
+    CHECK_EQ(app.meter.busy, 50);
+}
+
+static void test_a_log_flush_in_the_task_loop_counts_as_busy_time(void)
+{
+    start_tracking();
+    log_on();
+    fake_time_set_step(1200U);
+    run_n(1U, 16U);
+    fake_time_set_step(0U);
+    CHECK_EQ(app.log_flush.count, 1);
+    CHECK_EQ(app.meter.track.count, 16);
+    CHECK(app.meter.busy >= app.meter.track.sum + app.log_flush.sum);
+}
+
+static void test_received_bytes_and_bus_errors_are_counted_separately(void)
+{
+    start_tracking();
+    fake_uart_clear_output();
+    fake_uart_feed("ab");
+    fake_uart_feed_error();
+    fake_uart_feed("\n");
+    while (fake_uart_in_pending() > 0U) {
+        app_poll(&app);
+    }
+    CHECK_EQ(app.rx_bytes, 3);
+    CHECK_EQ(app.meter.rx_errors, 1);
+    CHECK_STR(fake_uart_output(), "CMD ab FAIL reason=unknown" EOL);
+    app_poll(&app);
+    app_poll(&app);
+    CHECK_EQ(app.rx_bytes, 3);
+    CHECK_EQ(app.meter.rx_errors, 1);
+}
+
+static void test_cmd_stats_prints_every_statistic_and_ends_with_the_verdict(void)
+{
+    start_tracking();
+    stats_step(PERIOD, 12000U);
+    CHECK_STR(run("stats\n"),
+              "STAT name=loop n=7 min_us=0 avg_us=7714 max_us=50000" EOL
+              "STAT name=sense n=1 min_us=1000 avg_us=1000 max_us=1000" EOL
+              "STAT name=track n=1 min_us=3000 avg_us=3000 max_us=3000" EOL
+              "STAT name=late n=1 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=period n=1 min_us=50000 avg_us=50000 max_us=50000" EOL
+              "STAT name=cmd n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=stow n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT load window_ms=54 busy_ms=3 load_pm=55" EOL
+              "STAT count runs=1 missed=0 rx_bytes=6 rx_errors=0 passes=7" EOL
+              "STAT mem ram=12288 static=3668 heap_used=0 heap_res=512 stack_used=312"
+              " stack_res=1024 stack_free=8316" EOL
+              "CMD stats OK" EOL);
+}
+
+static void test_cmd_stats_before_tracking_shows_an_empty_loop_and_no_load(void)
+{
+    start();
+    CHECK_STR(run("stats\n"),
+              "STAT name=loop n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=sense n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=track n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=late n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=period n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=cmd n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT name=stow n=0 min_us=0 avg_us=0 max_us=0" EOL
+              "STAT load window_ms=0 busy_ms=0 load_pm=0" EOL
+              "STAT count runs=0 missed=0 rx_bytes=6 rx_errors=0 passes=0" EOL
+              "STAT mem ram=12288 static=3668 heap_used=0 heap_res=512 stack_used=312"
+              " stack_res=1024 stack_free=8316" EOL
+              "CMD stats OK" EOL);
+}
+
+static void test_the_load_never_shows_more_than_one_thousand_permille(void)
+{
+    start_tracking();
+    stats_step(PERIOD, 0U);
+    app.meter.busy = 100U * PERIOD;
+    CHECK(strstr(run("stats\n"), "STAT load window_ms=50 busy_ms=5000 load_pm=1000" EOL) != NULL);
+}
+
+static void test_a_clock_below_one_kilohertz_gives_no_window_and_no_division(void)
+{
+    start();
+    fake_time_set_hz(999U);
+    app.meter.busy = 5U;
+    CHECK(strstr(run("stats\n"), "STAT load window_ms=0 busy_ms=0 load_pm=0" EOL) != NULL);
+}
+
+static void test_cmd_stats_shows_the_longest_memory_line_in_full(void)
+{
+    plat_mem_info_t big;
+
+    start();
+    big.ram_total = UINT32_MAX;
+    big.static_used = UINT32_MAX;
+    big.heap_reserved = UINT32_MAX;
+    big.heap_used = UINT32_MAX;
+    big.stack_reserved = UINT32_MAX;
+    big.stack_used = UINT32_MAX;
+    big.stack_free = UINT32_MAX;
+    fake_mem_set(&big);
+    CHECK(strstr(run("stats\n"),
+                 "STAT mem ram=4294967295 static=4294967295 heap_used=4294967295"
+                 " heap_res=4294967295 stack_used=4294967295 stack_res=4294967295"
+                 " stack_free=4294967295" EOL "CMD stats OK" EOL) != NULL);
+}
+
+static void test_a_failing_memory_report_does_not_stop_the_rest(void)
+{
+    start();
+    fake_mem_fail(PLAT_ERR_BUS);
+    CHECK(strstr(run("stats\n"), "STAT mem FAIL status=3" EOL "CMD stats OK" EOL) != NULL);
+}
+
+static void test_cmd_stats_rejects_bad_forms(void)
+{
+    start();
+    CHECK_STR(run("stats x\n"), "CMD stats FAIL reason=usage" EOL);
+    CHECK_STR(run("stats reset now\n"), "CMD stats FAIL reason=usage" EOL);
+    CHECK_STR(run("stats 1 2 3\n"), "CMD stats FAIL reason=usage" EOL);
+}
+
+static void test_stats_reset_starts_a_new_window(void)
+{
+    start_tracking();
+    log_on();
+    stats_step(PERIOD, 12000U);
+    tick(4U * PERIOD);
+    press_at(4U * PERIOD + 100U, 4U * PERIOD + 7300U);
+    CHECK_EQ(app.track_missed, 2);
+    CHECK_EQ(app.stow_latency.count, 1);
+    CHECK_STR(run("log flush\n"), "CMD log-flush OK stored=3 blocks=0 us=0" EOL);
+    CHECK_EQ(app.log_flush.count, 1);
+    fake_uart_feed_error();
+    app_poll(&app);
+    CHECK_EQ(app.meter.rx_errors, 1);
+    CHECK(app.meter.busy > 0U);
+    CHECK_STR(run("stats reset\n"), "CMD stats-reset OK" EOL);
+    CHECK_EQ(app.passes, 0);
+    CHECK_EQ(app.pass_max, 0);
+    CHECK_EQ(app.pass_min, UINT32_MAX);
+    CHECK_EQ(app.meter.late.count, 0);
+    CHECK_EQ(app.meter.period.count, 0);
+    CHECK_EQ(app.meter.sense.count, 0);
+    CHECK_EQ(app.meter.track.count, 0);
+    CHECK_EQ(app.rx_bytes, 0);
+    CHECK_EQ(app.meter.rx_errors, 0);
+    CHECK_EQ(app.meter.busy, 0);
+    CHECK_EQ(app.meter.start_ms, app.clock.ms);
+    CHECK_EQ(app.stow_latency.count, 0);
+    CHECK_EQ(app.log_flush.count, 0);
+    CHECK_STR(app.stow_latency.name, "stow");
+    CHECK_STR(app.log_flush.name, "logflush");
+    CHECK_STR(app.meter.late.name, "late");
+    CHECK_EQ(app.track_missed, 2);
+    CHECK_EQ(app.track_runs, 2);
+    stats_step(7U * PERIOD, 12000U);
+    run("stats\n");
+    CHECK(strstr(fake_uart_output(), "STAT load window_ms=154 busy_ms=3 load_pm=19" EOL) != NULL);
+    CHECK(strstr(fake_uart_output(), "STAT count runs=1 missed=2 ") != NULL);
+}
+
 static void test_line_crlf_terminator_runs_the_command_once(void)
 {
     start();
-    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log" EOL);
+    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats" EOL);
 }
 
 static void test_line_empty_and_blank_lines_are_ignored(void)
@@ -1276,7 +1550,7 @@ static void test_line_length_limit_and_recovery(void)
     CHECK_STR(run(longest), expected);
 
     CHECK_STR(run(too_long), "CMD ? FAIL reason=too-long" EOL);
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats" EOL);
 }
 
 static void test_null_and_oversized_arguments_are_harmless(void)
@@ -1384,6 +1658,25 @@ int main(void)
     RUN(test_cmd_log_get_reports_card_and_check_errors);
     RUN(test_cmd_sd_init_runs_the_whole_sequence_each_time);
     RUN(test_cmd_sd_usage);
+    RUN(test_every_tracking_pass_records_the_gap_since_the_previous_one);
+    RUN(test_the_first_gap_and_the_first_period_start_at_app_start);
+    RUN(test_the_loop_line_shows_the_shortest_the_average_and_the_longest_pass);
+    RUN(test_passes_are_not_counted_before_tracking_has_started);
+    RUN(test_the_start_lateness_and_the_real_period_of_each_run_are_recorded);
+    RUN(test_sense_and_track_times_are_read_from_the_cycle_counter);
+    RUN(test_a_failed_conversion_leaves_the_sense_statistic_alone);
+    RUN(test_a_dead_converter_is_not_timed_at_all);
+    RUN(test_a_command_is_timed_and_counts_as_busy_time);
+    RUN(test_a_log_flush_in_the_task_loop_counts_as_busy_time);
+    RUN(test_received_bytes_and_bus_errors_are_counted_separately);
+    RUN(test_cmd_stats_prints_every_statistic_and_ends_with_the_verdict);
+    RUN(test_cmd_stats_before_tracking_shows_an_empty_loop_and_no_load);
+    RUN(test_the_load_never_shows_more_than_one_thousand_permille);
+    RUN(test_a_clock_below_one_kilohertz_gives_no_window_and_no_division);
+    RUN(test_cmd_stats_shows_the_longest_memory_line_in_full);
+    RUN(test_a_failing_memory_report_does_not_stop_the_rest);
+    RUN(test_cmd_stats_rejects_bad_forms);
+    RUN(test_stats_reset_starts_a_new_window);
     RUN(test_line_crlf_terminator_runs_the_command_once);
     RUN(test_line_empty_and_blank_lines_are_ignored);
     RUN(test_line_waits_for_the_terminator);

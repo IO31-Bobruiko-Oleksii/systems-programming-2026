@@ -10,6 +10,7 @@
 
 void        fake_uart_reset(void);
 void        fake_uart_feed(const char *text);
+void        fake_uart_feed_error(void);
 size_t      fake_uart_in_pending(void);
 const char *fake_uart_output(void);
 void        fake_uart_clear_output(void);
