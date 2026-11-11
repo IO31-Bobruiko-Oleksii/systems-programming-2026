@@ -8,6 +8,7 @@
 #include "fake_adc.h"
 #include "fake_sdcard.h"
 #include "fake_time.h"
+#include "fake_button.h"
 
 #define CHECK_STR(actual, expected) \
     do { \
@@ -42,6 +43,7 @@ static void world(void)
     fake_adc_reset();
     fake_sd_reset();
     fake_time_reset();
+    fake_button_reset();
     fake_adc_set_raw(0U, 1025U);
     fake_adc_set_raw(1U, 2050U);
     fake_adc_set_raw(2U, 3074U);
@@ -210,7 +212,7 @@ static void test_selftest_can_run_again(void)
 static void test_cmd_help(void)
 {
     start();
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button" EOL);
 }
 
 static void test_cmd_unknown(void)
@@ -779,10 +781,130 @@ static void test_cmd_servo_sets_the_position_the_tracker_continues_from(void)
     CHECK_EQ(app.servo[0].pulse_us, servo_angle_to_us(31));
 }
 
+#define LOCKOUT  2400000U
+
+static void press_at(uint32_t edge, uint32_t now)
+{
+    fake_button_press(edge);
+    fake_time_set(now);
+    fake_uart_clear_output();
+    app_poll(&app);
+}
+
+static void test_init_remembers_a_failed_button_start(void)
+{
+    world();
+    fake_button_fail_init(PLAT_ERR_BUS);
+    app_init(&app);
+    CHECK_EQ(app.button_init, PLAT_ERR_BUS);
+    CHECK_STR(run("button\n"), "CMD button FAIL status=3" EOL);
+}
+
+static void test_a_press_stows_the_panel_and_reports_the_reaction_time(void)
+{
+    start_tracking();
+    tick(PERIOD);
+    CHECK_EQ(app.tracker.az, 91);
+    press_at(PERIOD + 1000U, PERIOD + 1000U + 7200U);
+    CHECK_STR(fake_uart_output(), "EVT stow t_us=50083 lat_us=600" EOL);
+    CHECK_EQ(app.tracker.stowed, 1);
+    CHECK_EQ(app.tracker.az, 90);
+    CHECK_EQ(app.servo[0].pulse_us, 1500);
+    CHECK_EQ(app.servo[1].pulse_us, 1500);
+    CHECK_EQ(app.button_accepted, 1);
+}
+
+static void test_a_press_is_handled_before_a_due_tracking_run(void)
+{
+    start_tracking();
+    press_at(PERIOD, PERIOD + 600U);
+    CHECK_EQ(app.track_runs, 1);
+    CHECK_EQ(fake_pwm_calls(), 6);
+    CHECK_EQ(fake_pwm_pulse_at(2), 1500);
+    CHECK_EQ(fake_pwm_pulse_at(3), 1500);
+    CHECK_EQ(app.tracker.az, 90);
+}
+
+static void test_a_press_works_before_tracking_has_started(void)
+{
+    start();
+    press_at(0U, 120U);
+    CHECK_STR(fake_uart_output(), "EVT stow t_us=0 lat_us=10" EOL);
+    CHECK_EQ(app.tracker.stowed, 1);
+}
+
+static void test_presses_inside_the_lockout_are_ignored_and_counted(void)
+{
+    start();
+    press_at(1000U, 2000U);
+    CHECK_EQ(app.button_accepted, 1);
+
+    press_at(1000U + LOCKOUT / 2U, 1300000U);
+    CHECK_STR(fake_uart_output(), "");
+    CHECK_EQ(app.button_accepted, 1);
+    CHECK_EQ(app.button_ignored, 1);
+
+    press_at(1000U + LOCKOUT - 1U, 2500000U);
+    CHECK_EQ(app.button_accepted, 1);
+    CHECK_EQ(app.button_ignored, 2);
+
+    press_at(1000U + LOCKOUT, 2500000U);
+    CHECK_EQ(app.button_accepted, 2);
+    CHECK_EQ(app.button_ignored, 2);
+    CHECK_EQ(app.button_edges, 4);
+}
+
+static void test_edges_that_arrive_together_count_as_one_press(void)
+{
+    start();
+    fake_button_press(5000U);
+    fake_button_press(5100U);
+    fake_button_press(5200U);
+    fake_time_set(6000U);
+    fake_uart_clear_output();
+    app_poll(&app);
+    CHECK_STR(fake_uart_output(), "EVT stow t_us=417 lat_us=83" EOL);
+    CHECK_EQ(app.button_edges, 3);
+    CHECK_EQ(app.button_accepted, 1);
+    CHECK_EQ(app.button_ignored, 2);
+}
+
+static void test_a_servo_failure_during_the_stow_is_reported(void)
+{
+    start();
+    fake_pwm_fail_next(PLAT_ERR_BUS);
+    press_at(1000U, 2000U);
+    CHECK_STR(fake_uart_output(), "EVT stow FAIL status=3" EOL);
+    CHECK_EQ(app.button_accepted, 1);
+    CHECK_EQ(app.stow_latency.count, 0);
+    CHECK_EQ(app.tracker.stowed, 1);
+}
+
+static void test_reaction_times_are_collected_for_every_accepted_press(void)
+{
+    start();
+    press_at(0U, 7200U);
+    press_at(LOCKOUT, LOCKOUT + 14400U);
+    press_at(LOCKOUT + 100U, LOCKOUT + 999999U);
+    CHECK_EQ(app.stow_latency.count, 2);
+    CHECK_EQ(app.stow_latency.min, 7200);
+    CHECK_EQ(app.stow_latency.max, 14400);
+    CHECK_EQ(app.stow_latency.sum, 21600);
+}
+
+static void test_cmd_button_reports_the_counters(void)
+{
+    start();
+    CHECK_STR(run("button\n"), "CMD button OK edges=0 accepted=0 ignored=0" EOL);
+    press_at(1000U, 2000U);
+    press_at(2000U, 3000U);
+    CHECK_STR(run("button\n"), "CMD button OK edges=2 accepted=1 ignored=1" EOL);
+}
+
 static void test_line_crlf_terminator_runs_the_command_once(void)
 {
     start();
-    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume" EOL);
+    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button" EOL);
 }
 
 static void test_line_empty_and_blank_lines_are_ignored(void)
@@ -828,7 +950,7 @@ static void test_line_length_limit_and_recovery(void)
     CHECK_STR(run(longest), expected);
 
     CHECK_STR(run(too_long), "CMD ? FAIL reason=too-long" EOL);
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button" EOL);
 }
 
 static void test_null_and_oversized_arguments_are_harmless(void)
@@ -904,6 +1026,15 @@ int main(void)
     RUN(test_cmd_stow_holds_the_panel_until_resume);
     RUN(test_cmd_stow_reports_a_servo_failure);
     RUN(test_cmd_servo_sets_the_position_the_tracker_continues_from);
+    RUN(test_init_remembers_a_failed_button_start);
+    RUN(test_a_press_stows_the_panel_and_reports_the_reaction_time);
+    RUN(test_a_press_is_handled_before_a_due_tracking_run);
+    RUN(test_a_press_works_before_tracking_has_started);
+    RUN(test_presses_inside_the_lockout_are_ignored_and_counted);
+    RUN(test_edges_that_arrive_together_count_as_one_press);
+    RUN(test_a_servo_failure_during_the_stow_is_reported);
+    RUN(test_reaction_times_are_collected_for_every_accepted_press);
+    RUN(test_cmd_button_reports_the_counters);
     RUN(test_cmd_sd_init_runs_the_whole_sequence_each_time);
     RUN(test_cmd_sd_usage);
     RUN(test_line_crlf_terminator_runs_the_command_once);

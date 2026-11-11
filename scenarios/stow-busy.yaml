@@ -1,0 +1,22 @@
+name: 'stow-busy: the button is pressed while an SD block write blocks the loop (LR3, reaction time is read from the EVT line)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 6025ms
+  - write-serial: "sd write 16000\n"
+  - delay: 2ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - wait-serial: 'CMD sd-write OK block=16000'
+  - wait-serial: 'EVT stow t_us='
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 70ms
+  - write-serial: "button\n"
+  - wait-serial: 'accepted=1 ignored='
+  - delay: 5ms

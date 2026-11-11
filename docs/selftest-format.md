@@ -58,7 +58,7 @@ except `selftest`, which prints the report first.
 
 | Command | Reply on success | Reply on failure |
 |---|---|---|
-| `help` | `CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume` | none |
+| `help` | `CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button` | none |
 | `selftest` | the report from section 1, then `CMD selftest OK failed=0` | the report, then `CMD selftest FAIL failed=<n>` |
 | `adc` | `CMD adc OK raw=<a>,<b>,<c>,<d>` | `CMD adc FAIL status=<s> at=<n>` |
 | `servo <1\|2> <0..180>` | `CMD servo OK ch=<c> angle=<deg> pulse_us=<us>` (1000 us at 0, 2000 us at 180) | `CMD servo FAIL reason=usage`, `reason=range` (angle above 180) or `status=<s>` |
@@ -72,8 +72,11 @@ except `selftest`, which prints the report first.
 | `zero <az> <tilt>` | `CMD zero OK az=<a> tilt=<t>`: sets the safe position (0..180 degrees each); a parked or stowed panel moves there at once | `CMD zero FAIL reason=usage`, `reason=range` or `status=<s>` |
 | `stow` | `CMD stow OK az=<a> tilt=<t>`: moves to the safe position and holds it | `CMD stow FAIL status=<s>` |
 | `resume` | `CMD resume OK`: tracking continues | none |
+| `button` | `CMD button OK edges=<n> accepted=<n> ignored=<n>`: falling edges seen on the pushbutton pin, presses that stowed the panel, edges that were ignored (inside the 200 ms lockout or part of the same press) | `CMD button FAIL status=<s>` if the pin could not be started |
 | anything else | none | `CMD <word> FAIL reason=unknown` |
 | a line longer than 48 characters | none | `CMD ? FAIL reason=too-long` |
+
+Besides replies the firmware prints event lines on its own. `EVT stow t_us=<t> lat_us=<l>` follows a pushbutton press (falling edge on PB5) that has stowed the panel: `t_us` is the time of the edge in microseconds on the free-running time base (a 32-bit cycle counter that wraps every 357.9 s), `lat_us` the time from the edge until both servo outputs were written. `EVT stow FAIL status=<s>` means a servo write failed. A press less than 200 ms after the last accepted one is ignored and only counted.
 
 ## 3. How it is checked
 

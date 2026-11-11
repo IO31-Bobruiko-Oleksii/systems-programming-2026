@@ -21,6 +21,7 @@ Every pin has exactly one function. The AF numbers below are the ones written by
 | PA7 | SPI1_MOSI | AF0 | sd1:DI | |
 | PB9 | GPIO output, SD chip select (software, active low) | none | sd1:CS | must be high from reset; the generated `MX_GPIO_Init()` drives it low until `plat_spi_init()` (section 6.3) |
 | PB3 | GPIO output, ADC timing marker (high while `plat_adc_read()` runs) | none | logic analyzer D7 only | test aid, not a product signal |
+| PB5 | GPIO input with pull-up, EXTI line 5 (vector EXTI4_15), falling edge: stow request | none | btn1:1.l, the other leg btn1:2.l to GND | Arduino D4 on the usual Nucleo-64 layout; no other function on the board |
 | PC6 | TIM3_CH1 | AF1 | servo1:PWM | |
 | PC7 | TIM3_CH2 | AF1 | servo2:PWM | |
 

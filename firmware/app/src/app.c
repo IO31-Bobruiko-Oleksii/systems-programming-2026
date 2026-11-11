@@ -4,6 +4,7 @@
 #include <string.h>
 #include "app.h"
 #include "plat_adc.h"
+#include "plat_button.h"
 #include "plat_pwm.h"
 #include "perf.h"
 #include "plat_spi.h"
@@ -59,6 +60,8 @@ void app_init(app_t *app)
         app->pwm_init = servo_init(&app->servo[1], PLAT_PWM_CH_SERVO2);
     }
     tracker_init(&app->tracker);
+    perf_stat_init(&app->stow_latency, "stow");
+    app->button_init = plat_button_init();    
 }
 
 void app_start(app_t *app)
@@ -207,7 +210,7 @@ static int parse_uint(const char *s, uint32_t max, uint32_t *out)
 
 static void cmd_help(void)
 {
-    say("CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume" EOL);
+    say("CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button" EOL);
 }
 
 static void cmd_selftest(app_t *app)
@@ -511,6 +514,50 @@ static void cmd_resume(app_t *app)
     say("CMD resume OK" EOL);
 }
 
+static void button_poll(app_t *app)
+{
+    uint32_t first = 0U;
+    uint32_t count = plat_button_take(&first);
+    uint32_t hz;
+    uint32_t lockout;
+    uint32_t cycles;
+    plat_status_t st;
+
+    if (count == 0U) {
+        return;
+    }
+    hz = plat_time_hz();
+    lockout = (hz / 1000U) * APP_STOW_LOCKOUT_MS;
+    app->button_edges += count;
+    if (app->button_accepted != 0U && (uint32_t)(first - app->button_last) < lockout) {
+        app->button_ignored += count;
+        return;
+    }
+    app->button_accepted++;
+    app->button_ignored += count - 1U;
+    app->button_last = first;
+    (void)tracker_stow(&app->tracker);
+    st = apply_servos(app);
+    cycles = plat_time_cycles() - first;
+    if (st != PLAT_OK) {
+        say("EVT stow FAIL status=%d" EOL, (int)st);
+        return;
+    }
+    perf_stat_add(&app->stow_latency, cycles);
+    say("EVT stow t_us=%lu lat_us=%lu" EOL, (unsigned long)perf_cycles_to_us(first, hz),
+        (unsigned long)perf_cycles_to_us(cycles, hz));
+}
+
+static void cmd_button(const app_t *app)
+{
+    if (app->button_init != PLAT_OK) {
+        say("CMD button FAIL status=%d" EOL, (int)app->button_init);
+        return;
+    }
+    say("CMD button OK edges=%lu accepted=%lu ignored=%lu" EOL, (unsigned long)app->button_edges,
+        (unsigned long)app->button_accepted, (unsigned long)app->button_ignored);
+}
+
 void app_execute(app_t *app, const char *line)
 {
     char work[APP_LINE_MAX + 1U];
@@ -547,6 +594,8 @@ void app_execute(app_t *app, const char *line)
         cmd_stow(app);
     } else if (strcmp(argv[0], "resume") == 0) {
         cmd_resume(app);
+    } else if (strcmp(argv[0], "button") == 0) {
+        cmd_button(app);
     } else {
         say("CMD %s FAIL reason=unknown" EOL, argv[0]);
     }
@@ -582,6 +631,7 @@ void app_poll(app_t *app)
     if (app == NULL) {
         return;
     }
+    button_poll(app);
     track_poll(app);
     console_poll(app);
 }
