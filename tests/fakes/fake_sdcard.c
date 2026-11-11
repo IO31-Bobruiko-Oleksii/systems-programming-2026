@@ -5,6 +5,8 @@
 #define BLOCK  512U
 #define OUT_CAPACITY  (BLOCK + 16U)
 
+enum { WR_NONE, WR_WAIT_TOKEN, WR_DATA, WR_CRC };
+
 static struct {
     uint8_t  silent;
     uint8_t  v1;
@@ -13,6 +15,9 @@ static struct {
     uint32_t cmd8_echo;
     uint8_t  read_r1;
     uint8_t  read_token;
+    uint8_t  write_r1;
+    uint8_t  write_resp;
+    unsigned write_busy_polls;
     uint32_t block_index;
     uint8_t  block_valid;
     uint8_t  block_data[BLOCK];
@@ -25,6 +30,12 @@ static struct {
     uint8_t  expect_acmd;
     uint8_t  hcs;
     int      busy_left;
+    uint8_t  wr_state;
+    size_t   wr_count;
+    uint32_t wr_block;
+    unsigned wr_busy;
+    unsigned write_count;
+    uint8_t  wr_buf[BLOCK];
 
     uint8_t  cs;
     plat_spi_speed_t speed;
@@ -47,6 +58,7 @@ void fake_sd_reset(void)
     m.high_capacity = 1U;
     m.cmd8_echo = 0x000001AAU;
     m.read_token = 0xFEU;
+    m.write_resp = 0x05U;
     m.fail_call = -1;
     m.speed = PLAT_SPI_SPEED_SLOW;
 }
@@ -58,6 +70,9 @@ void fake_sd_set_acmd41_busy_polls(int polls)      { m.busy_polls = polls; }
 void fake_sd_set_cmd8_echo(uint32_t value)         { m.cmd8_echo = value; }
 void fake_sd_set_read_r1(uint8_t r1)               { m.read_r1 = r1; }
 void fake_sd_set_read_token(uint8_t token)         { m.read_token = token; }
+void fake_sd_set_write_r1(uint8_t r1)              { m.write_r1 = r1; }
+void fake_sd_set_write_response(uint8_t token)     { m.write_resp = token; }
+void fake_sd_set_write_busy_polls(unsigned polls)  { m.write_busy_polls = polls; }
 
 void fake_sd_set_block(uint32_t index, const uint8_t *data512)
 {
@@ -78,6 +93,9 @@ uint8_t fake_sd_cmd_at(size_t index)               { return (uint8_t)(m.frames[i
 plat_spi_speed_t fake_sd_speed_at(size_t index)    { return m.frame_speed[index]; }
 unsigned fake_sd_idle_bytes_before_first_cmd(void) { return m.idle_bytes; }
 unsigned fake_sd_transfer_calls(void)              { return m.transfer_calls; }
+unsigned fake_sd_write_count(void)                 { return m.write_count; }
+uint32_t fake_sd_stored_index(void)                { return m.block_index; }
+const uint8_t *fake_sd_stored_block(void)          { return m.block_data; }
 uint8_t fake_sd_cs_asserted(void)                  { return m.cs; }
 plat_spi_speed_t fake_sd_speed(void)               { return m.speed; }
 
@@ -200,10 +218,69 @@ static void execute(void)
         }
         break;
     }
+    case 24U: {
+        uint32_t block = m.high_capacity ? arg : arg / BLOCK;
+
+        if (m.idle) {
+            push(0x05U);
+        } else if (m.write_r1 != 0U) {
+            push(m.write_r1);
+        } else {
+            push(0x00U);
+            m.wr_state = WR_WAIT_TOKEN;
+            m.wr_count = 0U;
+            m.wr_block = block;
+        }
+        break;
+    }
     default:
         push(m.idle ? 0x05U : 0x04U);
         break;
     }
+}
+
+static void finish_write(void)
+{
+    m.wr_state = WR_NONE;
+    m.out_head = 0U;
+    m.out_tail = 0U;
+    push(m.write_resp);
+    m.wr_busy = m.write_busy_polls;
+    if ((m.write_resp & 0x1FU) == 0x05U) {
+        memcpy(m.block_data, m.wr_buf, BLOCK);
+        m.block_index = m.wr_block;
+        m.block_valid = 1U;
+        m.write_count++;
+    }
+}
+
+static uint8_t write_byte(uint8_t in)
+{
+    uint8_t out = 0xFFU;
+
+    switch (m.wr_state) {
+    case WR_WAIT_TOKEN:
+        if (in == 0xFEU) {
+            m.wr_state = WR_DATA;
+            m.wr_count = 0U;
+        } else if (m.out_head < m.out_tail) {
+            out = m.out[m.out_head++];
+        }
+        break;
+    case WR_DATA:
+        m.wr_buf[m.wr_count++] = in;
+        if (m.wr_count == BLOCK) {
+            m.wr_state = WR_CRC;
+            m.wr_count = 0U;
+        }
+        break;
+    default:
+        if (++m.wr_count == 2U) {
+            finish_write();
+        }
+        break;
+    }
+    return out;
 }
 
 static uint8_t card_byte(uint8_t in)
@@ -216,9 +293,15 @@ static uint8_t card_byte(uint8_t in)
         }
         return 0xFFU; 
     }
+    if (m.wr_state != WR_NONE) {
+        return write_byte(in);
+    }
     if (m.frame_len == 0U && (in & 0xC0U) != 0x40U) {
         if (m.out_head < m.out_tail) {
             out = m.out[m.out_head++];
+        } else if (m.wr_busy > 0U) {
+            m.wr_busy--;
+            out = 0x00U;
         }
         return out;
     }
@@ -251,6 +334,8 @@ plat_status_t plat_spi_set_speed(plat_spi_speed_t speed)
 void plat_spi_cs(uint8_t asserted)
 {
     if (asserted == 0U) {
+        m.wr_state = WR_NONE;
+        m.wr_busy = 0U;
         m.frame_len = 0U;
         m.out_head = 0U; 
         m.out_tail = 0U;

@@ -1,0 +1,14 @@
+name: 'probe: time-base check, SD write and read-back at block 16000 (LR3, answers only, no pass/fail)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 5ms
+  - write-serial: "time\n"
+  - wait-serial: 'CMD time'
+  - delay: 5ms
+  - write-serial: "sd write 16000\n"
+  - wait-serial: 'CMD sd-write'
+  - delay: 5ms
+  - write-serial: "sd read 16000\n"
+  - wait-serial: 'CMD sd-read'
+  - delay: 5ms

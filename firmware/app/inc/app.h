@@ -11,6 +11,8 @@
 #define APP_LINE_MAX         48U
 #define APP_SELFTEST_CHECKS  5U
 
+#define APP_SD_WRITE_MIN_BLOCK  8192U
+
 typedef struct {
     pots_t   pots;
     servo_t  servo[2];

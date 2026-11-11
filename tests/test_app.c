@@ -7,6 +7,7 @@
 #include "fake_pwm.h"
 #include "fake_adc.h"
 #include "fake_sdcard.h"
+#include "fake_time.h"
 
 #define CHECK_STR(actual, expected) \
     do { \
@@ -40,6 +41,7 @@ static void world(void)
     fake_pwm_reset();
     fake_adc_reset();
     fake_sd_reset();
+    fake_time_reset();
     fake_adc_set_raw(0U, 1025U);
     fake_adc_set_raw(1U, 2050U);
     fake_adc_set_raw(2U, 3074U);
@@ -208,7 +210,7 @@ static void test_selftest_can_run_again(void)
 static void test_cmd_help(void)
 {
     start();
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time" EOL);
 }
 
 static void test_cmd_unknown(void)
@@ -314,6 +316,69 @@ static void test_cmd_sd_read_of_an_empty_block(void)
               "CMD sd-read OK block=3 sig=0000 first16=00000000000000000000000000000000" EOL);
 }
 
+static void test_cmd_sd_write_writes_a_patterned_block_and_reports_the_time(void)
+{
+    uint8_t expect[SDCARD_BLOCK_SIZE];
+    size_t i;
+
+    start();
+    fake_time_set_step(12000U);
+    CHECK_STR(run("sd write 8200\n"), "CMD sd-write OK block=8200 us=1000" EOL);
+    for (i = 0U; i < SDCARD_BLOCK_SIZE; i++) {
+        expect[i] = (uint8_t)(i + 8200U);
+    }
+    CHECK_EQ(fake_sd_write_count(), 1);
+    CHECK_EQ(fake_sd_stored_index(), 8200);
+    CHECK(memcmp(fake_sd_stored_block(), expect, SDCARD_BLOCK_SIZE) == 0);
+}
+
+static void test_cmd_sd_write_can_be_read_back_through_the_console(void)
+{
+    start();
+    CHECK_STR(run("sd write 9000\n"), "CMD sd-write OK block=9000 us=0" EOL);
+    CHECK_STR(run("sd read 9000\n"),
+              "CMD sd-read OK block=9000 sig=2627 first16=28292A2B2C2D2E2F3031323334353637" EOL);
+}
+
+static void test_cmd_sd_write_refuses_the_protected_area(void)
+{
+    start();
+    CHECK_STR(run("sd write 0\n"), "CMD sd-write FAIL reason=protected" EOL);
+    CHECK_STR(run("sd write 8191\n"), "CMD sd-write FAIL reason=protected" EOL);
+    CHECK_EQ(fake_sd_transfer_calls(), 0);
+    CHECK_EQ(fake_sd_write_count(), 0);
+}
+
+static void test_cmd_sd_write_errors(void)
+{
+    start();
+    CHECK_STR(run("sd write x\n"), "CMD sd-write FAIL reason=usage" EOL);
+    CHECK_STR(run("sd write\n"), "CMD sd FAIL reason=usage" EOL);
+    fake_sd_set_silent(1U);
+    CHECK_STR(run("sd write 9000\n"), "CMD sd-write FAIL step=init status=2" EOL);
+
+    start();
+    fake_sd_set_write_r1(0x04U);
+    CHECK_STR(run("sd write 9000\n"), "CMD sd-write FAIL step=write status=3" EOL);
+    CHECK_EQ(fake_sd_write_count(), 0);
+}
+
+static void test_cmd_time_reports_the_cost_of_one_reading(void)
+{
+    start();
+    fake_time_set_step(5U);
+    CHECK_STR(run("time\n"), "CMD time OK hz=12000000 read_cycles=5 backsteps=0" EOL);
+    CHECK_EQ(fake_time_calls(), 40000);
+}
+
+static void test_cmd_time_counts_readings_that_go_backwards(void)
+{
+    start();
+    fake_time_set_step(0xFFFFFFFBU);
+    CHECK_STR(run("time\n"),
+              "CMD time OK hz=12000000 read_cycles=4294967295 backsteps=20000" EOL);
+}
+
 static void test_cmd_sd_read_errors(void)
 {
     start();
@@ -359,7 +424,7 @@ static void test_cmd_sd_usage(void)
 static void test_line_crlf_terminator_runs_the_command_once(void)
 {
     start();
-    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd" EOL);
+    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time" EOL);
 }
 
 static void test_line_empty_and_blank_lines_are_ignored(void)
@@ -405,7 +470,7 @@ static void test_line_length_limit_and_recovery(void)
     CHECK_STR(run(longest), expected);
 
     CHECK_STR(run(too_long), "CMD ? FAIL reason=too-long" EOL);
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time" EOL);
 }
 
 static void test_null_and_oversized_arguments_are_harmless(void)
@@ -452,6 +517,12 @@ int main(void)
     RUN(test_cmd_sd_read_initialises_once_then_reads);
     RUN(test_cmd_sd_read_of_an_empty_block);
     RUN(test_cmd_sd_read_errors);
+    RUN(test_cmd_sd_write_writes_a_patterned_block_and_reports_the_time);
+    RUN(test_cmd_sd_write_can_be_read_back_through_the_console);
+    RUN(test_cmd_sd_write_refuses_the_protected_area);
+    RUN(test_cmd_sd_write_errors);
+    RUN(test_cmd_time_reports_the_cost_of_one_reading);
+    RUN(test_cmd_time_counts_readings_that_go_backwards);
     RUN(test_cmd_sd_init_runs_the_whole_sequence_each_time);
     RUN(test_cmd_sd_usage);
     RUN(test_line_crlf_terminator_runs_the_command_once);

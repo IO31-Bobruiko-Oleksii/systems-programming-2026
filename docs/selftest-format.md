@@ -58,13 +58,15 @@ except `selftest`, which prints the report first.
 
 | Command | Reply on success | Reply on failure |
 |---|---|---|
-| `help` | `CMD help OK commands=help,selftest,adc,servo,sd` | none |
+| `help` | `CMD help OK commands=help,selftest,adc,servo,sd,time` | none |
 | `selftest` | the report from section 1, then `CMD selftest OK failed=0` | the report, then `CMD selftest FAIL failed=<n>` |
 | `adc` | `CMD adc OK raw=<a>,<b>,<c>,<d>` | `CMD adc FAIL status=<s> at=<n>` |
 | `servo <1\|2> <0..180>` | `CMD servo OK ch=<c> angle=<deg> pulse_us=<us>` (1000 us at 0, 2000 us at 180) | `CMD servo FAIL reason=usage`, `reason=range` (angle above 180) or `status=<s>` |
 | `sd init` | `CMD sd-init OK type=<T>` (runs the whole init sequence again) | `CMD sd-init FAIL status=<s>` |
 | `sd read <block>` | `CMD sd-read OK block=<n> sig=<XXXX> first16=<32 hex digits>` | `CMD sd-read FAIL reason=usage`, or `step=init` / `step=read` with `status=<s>` |
+| `sd write <block>` | `CMD sd-write OK block=<n> us=<t>`: writes 512 bytes, byte *i* = (*i* + block) mod 256; `us` is the time of the write | `CMD sd-write FAIL reason=usage`, `reason=protected` (block below 8192), or `step=init` / `step=write` with `status=<s>` |
 | `sd` with a missing or unknown subcommand | none | `CMD sd FAIL reason=usage` |
+| `time` | `CMD time OK hz=<f> read_cycles=<n> backsteps=<k>`: 20000 pairs of back-to-back readings of the time base; `read_cycles` is the smallest cost of one reading in cycles, `backsteps` counts pairs where the second reading was earlier | none |
 | anything else | none | `CMD <word> FAIL reason=unknown` |
 | a line longer than 48 characters | none | `CMD ? FAIL reason=too-long` |
 

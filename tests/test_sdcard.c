@@ -357,6 +357,215 @@ static void test_read_block_sdhc_accepts_large_block_numbers(void)
     CHECK_CMD(n, 17, 0x00800000U);
 }
 
+static void make_pattern(uint8_t *b, uint8_t seed)
+{
+    size_t i;
+
+    for (i = 0U; i < SDCARD_BLOCK_SIZE; i++) {
+        b[i] = (uint8_t)(i * 3U + seed);
+    }
+}
+
+static void test_write_block_sdhc_sends_cmd24_and_stores_the_data(void)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+    size_t n;
+
+    fake_sd_reset();
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    n = fake_sd_cmd_count();
+    make_pattern(data, 9U);
+    CHECK_EQ(sdcard_write_block(&sd, 0x1234U, data), PLAT_OK);
+    CHECK_EQ(fake_sd_cmd_count(), n + 1U);
+    CHECK_CMD(n, 24, 0x00001234U);
+    CHECK_EQ(fake_sd_write_count(), 1);
+    CHECK_EQ(fake_sd_stored_index(), 0x1234);
+    CHECK(memcmp(fake_sd_stored_block(), data, SDCARD_BLOCK_SIZE) == 0);
+    CHECK_EQ(fake_sd_cs_asserted(), 0);
+}
+
+static void test_write_block_standard_capacity_uses_byte_address(void)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+    size_t n;
+
+    fake_sd_reset();
+    fake_sd_set_high_capacity(0U);
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    CHECK_EQ(sd.type, SD_TYPE_V2);
+    n = fake_sd_cmd_count();
+    make_pattern(data, 1U);
+    CHECK_EQ(sdcard_write_block(&sd, 3U, data), PLAT_OK);
+    CHECK_CMD(n, 24, 3U * SDCARD_BLOCK_SIZE);
+    CHECK_EQ(fake_sd_stored_index(), 3);
+}
+
+static void test_write_block_data_reads_back(void)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+
+    fake_sd_reset();
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    make_pattern(data, 77U);
+    CHECK_EQ(sdcard_write_block(&sd, 5U, data), PLAT_OK);
+    CHECK_EQ(sdcard_read_block(&sd, 5U, buf), PLAT_OK);
+    CHECK(memcmp(buf, data, SDCARD_BLOCK_SIZE) == 0);
+    CHECK_EQ(sdcard_read_block(&sd, 6U, buf), PLAT_OK);
+    CHECK_EQ(buf[0], 0);
+    CHECK_EQ(buf[511], 0);
+}
+
+static void test_write_block_command_rejected_is_a_bus_error(void)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+
+    fake_sd_reset();
+    fake_sd_set_write_r1(0x04U);
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    make_pattern(data, 0U);
+    CHECK_EQ(sdcard_write_block(&sd, 1U, data), PLAT_ERR_BUS);
+    CHECK_EQ(fake_sd_write_count(), 0);
+    CHECK_EQ(fake_sd_cs_asserted(), 0);
+}
+
+static void test_write_block_error_responses_are_bus_errors(void)
+{
+    static const uint8_t responses[] = { 0x0BU, 0x0DU };
+    uint8_t data[SDCARD_BLOCK_SIZE];
+    unsigned i;
+
+    make_pattern(data, 0U);
+    for (i = 0U; i < sizeof responses; i++) {
+        sdcard_t sd;
+
+        fake_sd_reset();
+        fake_sd_set_write_response(responses[i]);
+        CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+        CHECK_EQ(sdcard_write_block(&sd, 1U, data), PLAT_ERR_BUS);
+        CHECK_EQ(fake_sd_write_count(), 0);
+    }
+}
+
+static void test_write_block_accepts_the_response_with_upper_bits_set(void)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+
+    fake_sd_reset();
+    fake_sd_set_write_response(0xE5U);
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    make_pattern(data, 4U);
+    CHECK_EQ(sdcard_write_block(&sd, 1U, data), PLAT_OK);
+    CHECK_EQ(fake_sd_write_count(), 1);
+}
+
+static void test_write_block_missing_response_times_out(void)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+
+    fake_sd_reset();
+    fake_sd_set_write_response(0xFFU);
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    make_pattern(data, 0U);
+    CHECK_EQ(sdcard_write_block(&sd, 1U, data), PLAT_ERR_TIMEOUT);
+    CHECK_EQ(fake_sd_write_count(), 0);
+    CHECK_EQ(fake_sd_cs_asserted(), 0);
+}
+
+static void test_write_block_waits_while_the_card_is_busy(void)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+
+    make_pattern(data, 0U);
+
+    fake_sd_reset();
+    fake_sd_set_write_busy_polls(10U);
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    CHECK_EQ(sdcard_write_block(&sd, 1U, data), PLAT_OK);
+
+    fake_sd_reset();
+    fake_sd_set_write_busy_polls(SDCARD_BUSY_POLLS - 1U);
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    CHECK_EQ(sdcard_write_block(&sd, 1U, data), PLAT_OK);
+}
+
+static void test_write_block_card_that_stays_busy_times_out(void)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+
+    make_pattern(data, 0U);
+    fake_sd_reset();
+    fake_sd_set_write_busy_polls(SDCARD_BUSY_POLLS);
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    CHECK_EQ(sdcard_write_block(&sd, 1U, data), PLAT_ERR_TIMEOUT);
+    CHECK_EQ(fake_sd_cs_asserted(), 0);
+}
+
+static int write_fails_cleanly_at(unsigned offset)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+
+    make_pattern(data, 0U);
+    fake_sd_reset();
+    fake_sd_set_write_busy_polls(2U);
+    if (sdcard_init(&sd) != PLAT_OK) {
+        return 0;
+    }
+    fake_sd_fail_transfer(fake_sd_transfer_calls() + offset, PLAT_ERR_TIMEOUT);
+    return sdcard_write_block(&sd, 1U, data) == PLAT_ERR_TIMEOUT && fake_sd_cs_asserted() == 0U;
+}
+
+static void test_write_block_bus_error_at_every_transfer_is_reported(void)
+{
+    sdcard_t sd;
+    uint8_t data[SDCARD_BLOCK_SIZE];
+    unsigned before;
+    unsigned total;
+    unsigned k;
+    unsigned clean = 0U;
+
+    make_pattern(data, 0U);
+    fake_sd_reset();
+    fake_sd_set_write_busy_polls(2U);
+    CHECK_EQ(sdcard_init(&sd), PLAT_OK);
+    before = fake_sd_transfer_calls();
+    CHECK_EQ(sdcard_write_block(&sd, 1U, data), PLAT_OK);
+    total = fake_sd_transfer_calls() - before;
+    CHECK(total >= 9U);
+
+    for (k = 0U; k < total; k++) {
+        if (write_fails_cleanly_at(k)) {
+            clean++;
+        } else {
+            printf("    not clean at transfer %u\n", k);
+        }
+    }
+    CHECK_EQ(clean, total);
+}
+
+static void test_write_block_rejects_bad_arguments_without_bus_traffic(void)
+{
+    sdcard_t ready = { SD_TYPE_V2 };
+    sdcard_t none = { SD_TYPE_NONE };
+    uint8_t data[SDCARD_BLOCK_SIZE];
+
+    make_pattern(data, 0U);
+    fake_sd_reset();
+    CHECK_EQ(sdcard_write_block(NULL, 0U, data), PLAT_ERR_ARG);
+    CHECK_EQ(sdcard_write_block(&ready, 0U, NULL), PLAT_ERR_ARG);
+    CHECK_EQ(sdcard_write_block(&none, 0U, data), PLAT_ERR_ARG);
+    CHECK_EQ(sdcard_write_block(&ready, 0x00800000U, data), PLAT_ERR_ARG);
+    CHECK_EQ(fake_sd_transfer_calls(), 0);
+}
+
 static void test_boot_signature_vectors(void)
 {
     uint8_t b[SDCARD_BLOCK_SIZE];
@@ -397,6 +606,17 @@ int main(void)
     RUN(test_read_block_bus_error_at_every_transfer_is_reported);
     RUN(test_read_block_rejects_bad_arguments_without_bus_traffic);
     RUN(test_read_block_sdhc_accepts_large_block_numbers);
+    RUN(test_write_block_sdhc_sends_cmd24_and_stores_the_data);
+    RUN(test_write_block_standard_capacity_uses_byte_address);
+    RUN(test_write_block_data_reads_back);
+    RUN(test_write_block_command_rejected_is_a_bus_error);
+    RUN(test_write_block_error_responses_are_bus_errors);
+    RUN(test_write_block_accepts_the_response_with_upper_bits_set);
+    RUN(test_write_block_missing_response_times_out);
+    RUN(test_write_block_waits_while_the_card_is_busy);
+    RUN(test_write_block_card_that_stays_busy_times_out);
+    RUN(test_write_block_bus_error_at_every_transfer_is_reported);
+    RUN(test_write_block_rejects_bad_arguments_without_bus_traffic);
     RUN(test_boot_signature_vectors);
     return REPORT();
 }

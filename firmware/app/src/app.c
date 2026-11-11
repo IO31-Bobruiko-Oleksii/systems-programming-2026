@@ -5,13 +5,16 @@
 #include "app.h"
 #include "plat_adc.h"
 #include "plat_pwm.h"
+#include "perf.h"
 #include "plat_spi.h"
+#include "plat_time.h"
 #include "plat_uart.h"
 
 #define EOL                "\r\n"
 #define POLL_TIMEOUT_MS    5U
 #define MAX_ARGS           4U
 #define SELFTEST_VERSION   1U
+#define TIME_PROBE_PAIRS   20000U
 
 static void say(const char *fmt, ...)
 {
@@ -190,7 +193,7 @@ static int parse_uint(const char *s, uint32_t max, uint32_t *out)
 
 static void cmd_help(void)
 {
-    say("CMD help OK commands=help,selftest,adc,servo,sd" EOL);
+    say("CMD help OK commands=help,selftest,adc,servo,sd,time" EOL);
 }
 
 static void cmd_selftest(app_t *app)
@@ -299,15 +302,73 @@ static void cmd_sd_read(app_t *app, const char *arg)
         (unsigned)app->block[510], (unsigned)app->block[511], first16);
 }
 
+static void cmd_sd_write(app_t *app, const char *arg)
+{
+    uint32_t block;
+    uint32_t t0;
+    uint32_t cycles;
+    plat_status_t st;
+    unsigned i;
+
+    if (parse_uint(arg, UINT32_MAX, &block) != 0) {
+        say("CMD sd-write FAIL reason=usage" EOL);
+        return;
+    }
+    if (block < APP_SD_WRITE_MIN_BLOCK) {
+        say("CMD sd-write FAIL reason=protected" EOL);
+        return;
+    }
+    st = sd_ensure_init(app);
+    if (st != PLAT_OK) {
+        say("CMD sd-write FAIL step=init status=%d" EOL, (int)st);
+        return;
+    }
+    for (i = 0U; i < SDCARD_BLOCK_SIZE; i++) {
+        app->block[i] = (uint8_t)(i + block);
+    }
+    t0 = plat_time_cycles();
+    st = sdcard_write_block(&app->sd, block, app->block);
+    cycles = plat_time_cycles() - t0;
+    if (st != PLAT_OK) {
+        say("CMD sd-write FAIL step=write status=%d" EOL, (int)st);
+        return;
+    }
+    say("CMD sd-write OK block=%lu us=%lu" EOL, (unsigned long)block,
+        (unsigned long)perf_cycles_to_us(cycles, plat_time_hz()));
+}
+
 static void cmd_sd(app_t *app, unsigned argc, char *argv[])
 {
     if (argc == 2U && strcmp(argv[1], "init") == 0) {
         cmd_sd_init(app);
     } else if (argc == 3U && strcmp(argv[1], "read") == 0) {
         cmd_sd_read(app, argv[2]);
+    } else if (argc == 3U && strcmp(argv[1], "write") == 0) {
+        cmd_sd_write(app, argv[2]);
     } else {
         say("CMD sd FAIL reason=usage" EOL);
     }
+}
+
+static void cmd_time(void)
+{
+    uint32_t smallest = UINT32_MAX;
+    uint32_t backsteps = 0U;
+    unsigned i;
+
+    for (i = 0U; i < TIME_PROBE_PAIRS; i++) {
+        uint32_t a = plat_time_cycles();
+        uint32_t b = plat_time_cycles();
+        uint32_t d = b - a;
+
+        if ((int32_t)d < 0) {
+            backsteps++;
+        } else if (d < smallest) {
+            smallest = d;
+        }
+    }
+    say("CMD time OK hz=%lu read_cycles=%lu backsteps=%lu" EOL, (unsigned long)plat_time_hz(),
+        (unsigned long)smallest, (unsigned long)backsteps);
 }
 
 void app_execute(app_t *app, const char *line)
@@ -334,6 +395,8 @@ void app_execute(app_t *app, const char *line)
         cmd_servo(app, argc, argv);
     } else if (strcmp(argv[0], "sd") == 0) {
         cmd_sd(app, argc, argv);
+    } else if (strcmp(argv[0], "time") == 0) {
+        cmd_time();
     } else {
         say("CMD %s FAIL reason=unknown" EOL, argv[0]);
     }
