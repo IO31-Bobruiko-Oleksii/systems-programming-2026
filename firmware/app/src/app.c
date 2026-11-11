@@ -242,7 +242,7 @@ static int parse_uint(const char *s, uint32_t max, uint32_t *out)
 
 static void cmd_help(void)
 {
-    say("CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats" EOL);
+    say("CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load" EOL);
 }
 
 static void cmd_selftest(app_t *app)
@@ -837,6 +837,21 @@ static void print_mem(void)
         (unsigned long)mi.stack_reserved, (unsigned long)mi.stack_free);
 }
 
+static void print_stats(const app_t *app)
+{
+    print_loop(app);
+    print_stat(&app->meter.sense);
+    print_stat(&app->meter.track);
+    print_stat(&app->meter.late);
+    print_stat(&app->meter.period);
+    print_stat(&app->meter.cmd);
+    print_stat(&app->log_flush);
+    print_stat(&app->stow_latency);
+    print_load(app);
+    print_count(app);
+    print_mem();
+}
+
 static void cmd_stats(app_t *app, unsigned argc, char *argv[])
 {
     if (argc > 2U || (argc == 2U && strcmp(argv[1], "reset") != 0)) {
@@ -849,18 +864,62 @@ static void cmd_stats(app_t *app, unsigned argc, char *argv[])
         say("CMD stats-reset OK" EOL);
         return;
     }
-    print_loop(app);
-    print_stat(&app->meter.sense);
-    print_stat(&app->meter.track);
-    print_stat(&app->meter.late);
-    print_stat(&app->meter.period);
-    print_stat(&app->meter.cmd);
-    print_stat(&app->log_flush);
-    print_stat(&app->stow_latency);
-    print_load(app);
-    print_count(app);
-    print_mem();
+    print_stats(app);
     say("CMD stats OK" EOL);
+}
+
+static void load_finish(app_t *app)
+{
+    (void)perf_clock_advance(&app->clock, plat_time_cycles(), plat_time_hz());
+    app->load_active = 0U;
+    app->load_cycles = 0U;
+    print_stats(app);
+    say("EVT load done us=%lu ms=%lu" EOL, (unsigned long)app->load_us,
+        (unsigned long)(app->clock.ms - app->meter.start_ms));
+}
+
+static void cmd_load(app_t *app, unsigned argc, char *argv[])
+{
+    uint32_t us;
+    uint32_t ms;
+    uint32_t now;
+
+    if (argc == 1U) {
+        say("CMD load OK us=%lu active=%u" EOL, (unsigned long)app->load_us,
+            (unsigned)app->load_active);
+        return;
+    }
+    if (argc != 3U || parse_uint(argv[1], UINT32_MAX, &us) != 0 ||
+        parse_uint(argv[2], UINT32_MAX, &ms) != 0) {
+        say("CMD load FAIL reason=usage" EOL);
+        return;
+    }
+    if (us > APP_LOAD_MAX_US || ms == 0U || ms > APP_LOAD_MAX_MS) {
+        say("CMD load FAIL reason=range" EOL);
+        return;
+    }
+    now = plat_time_cycles();
+    (void)perf_clock_advance(&app->clock, now, plat_time_hz());
+    meter_reset(app);
+    app->load_us = us;
+    app->load_cycles = us * (plat_time_hz() / 1000000U);
+    app->load_end = now + ms * (plat_time_hz() / 1000U);
+    app->load_active = 1U;
+    say("CMD load OK us=%lu ms=%lu" EOL, (unsigned long)us, (unsigned long)ms);
+}
+
+static void load_poll(app_t *app)
+{
+    uint32_t t0 = plat_time_cycles();
+    uint32_t now = t0;
+
+    while ((uint32_t)(now - t0) < app->load_cycles) {
+        now = plat_time_cycles();
+    }
+    app->meter.busy += now - t0;
+    if ((int32_t)(now - app->load_end) >= 0) {
+        load_finish(app);
+    }
 }
 
 void app_execute(app_t *app, const char *line)
@@ -905,6 +964,8 @@ void app_execute(app_t *app, const char *line)
         cmd_log(app, argc, argv);
     } else if (strcmp(argv[0], "stats") == 0) {
         cmd_stats(app, argc, argv);
+    } else if (strcmp(argv[0], "load") == 0) {
+        cmd_load(app, argc, argv);
     } else {
         say("CMD %s FAIL reason=unknown" EOL, argv[0]);
     }
@@ -962,5 +1023,8 @@ void app_poll(app_t *app)
     }
     button_poll(app);
     track_poll(app);
+    if (app->load_active != 0U) {
+        load_poll(app);
+    }
     console_poll(app);
 }

@@ -1,0 +1,15 @@
+name: 'load: a timed window adds 40 us of work to every loop pass, then the statistics are printed (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 25ms
+  - write-serial: "load 40 300\n"
+  - wait-serial: 'CMD load OK us=40 ms=300'
+  - wait-serial: 'STAT name=loop n='
+  - wait-serial: 'STAT name=cmd n=1 '
+  - wait-serial: 'STAT count runs='
+  - wait-serial: 'EVT load done us=40 ms='
+  - delay: 30ms
+  - write-serial: "load\n"
+  - wait-serial: 'CMD load OK us=40 active=0'
+  - delay: 5ms

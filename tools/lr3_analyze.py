@@ -340,7 +340,8 @@ def main():
         lines = uart_lines(cap)
         lo = hi = None
         for t, text in lines:
-            if lo is None and text.startswith("CMD stats-reset OK"):
+            if lo is None and (text.startswith("CMD stats-reset OK")
+                               or (text.startswith("CMD load OK us=") and " ms=" in text)):
                 lo = t
             if lo is not None and hi is None and t > lo and text.startswith("STAT name=loop"):
                 hi = t

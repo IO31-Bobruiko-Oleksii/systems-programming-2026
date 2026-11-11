@@ -11,6 +11,8 @@ clock 12 MHz), see the report for what that means.
 | `stats` | eleven lines starting with `STAT`, then `CMD stats OK` |
 | `stats reset` | `CMD stats-reset OK`, starts a new measurement window |
 | anything else after `stats` | `CMD stats FAIL reason=usage` |
+| `load <us> <ms>` | `CMD load OK us=<us> ms=<ms>`; at the end of the window the `STAT` lines and `EVT load done us=<us> ms=<window>` |
+| `load` | `CMD load OK us=<last value> active=<0 or 1>` |
 
 `stats reset` clears the statistics, the counters and the window start. It does not touch the
 state of the product (`track`, `button` and `log` keep their own counters).
@@ -60,6 +62,22 @@ RAM was used by the stack at some time. Limits of the method:
 - the stack used before `main` (reset handler, `SystemInit`) is not painted and not counted;
 - a stack word that is rewritten with exactly the pattern is counted as untouched;
 - the result is a high-water mark since reset, it is not cleared by `stats reset`.
+
+## The load window: an extra load for breaking-point runs
+
+`load <us> <ms>` is a test aid, not a product function. One command does three things: it starts a
+new measurement window (like `stats reset`), it makes every pass of the loop spend `<us>`
+microseconds in a busy wait (the cycle counter is read until the time is over, so the wait is at
+least `<us>` and longer by up to one clock reading), and it ends by itself.
+
+- The window ends at the first pass after `<ms>` milliseconds. The firmware then prints the
+  `STAT` lines of the window and, as the last line, `EVT load done us=<us> ms=<window>`. Nothing
+  has to be sent while the load is on. That matters: once a pass is longer than about one byte
+  time the console loses bytes, and a command to switch the load off would be lost too.
+- The extra time counts as busy time, so `STAT load` and the busy pin PB6 both see it.
+- A `load` command that arrives while a window is open starts a new window.
+- Limits: `<us>` up to 50000, `<ms>` from 1 to 60000. There is no way to leave a window open.
+- Cost while no window is open: one byte is tested in `app_poll`. Flash grew by 620 bytes.
 
 ## Cost of the instrumentation
 

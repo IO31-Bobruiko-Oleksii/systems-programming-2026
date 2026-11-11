@@ -1,15 +1,17 @@
 capture docs/captures/lr3/stow.vcd: 6540.764 ms
 edges per channel: D0=2192  D1=258  D2=4  D3=541  D4=3145  D5=652  D6=5  D7=1040
 
-button presses found: 3 (falling edges on PB5: 270), EVENT pulses (accepted presses): 2, EVT lines in the serial log: 1
+button presses found: 3 (falling edges on PB5: 270), EVENT pulses (accepted presses): 2, EVT lines in the serial log: 2
 
 press 1: first falling edge at 6073.596 ms, 64 falling edge(s) in the bounce, loop waiting for a byte at the edge
   EVENT pulse: starts 4576.4 us after the edge, ends 4678.7 us after the edge (handler 102.2 us)
-  firmware EVT line: lat_us=1938 (cycle counter, from the interrupt time stamp to the end of the handler)
-  difference analyzer - firmware: +2740.7 us (the analyzer starts at the pin edge, the firmware at the time stamp taken in the interrupt)
+  firmware EVT line: lat_us=4666 (cycle counter, from the interrupt time stamp to the end of the handler)
+  difference analyzer - firmware: +12.7 us (the analyzer starts at the pin edge, the firmware at the time stamp taken in the interrupt)
   servo 1 pulse: 2000 us before, 1500 us after; the new pulse starts 13392.0 us and ends 14892.0 us after the edge (task deadline: 30000 us)
 press 2: first falling edge at 6174.932 ms, 60 falling edge(s) in the bounce, loop waiting for a byte at the edge
   no EVENT pulse: the press was ignored by the 200 ms lockout (or is still pending)
 press 3: first falling edge at 6480.326 ms, 146 falling edge(s) in the bounce, loop waiting for a byte at the edge
   EVENT pulse: starts 1835.8 us after the edge, ends 1954.8 us after the edge (handler 119.0 us)
+  firmware EVT line: lat_us=1938 (cycle counter, from the interrupt time stamp to the end of the handler)
+  difference analyzer - firmware: +16.8 us (the analyzer starts at the pin edge, the firmware at the time stamp taken in the interrupt)
   servo 1: no pulse with a different width after the press (width before 1500 us)

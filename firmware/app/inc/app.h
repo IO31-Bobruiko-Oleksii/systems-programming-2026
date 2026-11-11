@@ -17,6 +17,8 @@
 #define APP_SD_WRITE_MIN_BLOCK  8192U
 #define APP_TRACK_PERIOD_MS  50U
 #define APP_STOW_LOCKOUT_MS  200U
+#define APP_LOAD_MAX_US      50000U
+#define APP_LOAD_MAX_MS      60000U
 
 typedef struct {
     perf_stat_t sense;
@@ -39,6 +41,7 @@ typedef struct {
     uint32_t pass_max;
     uint32_t rx_bytes;
     uint8_t  tracking;
+    uint8_t  load_active;
     pots_t   pots;
     servo_t  servo[2];
     sdcard_t sd;
@@ -56,6 +59,9 @@ typedef struct {
     perf_clock_t clock;
     logger_t logger;
     perf_stat_t log_flush;
+    uint32_t load_us;
+    uint32_t load_cycles;
+    uint32_t load_end;
     uint8_t  log_on;
     app_meter_t meter;
     char     line[APP_LINE_MAX + 1U];

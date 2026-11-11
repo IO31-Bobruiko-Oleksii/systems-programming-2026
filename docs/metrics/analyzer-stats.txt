@@ -19,13 +19,15 @@ T1 SENSE (D7: from the start of the first to the end of the fourth conversion)
 
 CPU TIME
   T2 pulses add up to 50.44 ms = 16.8 permille of the window
-  loop-busy pin high  148.34 ms = 49.4 permille (all work outside the UART wait, the per-pass cost P included)
+  loop-busy pin high  69.33 ms = 23.1 permille (all work outside the UART wait, the per-pass cost P included)
 
 COMPARISON with the firmware (STAT lines, cycle counter), all in us unless noted: min / avg / max
   metric                     firmware (cycle counter)           logic analyzer                     difference
+  loop pass period           83.0 / 5943.0 / 6005.0             82.7 / 5938.0 / 6004.2             avg -5.0, max -0.8  the firmware counts passes with tracking on
   T2 duration                839.0 / 846.0 / 850.0              834.2 / 840.7 / 844.7              avg -5.3, max -5.3  analyzer pulse starts after the time stamp
   T2 start to start          47993.0 / 50065.0 / 54005.0        47988.8 / 50029.6 / 54000.5        avg -35.4, max -4.5
-  T1 sense                   602.0 / 602.0 / 602.0              581.5 / 581.5 / 581.5              avg -20.6, max -20.6  analyzer includes the gaps between conversions
+  T1 sense                   602.0 / 602.0 / 602.0              581.5 / 581.5 / 581.5              avg -20.6, max -20.6  analyzer: first start to last end only, firmware: whole call
+  passes counted             505                                505                                
   T2 start jitter (us)       4007.0                             4228.2                             difference +221.2
   T2 runs                    60                                 60                                 
   busy time (ms)             53                                 50.4 (T2 only)                     firmware busy = T2 + commands + log flushes

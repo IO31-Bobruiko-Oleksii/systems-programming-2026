@@ -216,7 +216,7 @@ static void test_selftest_can_run_again(void)
 static void test_cmd_help(void)
 {
     start();
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load" EOL);
 }
 
 static void test_cmd_unknown(void)
@@ -1503,6 +1503,169 @@ static void test_stats_reset_starts_a_new_window(void)
     CHECK(strstr(fake_uart_output(), "STAT count runs=1 missed=2 ") != NULL);
 }
 
+static void test_cmd_load_without_arguments_reports_the_state(void)
+{
+    start();
+    CHECK_STR(run("load\n"), "CMD load OK us=0 active=0" EOL);
+}
+
+static void test_cmd_load_opens_a_window_and_reports_it(void)
+{
+    start_tracking();
+    CHECK_STR(run("load 40 500\n"), "CMD load OK us=40 ms=500" EOL);
+    CHECK_EQ(app.load_active, 1);
+    CHECK_EQ(app.load_us, 40);
+    CHECK_EQ(app.load_cycles, 480);
+    CHECK_EQ(app.load_end, 6000000);
+    fake_time_set_step(100U);
+    CHECK_STR(run("load\n"), "CMD load OK us=40 active=1" EOL);
+}
+
+static void test_cmd_load_rejects_bad_input_and_opens_nothing(void)
+{
+    start();
+    CHECK_STR(run("load 10\n"), "CMD load FAIL reason=usage" EOL);
+    CHECK_STR(run("load 10 20 30\n"), "CMD load FAIL reason=usage" EOL);
+    CHECK_STR(run("load x 100\n"), "CMD load FAIL reason=usage" EOL);
+    CHECK_STR(run("load 10 y\n"), "CMD load FAIL reason=usage" EOL);
+    CHECK_STR(run("load -1 100\n"), "CMD load FAIL reason=usage" EOL);
+    CHECK_STR(run("load 50001 100\n"), "CMD load FAIL reason=range" EOL);
+    CHECK_STR(run("load 10 0\n"), "CMD load FAIL reason=range" EOL);
+    CHECK_STR(run("load 10 60001\n"), "CMD load FAIL reason=range" EOL);
+    CHECK_EQ(app.load_active, 0);
+    CHECK_EQ(app.load_cycles, 0);
+    CHECK_STR(run("load 50000 60000\n"), "CMD load OK us=50000 ms=60000" EOL);
+    CHECK_EQ(app.load_active, 1);
+}
+
+static void test_a_pass_without_a_window_does_not_read_the_clock(void)
+{
+    start();
+    fake_time_set_step(10U);
+    app_poll(&app);
+    CHECK_EQ(fake_time_calls(), 0);
+}
+
+static void test_every_pass_of_a_window_burns_the_requested_time_and_counts_it_as_busy(void)
+{
+    unsigned before;
+
+    start_tracking();
+    run("load 10 1000\n");
+    CHECK_EQ(app.meter.busy, 0);
+    fake_time_set_step(10U);
+    before = fake_time_calls();
+    app_poll(&app);
+    CHECK_EQ(fake_time_calls() - before, 14);
+    CHECK_EQ(app.meter.busy, 120);
+    app_poll(&app);
+    CHECK_EQ(app.meter.busy, 240);
+}
+
+static void test_the_burn_lasts_at_least_as_long_as_requested_when_the_clock_steps_unevenly(void)
+{
+    unsigned before;
+
+    start_tracking();
+    run("load 10 1000\n");
+    fake_time_set_step(7U);
+    before = fake_time_calls();
+    app_poll(&app);
+    CHECK_EQ(fake_time_calls() - before, 20);
+    CHECK_EQ(app.meter.busy, 126);
+}
+
+static void test_a_window_of_zero_microseconds_only_measures(void)
+{
+    unsigned before;
+
+    start_tracking();
+    run("load 0 1000\n");
+    fake_time_set_step(10U);
+    before = fake_time_calls();
+    app_poll(&app);
+    CHECK_EQ(fake_time_calls() - before, 2);
+    CHECK_EQ(app.meter.busy, 0);
+    CHECK_EQ(app.load_active, 1);
+}
+
+static void test_the_window_ends_with_the_statistics_and_a_closing_line_last(void)
+{
+    static const char tail[] = "EVT load done us=10 ms=5" EOL;
+    const char *out;
+    unsigned before;
+    int guard = 0;
+
+    start_tracking();
+    run("load 10 5\n");
+    fake_time_set_step(1000U);
+    fake_uart_clear_output();
+    while (app.load_active != 0U && guard < 100) {
+        app_poll(&app);
+        guard++;
+    }
+    out = fake_uart_output();
+    CHECK(guard < 100);
+    CHECK_EQ(app.load_active, 0);
+    CHECK_EQ(app.load_cycles, 0);
+    CHECK(strstr(out, "STAT name=loop") != NULL);
+    CHECK(strstr(out, "STAT count runs=") != NULL);
+    CHECK(strstr(out, "STAT mem ram=") != NULL);
+    CHECK(strlen(out) > strlen(tail));
+    CHECK_STR(out + strlen(out) - strlen(tail), tail);
+    before = fake_time_calls();
+    app_poll(&app);
+    CHECK_EQ(fake_time_calls() - before, 1);
+}
+
+static void test_the_end_of_the_window_is_found_across_the_counter_wrap(void)
+{
+    static const char tail[] = "EVT load done us=0 ms=5" EOL;
+    const char *out;
+    int guard = 0;
+
+    start();
+    fake_time_set(0xFFFFF000U);
+    run("load 0 5\n");
+    fake_time_set_step(1000U);
+    fake_uart_clear_output();
+    while (app.load_active != 0U && guard < 100) {
+        app_poll(&app);
+        guard++;
+    }
+    out = fake_uart_output();
+    CHECK(guard < 100);
+    CHECK(guard > 1);
+    CHECK_EQ(app.load_active, 0);
+    CHECK_STR(out + strlen(out) - strlen(tail), tail);
+}
+
+static void test_a_new_load_command_restarts_the_window_and_the_statistics(void)
+{
+    start_tracking();
+    run("load 10 1000\n");
+    fake_time_set_step(100U);
+    run("help\n");
+    CHECK_EQ(app.meter.cmd.count, 2);
+    run("load 20 2000\n");
+    CHECK_EQ(app.load_active, 1);
+    CHECK_EQ(app.load_us, 20);
+    CHECK_EQ(app.load_cycles, 240);
+    CHECK_EQ(app.meter.cmd.count, 1);
+}
+
+static void test_a_clock_below_one_kilohertz_opens_a_window_that_closes_at_once(void)
+{
+    start();
+    fake_time_set_hz(999U);
+    CHECK_STR(run("load 40 500\n"), "CMD load OK us=40 ms=500" EOL);
+    CHECK_EQ(app.load_cycles, 0);
+    CHECK_EQ(app.load_end, 0);
+    fake_time_set_step(1U);
+    app_poll(&app);
+    CHECK_EQ(app.load_active, 0);
+}
+
 static void test_init_starts_the_service_pins_and_leaves_them_alone_afterwards(void)
 {
     start();
@@ -1634,7 +1797,7 @@ static void test_a_press_and_a_due_run_in_one_pass_give_one_pulse_each_event_fir
 static void test_line_crlf_terminator_runs_the_command_once(void)
 {
     start();
-    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats" EOL);
+    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load" EOL);
 }
 
 static void test_line_empty_and_blank_lines_are_ignored(void)
@@ -1680,7 +1843,7 @@ static void test_line_length_limit_and_recovery(void)
     CHECK_STR(run(longest), expected);
 
     CHECK_STR(run(too_long), "CMD ? FAIL reason=too-long" EOL);
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load" EOL);
 }
 
 static void test_null_and_oversized_arguments_are_harmless(void)
@@ -1807,6 +1970,17 @@ int main(void)
     RUN(test_a_failing_memory_report_does_not_stop_the_rest);
     RUN(test_cmd_stats_rejects_bad_forms);
     RUN(test_stats_reset_starts_a_new_window);
+    RUN(test_cmd_load_without_arguments_reports_the_state);
+    RUN(test_cmd_load_opens_a_window_and_reports_it);
+    RUN(test_cmd_load_rejects_bad_input_and_opens_nothing);
+    RUN(test_a_pass_without_a_window_does_not_read_the_clock);
+    RUN(test_every_pass_of_a_window_burns_the_requested_time_and_counts_it_as_busy);
+    RUN(test_the_burn_lasts_at_least_as_long_as_requested_when_the_clock_steps_unevenly);
+    RUN(test_a_window_of_zero_microseconds_only_measures);
+    RUN(test_the_window_ends_with_the_statistics_and_a_closing_line_last);
+    RUN(test_the_end_of_the_window_is_found_across_the_counter_wrap);
+    RUN(test_a_new_load_command_restarts_the_window_and_the_statistics);
+    RUN(test_a_clock_below_one_kilohertz_opens_a_window_that_closes_at_once);
     RUN(test_init_starts_the_service_pins_and_leaves_them_alone_afterwards);
     RUN(test_a_run_holds_the_t2_pin_high_from_the_start_to_the_last_servo_write);
     RUN(test_the_t2_pin_pulses_once_per_run_and_not_between_runs);
