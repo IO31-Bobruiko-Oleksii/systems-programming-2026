@@ -77,9 +77,10 @@ Measuring changes the thing measured, so the cost is written down.
   about 25 us in every 50 ms (0.05 %).
 - **Command.** Two clock readings per command line.
 - **Memory.** Flash grows by 2.2 KB, RAM by 168 bytes (`app` is 0x580 bytes, was 0x4d8).
-- **Output.** The reply to `stats` is about 700 characters, 60 ms of UART transmission during
-  which the loop does nothing else. A release of T2 that falls into this time is late and can be
-  skipped. Read the statistics at the end of a measurement, not during it.
+- **Output.** The reply to `stats` is 666 characters. The loop is busy for 82.7 ms (measured on
+  PB6): 57.7 ms of UART transmission and about 25 ms of formatting, and it does nothing else. A
+  release of T2 that falls into this time is late by up to about 83 ms, and one release is skipped
+  when the lateness exceeds 50 ms. Read the statistics at the end of a measurement, not during it.
   
 ## Service pins and the logic analyzer (the second method)
 
@@ -119,8 +120,11 @@ Where the two methods are expected to differ:
   bookkeeping and the call of `plat_probe_set` come first) and ends one call after the time stamp
   that ends it, so it is a few microseconds shorter than `track`.
 - The `stow` latency starts at the time stamp taken in the interrupt, after the interrupt entry,
-  so the analyzer sees a few microseconds more.
+  so the analyzer sees more: 11 to 17 us in the stow captures (idle and busy).
 - Both counts of passes and runs can differ by one at the edges of the window.
+- The firmware `load` counts task code only (T2, log flushes, console commands). PB6 also shows
+  the work of every plain pass (28 us, about 5 permille), so the busy time of the pin is larger
+  than `busy_ms`; the report prints both.
 
 Cost of the pins:
 

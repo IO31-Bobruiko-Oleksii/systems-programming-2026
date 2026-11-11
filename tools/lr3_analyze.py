@@ -120,7 +120,8 @@ def fmt(s, scale=1000.0, nd=1):
 def parse_serial(path):
     stats, load, count, evts = {}, None, None, []
     with open(path, "rb") as f:
-        for line in f.read().decode("ascii", "replace").replace("\r", "").split("\n"):
+        text = f.read().decode("ascii", "replace").replace("\r", "")
+        for line in re.sub(r"(STAT |EVT |CMD )", r"\n\1", text).split("\n"):
             m = re.match(r"STAT name=(\w+) n=(\d+) min_us=(\d+) avg_us=(\d+) max_us=(\d+)", line)
             if m:
                 stats[m.group(1)] = {"n": int(m.group(2)), "min": int(m.group(3)) * 1000.0,
@@ -152,6 +153,10 @@ def stat_cell(s):
 
 def inside(t, lo, hi):
     return lo <= t < hi
+
+
+def overlap(pulses, lo, hi):
+    return sum(max(0, min(b, hi) - max(a, lo)) for a, b in pulses)
 
 
 def report_loop(cap, p, fw, lo, hi, period_ms, p_limit_us):
@@ -216,8 +221,8 @@ def report_loop(cap, p, fw, lo, hi, period_ms, p_limit_us):
     p(f"  burst length     {fmt(ss)}   (conversions per run: {sorted(set(n_adc))})")
     p("")
 
-    t2_total = sum(b - a for a, b in t2)
-    busy_total = sum(b - a for a, b in busy)
+    t2_total = overlap(cap.pulses(T2), lo, hi)
+    busy_total = overlap(cap.pulses(BUSY), lo, hi)
     p("CPU TIME")
     p(f"  T2 pulses add up to {t2_total / 1e6:.2f} ms = {1000.0 * t2_total / (hi - lo):.1f} permille of the window")
     p(f"  loop-busy pin high  {busy_total / 1e6:.2f} ms = {1000.0 * busy_total / (hi - lo):.1f} permille "
@@ -235,7 +240,7 @@ def report_loop(cap, p, fw, lo, hi, period_ms, p_limit_us):
         if "period" in stats:
             rows.append(("T2 start to start", stats["period"], pp, ""))
         if "sense" in stats:
-            rows.append(("T1 sense", stats["sense"], ss, "analyzer includes the gaps between conversions"))
+            rows.append(("T1 sense", stats["sense"], ss, "analyzer: first start to last end only, firmware: whole call"))
         for label, a, b, note in rows:
             d = ""
             if b is not None:
