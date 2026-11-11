@@ -1,5 +1,6 @@
 #include "stm32c0xx_hal.h"
 #include "plat_uart.h"
+#include "probe_pins.h"
 
 extern UART_HandleTypeDef huart2;
 
@@ -25,7 +26,9 @@ plat_status_t plat_uart_read_byte(uint8_t *byte, uint32_t timeout_ms)
     if (byte == NULL) {
         return PLAT_ERR_ARG;
     }
+    PROBE_BUSY_LOW();
     st = HAL_UART_Receive(&huart2, byte, 1U, timeout_ms);
+    PROBE_BUSY_HIGH();
     if (st == HAL_TIMEOUT) {
         return PLAT_ERR_TIMEOUT;
     }

@@ -10,6 +10,7 @@
 #include "fake_time.h"
 #include "fake_button.h"
 #include "fake_mem.h"
+#include "fake_probe.h"
 
 #define CHECK_STR(actual, expected) \
     do { \
@@ -46,6 +47,7 @@ static void world(void)
     fake_time_reset();
     fake_button_reset();
     fake_mem_reset();
+    fake_probe_reset();
     fake_adc_set_raw(0U, 1025U);
     fake_adc_set_raw(1U, 2050U);
     fake_adc_set_raw(2U, 3074U);
@@ -1501,6 +1503,134 @@ static void test_stats_reset_starts_a_new_window(void)
     CHECK(strstr(fake_uart_output(), "STAT count runs=1 missed=2 ") != NULL);
 }
 
+static void test_init_starts_the_service_pins_and_leaves_them_alone_afterwards(void)
+{
+    start();
+    CHECK_EQ(fake_probe_inits(), 1);
+    CHECK_EQ(fake_probe_events(), 0);
+    CHECK_EQ(fake_probe_level(PLAT_PROBE_T2), 0);
+    CHECK_EQ(fake_probe_level(PLAT_PROBE_EVENT), 0);
+    app_start(&app);
+    run("help\n");
+    CHECK_EQ(fake_probe_inits(), 1);
+    CHECK_EQ(fake_probe_events(), 0);
+}
+
+static void test_a_run_holds_the_t2_pin_high_from_the_start_to_the_last_servo_write(void)
+{
+    start_tracking();
+    tick(PERIOD - 1U);
+    CHECK_EQ(fake_probe_events(), 0);
+    tick(PERIOD);
+    CHECK_EQ(fake_probe_events(), 2);
+    CHECK_EQ(fake_probe_event(0)->probe, PLAT_PROBE_T2);
+    CHECK_EQ(fake_probe_event(0)->level, 1);
+    CHECK_EQ(fake_probe_event(0)->adc_calls, 0);
+    CHECK_EQ(fake_probe_event(0)->pwm_calls, 2);
+    CHECK_EQ(fake_probe_event(1)->probe, PLAT_PROBE_T2);
+    CHECK_EQ(fake_probe_event(1)->level, 0);
+    CHECK_EQ(fake_probe_event(1)->adc_calls, 4);
+    CHECK_EQ(fake_probe_event(1)->pwm_calls, 4);
+    CHECK_EQ(fake_probe_level(PLAT_PROBE_T2), 0);
+    CHECK_EQ(fake_probe_level(PLAT_PROBE_EVENT), 0);
+}
+
+static void test_the_t2_pin_pulses_once_per_run_and_not_between_runs(void)
+{
+    start_tracking();
+    tick(PERIOD);
+    tick(PERIOD + 5U);
+    tick(2U * PERIOD - 1U);
+    CHECK_EQ(fake_probe_sets(PLAT_PROBE_T2), 1);
+    CHECK_EQ(fake_probe_clears(PLAT_PROBE_T2), 1);
+    tick(2U * PERIOD);
+    CHECK_EQ(fake_probe_sets(PLAT_PROBE_T2), 2);
+    CHECK_EQ(fake_probe_clears(PLAT_PROBE_T2), 2);
+    tick(5U * PERIOD);
+    CHECK_EQ(fake_probe_sets(PLAT_PROBE_T2), 3);
+    CHECK_EQ(fake_probe_clears(PLAT_PROBE_T2), 3);
+    CHECK_EQ(fake_probe_level(PLAT_PROBE_T2), 0);
+}
+
+static void test_the_t2_pin_still_ends_low_when_the_run_fails(void)
+{
+    start_tracking();
+    fake_adc_fail_channel(2U, PLAT_ERR_TIMEOUT);
+    tick(PERIOD);
+    CHECK_EQ(app.track_errors, 1);
+    CHECK_EQ(fake_probe_sets(PLAT_PROBE_T2), 1);
+    CHECK_EQ(fake_probe_clears(PLAT_PROBE_T2), 1);
+    CHECK_EQ(fake_probe_level(PLAT_PROBE_T2), 0);
+}
+
+static void test_the_t2_pin_is_low_again_before_the_log_flush_starts(void)
+{
+    start_tracking();
+    log_on();
+    run_n(1U, 16U);
+    CHECK_EQ(fake_sd_write_count(), 1);
+    CHECK_EQ(fake_probe_sets(PLAT_PROBE_T2), 16);
+    CHECK_EQ(fake_probe_clears(PLAT_PROBE_T2), 16);
+    CHECK_EQ(fake_probe_events(), 32);
+    CHECK_EQ(fake_probe_event(31)->level, 0);
+    CHECK_EQ(fake_probe_event(31)->sd_writes, 0);
+}
+
+static void test_a_press_holds_the_event_pin_high_from_the_start_of_the_stow_to_its_last_servo_write(void)
+{
+    start();
+    press_at(1000U, 2000U);
+    CHECK_EQ(fake_probe_events(), 2);
+    CHECK_EQ(fake_probe_event(0)->probe, PLAT_PROBE_EVENT);
+    CHECK_EQ(fake_probe_event(0)->level, 1);
+    CHECK_EQ(fake_probe_event(0)->pwm_calls, 2);
+    CHECK_EQ(fake_probe_event(1)->probe, PLAT_PROBE_EVENT);
+    CHECK_EQ(fake_probe_event(1)->level, 0);
+    CHECK_EQ(fake_probe_event(1)->pwm_calls, 4);
+    CHECK_EQ(fake_probe_level(PLAT_PROBE_EVENT), 0);
+    CHECK_EQ(fake_probe_sets(PLAT_PROBE_T2), 0);
+}
+
+static void test_a_press_inside_the_lockout_leaves_the_event_pin_alone(void)
+{
+    start();
+    press_at(1000U, 2000U);
+    press_at(1000U + LOCKOUT / 2U, 1300000U);
+    CHECK_EQ(app.button_ignored, 1);
+    CHECK_EQ(fake_probe_sets(PLAT_PROBE_EVENT), 1);
+    CHECK_EQ(fake_probe_clears(PLAT_PROBE_EVENT), 1);
+    press_at(1000U + LOCKOUT, 2500000U);
+    CHECK_EQ(fake_probe_sets(PLAT_PROBE_EVENT), 2);
+    CHECK_EQ(fake_probe_clears(PLAT_PROBE_EVENT), 2);
+    CHECK_EQ(fake_probe_level(PLAT_PROBE_EVENT), 0);
+}
+
+static void test_a_failed_stow_still_ends_the_event_pulse(void)
+{
+    start();
+    fake_pwm_fail_next(PLAT_ERR_BUS);
+    press_at(1000U, 2000U);
+    CHECK_STR(fake_uart_output(), "EVT stow FAIL status=3" EOL);
+    CHECK_EQ(fake_probe_sets(PLAT_PROBE_EVENT), 1);
+    CHECK_EQ(fake_probe_clears(PLAT_PROBE_EVENT), 1);
+    CHECK_EQ(fake_probe_level(PLAT_PROBE_EVENT), 0);
+}
+
+static void test_a_press_and_a_due_run_in_one_pass_give_one_pulse_each_event_first(void)
+{
+    start_tracking();
+    press_at(PERIOD, PERIOD + 600U);
+    CHECK_EQ(fake_probe_events(), 4);
+    CHECK_EQ(fake_probe_event(0)->probe, PLAT_PROBE_EVENT);
+    CHECK_EQ(fake_probe_event(0)->level, 1);
+    CHECK_EQ(fake_probe_event(1)->probe, PLAT_PROBE_EVENT);
+    CHECK_EQ(fake_probe_event(1)->level, 0);
+    CHECK_EQ(fake_probe_event(2)->probe, PLAT_PROBE_T2);
+    CHECK_EQ(fake_probe_event(2)->level, 1);
+    CHECK_EQ(fake_probe_event(3)->probe, PLAT_PROBE_T2);
+    CHECK_EQ(fake_probe_event(3)->level, 0);
+}
+
 static void test_line_crlf_terminator_runs_the_command_once(void)
 {
     start();
@@ -1677,6 +1807,15 @@ int main(void)
     RUN(test_a_failing_memory_report_does_not_stop_the_rest);
     RUN(test_cmd_stats_rejects_bad_forms);
     RUN(test_stats_reset_starts_a_new_window);
+    RUN(test_init_starts_the_service_pins_and_leaves_them_alone_afterwards);
+    RUN(test_a_run_holds_the_t2_pin_high_from_the_start_to_the_last_servo_write);
+    RUN(test_the_t2_pin_pulses_once_per_run_and_not_between_runs);
+    RUN(test_the_t2_pin_still_ends_low_when_the_run_fails);
+    RUN(test_the_t2_pin_is_low_again_before_the_log_flush_starts);
+    RUN(test_a_press_holds_the_event_pin_high_from_the_start_of_the_stow_to_its_last_servo_write);
+    RUN(test_a_press_inside_the_lockout_leaves_the_event_pin_alone);
+    RUN(test_a_failed_stow_still_ends_the_event_pulse);
+    RUN(test_a_press_and_a_due_run_in_one_pass_give_one_pulse_each_event_first);
     RUN(test_line_crlf_terminator_runs_the_command_once);
     RUN(test_line_empty_and_blank_lines_are_ignored);
     RUN(test_line_waits_for_the_terminator);

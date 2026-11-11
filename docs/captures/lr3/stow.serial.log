@@ -1,0 +1,12 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0EVT stow t_us=6070486 lat_us=4666
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=1 dark=0 runs=121 missed=0 errors=0
+CMD button OK edges=124 accepted=1 ignored=123
+EVT stow t_us=6477250 lat_us=1938
+CMD button OK edges=270 accepted=2 ignored=268

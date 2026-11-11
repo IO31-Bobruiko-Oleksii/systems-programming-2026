@@ -7,6 +7,7 @@
 #include "plat_adc.h"
 #include "plat_button.h"
 #include "plat_mem.h"
+#include "plat_probe.h"
 #include "plat_pwm.h"
 #include "perf.h"
 #include "plat_spi.h"
@@ -74,6 +75,7 @@ void app_init(app_t *app)
         return;
     }
     memset(app, 0, sizeof *app);
+    plat_probe_init();
     app->adc_init = plat_adc_init();
     app->spi_init = plat_spi_init();
     app->pwm_init = plat_pwm_init();
@@ -523,6 +525,7 @@ static void track_due(app_t *app, uint32_t now)
     uint32_t skipped;
     uint32_t cycles;
 
+    plat_probe_set(PLAT_PROBE_T2);
     (void)perf_clock_advance(&app->clock, now, plat_time_hz());
     late = now - app->track_next;
     perf_stat_add(&m->late, late);
@@ -533,6 +536,7 @@ static void track_due(app_t *app, uint32_t now)
     app->track_next += (skipped + 1U) * app->track_period;
     track_task(app);
     cycles = plat_time_cycles() - now;
+    plat_probe_clear(PLAT_PROBE_T2);
     perf_stat_add(&m->track, cycles);
     m->busy += cycles;
     log_poll(app);
@@ -655,9 +659,11 @@ static void button_poll(app_t *app)
     app->button_accepted++;
     app->button_ignored += count - 1U;
     app->button_last = first;
+    plat_probe_set(PLAT_PROBE_EVENT);
     moved = tracker_stow(&app->tracker);
     st = apply_servos(app);
     now = plat_time_cycles();
+    plat_probe_clear(PLAT_PROBE_EVENT);
     cycles = now - first;
     if (st != PLAT_OK) {
         say("EVT stow FAIL status=%d" EOL, (int)st);
