@@ -1,0 +1,118 @@
+name: 'sweep-ms: three stow presses per window under a load of 1 to 30 ms per loop pass (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 25ms
+  - write-serial: "load 1000 1200\n"
+  - wait-serial: 'CMD load OK us=1000 ms=1200'
+  - delay: 300ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - wait-serial: 'EVT load done us=1000 ms='
+  - delay: 30ms
+  - write-serial: "load 2000 1200\n"
+  - wait-serial: 'CMD load OK us=2000 ms=1200'
+  - delay: 300ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - wait-serial: 'EVT load done us=2000 ms='
+  - delay: 30ms
+  - write-serial: "load 4000 1200\n"
+  - wait-serial: 'CMD load OK us=4000 ms=1200'
+  - delay: 300ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - wait-serial: 'EVT load done us=4000 ms='
+  - delay: 30ms
+  - write-serial: "load 6000 1200\n"
+  - wait-serial: 'CMD load OK us=6000 ms=1200'
+  - delay: 300ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - wait-serial: 'EVT load done us=6000 ms='
+  - delay: 30ms
+  - write-serial: "load 10000 1200\n"
+  - wait-serial: 'CMD load OK us=10000 ms=1200'
+  - delay: 300ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - wait-serial: 'EVT load done us=10000 ms='
+  - delay: 30ms
+  - write-serial: "load 20000 1200\n"
+  - wait-serial: 'CMD load OK us=20000 ms=1200'
+  - delay: 300ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - wait-serial: 'EVT load done us=20000 ms='
+  - delay: 30ms
+  - write-serial: "load 30000 1200\n"
+  - wait-serial: 'CMD load OK us=30000 ms=1200'
+  - delay: 300ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - delay: 290ms
+  - set-control: {part-id: btn1, control: pressed, value: 1}
+  - delay: 10ms
+  - set-control: {part-id: btn1, control: pressed, value: 0}
+  - wait-serial: 'EVT load done us=30000 ms='
+  - delay: 5ms
+  

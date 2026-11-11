@@ -76,8 +76,37 @@ least `<us>` and longer by up to one clock reading), and it ends by itself.
   time the console loses bytes, and a command to switch the load off would be lost too.
 - The extra time counts as busy time, so `STAT load` and the busy pin PB6 both see it.
 - A `load` command that arrives while a window is open starts a new window.
+- The command also restarts the 50 ms grid of task T2: the first run of the window is due 50 ms
+  after it, and the release that was pending is replaced, not counted as missed. The phase of T2
+  inside the window is then known, so test bytes can be sent into the gap between two runs.
 - Limits: `<us>` up to 50000, `<ms>` from 1 to 60000. There is no way to leave a window open.
-- Cost while no window is open: one byte is tested in `app_poll`. Flash grew by 620 bytes.
+- Cost while no window is open: one byte is tested in `app_poll`. Flash grew by 636 bytes.
+
+## Breaking-point sweeps
+
+Two scenarios raise the extra load per pass step by step, one `load` window per step. After the
+run `tools/lr3_sweep.py` prints one row per window.
+
+| Scenario | Load per pass | In each window | Run |
+|----------|---------------|----------------|-----|
+| `sweep-uart` | 0 to 100 us | four 48-byte console lines (`resume` and 40 digits) | `tools/lr3_capture.sh sweep-uart sweep 60000` |
+| `sweep-ms` | 1 to 30 ms | three stow presses, 300 ms apart | `tools/lr3_capture.sh sweep-ms sweep 60000` |
+
+- Nothing is awaited inside a window, because a reply may be lost. Each window ends with
+  `wait-serial 'EVT load done us=<X> ms='`, which is always printed.
+- The `load` command restarts the 50 ms grid of T2, so the runs are due 50, 100, ... ms after it and
+  start up to 6 ms late. The lines of `sweep-uart` start 15 ms after the reply and are 50 ms apart.
+  A line lasts 4.2 ms, so it always lies in the gap between two T2 runs.
+- The control window `load 1 300` sends two double lines that start 4 ms before a T2 run. The bytes
+  lost there are lost to T2 and not to the length of the pass. The column `T2 in burst` shows from
+  the capture how many replies belonged to a line that overlapped a T2 run.
+- X is the requested wait. The real extra time is a multiple of one clock reading (8.5 us) plus the
+  loop overhead, so the tables use P measured on PB6, not X.
+- First table: P, the margin to the byte time, load by the firmware and by the pin (permille),
+  received and lost bytes (`rx`, `lost`), overruns (`err`), intact replies (`ok`) and damaged ones
+  (`bad`). Second table: pass period, T2 lateness and missed runs against the 25 ms deadline, stow
+  reaction against 10 ms (firmware and pin). The last lines give the first window that broke each
+  limit and the last window that did not.
 
 ## Cost of the instrumentation
 

@@ -901,6 +901,8 @@ static void cmd_load(app_t *app, unsigned argc, char *argv[])
     now = plat_time_cycles();
     (void)perf_clock_advance(&app->clock, now, plat_time_hz());
     meter_reset(app);
+    app->track_next = now + app->track_period;
+    app->meter.track_last = now;
     app->load_us = us;
     app->load_cycles = us * (plat_time_hz() / 1000000U);
     app->load_end = now + ms * (plat_time_hz() / 1000U);

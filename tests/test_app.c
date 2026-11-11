@@ -1521,6 +1521,25 @@ static void test_cmd_load_opens_a_window_and_reports_it(void)
     CHECK_STR(run("load\n"), "CMD load OK us=40 active=1" EOL);
 }
 
+static void test_a_new_window_restarts_the_50ms_grid_at_the_command(void)
+{
+    start_tracking();
+    fake_time_set(250000U);
+    run("load 0 500\n");
+    CHECK_EQ(app.track_next, 250000U + PERIOD);
+    CHECK_EQ(app.meter.track_last, 250000U);
+    fake_time_set(PERIOD + 1U);
+    app_poll(&app);
+    CHECK_EQ(app.track_runs, 0);
+    fake_time_set(250000U + PERIOD);
+    app_poll(&app);
+    CHECK_EQ(app.track_runs, 1);
+    CHECK_EQ(app.meter.late.count, 1);
+    CHECK_EQ(app.meter.late.max, 0);
+    CHECK_EQ(app.meter.period.max, PERIOD);
+    CHECK_EQ(app.track_missed, 0);
+}
+
 static void test_cmd_load_rejects_bad_input_and_opens_nothing(void)
 {
     start();
@@ -1972,6 +1991,7 @@ int main(void)
     RUN(test_stats_reset_starts_a_new_window);
     RUN(test_cmd_load_without_arguments_reports_the_state);
     RUN(test_cmd_load_opens_a_window_and_reports_it);
+    RUN(test_a_new_window_restarts_the_50ms_grid_at_the_command);
     RUN(test_cmd_load_rejects_bad_input_and_opens_nothing);
     RUN(test_a_pass_without_a_window_does_not_read_the_clock);
     RUN(test_every_pass_of_a_window_burns_the_requested_time_and_counts_it_as_busy);

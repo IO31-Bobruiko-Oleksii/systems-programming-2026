@@ -2,8 +2,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-name="${1:?usage: $0 <scenario> <loop|event> [timeout_ms]}"
-mode="${2:?usage: $0 <scenario> <loop|event> [timeout_ms]}"
+name="${1:?usage: $0 <scenario> <loop|event|sweep> [timeout_ms]}"
+mode="${2:?usage: $0 <scenario> <loop|event|sweep> [timeout_ms]}"
 timeout_ms="${3:-20000}"
 
 scn="scenarios/$name.yaml"
@@ -29,4 +29,8 @@ if [ "$ok" -ne 1 ]; then
     exit 1
 fi
 
-python3 tools/lr3_analyze.py "$vcd" "$mode" --serial "$serial" | tee "$report"
+if [ "$mode" = "sweep" ]; then
+    python3 tools/lr3_sweep.py "$vcd" --serial "$serial" | tee "$report"
+else
+    python3 tools/lr3_analyze.py "$vcd" "$mode" --serial "$serial" | tee "$report"
+fi
