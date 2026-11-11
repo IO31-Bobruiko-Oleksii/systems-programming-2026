@@ -58,7 +58,7 @@ except `selftest`, which prints the report first.
 
 | Command | Reply on success | Reply on failure |
 |---|---|---|
-| `help` | `CMD help OK commands=help,selftest,adc,servo,sd,time` | none |
+| `help` | `CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume` | none |
 | `selftest` | the report from section 1, then `CMD selftest OK failed=0` | the report, then `CMD selftest FAIL failed=<n>` |
 | `adc` | `CMD adc OK raw=<a>,<b>,<c>,<d>` | `CMD adc FAIL status=<s> at=<n>` |
 | `servo <1\|2> <0..180>` | `CMD servo OK ch=<c> angle=<deg> pulse_us=<us>` (1000 us at 0, 2000 us at 180) | `CMD servo FAIL reason=usage`, `reason=range` (angle above 180) or `status=<s>` |
@@ -67,10 +67,17 @@ except `selftest`, which prints the report first.
 | `sd write <block>` | `CMD sd-write OK block=<n> us=<t>`: writes 512 bytes, byte *i* = (*i* + block) mod 256; `us` is the time of the write | `CMD sd-write FAIL reason=usage`, `reason=protected` (block below 8192), or `step=init` / `step=write` with `status=<s>` |
 | `sd` with a missing or unknown subcommand | none | `CMD sd FAIL reason=usage` |
 | `time` | `CMD time OK hz=<f> read_cycles=<n> backsteps=<k>`: 20000 pairs of back-to-back readings of the time base; `read_cycles` is the smallest cost of one reading in cycles, `backsteps` counts pairs where the second reading was earlier | none |
+| `track` | `CMD track OK az=<a> tilt=<t> band=<d> zero=<a>,<t> parked=<0\|1> stowed=<0\|1> dark=<n> runs=<n> missed=<n> errors=<n>`: current angles, dead zone, safe position, dark samples counted so far, runs of the 50 ms tracking task, releases skipped because the loop was late, runs that hit an ADC or servo error | none |
+| `deadband <0..4095>` | `CMD deadband OK value=<n>` | `CMD deadband FAIL reason=usage` or `reason=range` |
+| `zero <az> <tilt>` | `CMD zero OK az=<a> tilt=<t>`: sets the safe position (0..180 degrees each); a parked or stowed panel moves there at once | `CMD zero FAIL reason=usage`, `reason=range` or `status=<s>` |
+| `stow` | `CMD stow OK az=<a> tilt=<t>`: moves to the safe position and holds it | `CMD stow FAIL status=<s>` |
+| `resume` | `CMD resume OK`: tracking continues | none |
 | anything else | none | `CMD <word> FAIL reason=unknown` |
 | a line longer than 48 characters | none | `CMD ? FAIL reason=too-long` |
 
 ## 3. How it is checked
+
+The tracking task starts after the self-test and runs every 50 ms without printing anything. A `servo` command sets the position from which tracking continues; `stow` holds the panel at the safe position until `resume`.
 
 - Host tests (`make check`): `tests/test_app.c` runs the firmware logic against a fake UART and
   compares the output with the strings above, including every failure line.

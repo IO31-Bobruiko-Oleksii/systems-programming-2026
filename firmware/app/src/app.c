@@ -18,7 +18,7 @@
 
 static void say(const char *fmt, ...)
 {
-    char buf[128];
+    char buf[160];
     va_list ap;
     int n;
 
@@ -58,6 +58,20 @@ void app_init(app_t *app)
     if (app->pwm_init == PLAT_OK) {
         app->pwm_init = servo_init(&app->servo[1], PLAT_PWM_CH_SERVO2);
     }
+    tracker_init(&app->tracker);
+}
+
+void app_start(app_t *app)
+{
+    if (app == NULL) {
+        return;
+    }
+    app->track_period = (plat_time_hz() / 1000U) * APP_TRACK_PERIOD_MS;
+    if (app->track_period == 0U) {
+        return;
+    }
+    app->track_next = plat_time_cycles() + app->track_period;
+    app->tracking = 1U;
 }
 
 static int check_adc(app_t *app)
@@ -193,7 +207,7 @@ static int parse_uint(const char *s, uint32_t max, uint32_t *out)
 
 static void cmd_help(void)
 {
-    say("CMD help OK commands=help,selftest,adc,servo,sd,time" EOL);
+    say("CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume" EOL);
 }
 
 static void cmd_selftest(app_t *app)
@@ -241,6 +255,11 @@ static void cmd_servo(app_t *app, unsigned argc, char *argv[])
     if (st != PLAT_OK) {
         say("CMD servo FAIL status=%d" EOL, (int)st);
         return;
+    }
+    if (ch == 1U) {
+        app->tracker.az = (uint8_t)angle;
+    } else {
+        app->tracker.tilt = (uint8_t)angle;
     }
     say("CMD servo OK ch=%u angle=%u pulse_us=%u" EOL, (unsigned)ch, (unsigned)angle,
         (unsigned)app->servo[ch - 1U].pulse_us);
@@ -371,6 +390,127 @@ static void cmd_time(void)
         (unsigned long)smallest, (unsigned long)backsteps);
 }
 
+static plat_status_t apply_servos(app_t *app)
+{
+    plat_status_t az = app->pwm_init;
+    plat_status_t tilt;
+
+    if (az != PLAT_OK) {
+        return az;
+    }
+    az = servo_set_angle(&app->servo[0], (int16_t)app->tracker.az);
+    tilt = servo_set_angle(&app->servo[1], (int16_t)app->tracker.tilt);
+    return (az != PLAT_OK) ? az : tilt;
+}
+
+static void track_task(app_t *app)
+{
+    int at = -1;
+    plat_status_t st = app->adc_init;
+
+    if (st == PLAT_OK) {
+        st = pots_read_all(&app->pots, &at);
+    }
+    if (st == PLAT_OK) {
+        (void)tracker_update(&app->tracker, app->pots.raw);
+        st = apply_servos(app);
+    }
+    app->track_runs++;
+    if (st != PLAT_OK) {
+        app->track_errors++;
+    }
+}
+
+static void track_poll(app_t *app)
+{
+    uint32_t now;
+    uint32_t late;
+    uint32_t skipped;
+
+    if (app->tracking == 0U) {
+        return;
+    }
+    now = plat_time_cycles();
+    if ((int32_t)(now - app->track_next) < 0) {
+        return;
+    }
+    late = now - app->track_next;
+    skipped = late / app->track_period;
+    app->track_missed += skipped;
+    app->track_next += (skipped + 1U) * app->track_period;
+    track_task(app);
+}
+
+static void cmd_track(const app_t *app)
+{
+    const tracker_t *t = &app->tracker;
+
+    say("CMD track OK az=%u tilt=%u band=%u zero=%u,%u parked=%u stowed=%u dark=%u"
+        " runs=%lu missed=%lu errors=%lu" EOL,
+        (unsigned)t->az, (unsigned)t->tilt, (unsigned)t->deadband, (unsigned)t->zero_az,
+        (unsigned)t->zero_tilt, (unsigned)t->parked, (unsigned)t->stowed, (unsigned)t->dark_count,
+        (unsigned long)app->track_runs, (unsigned long)app->track_missed,
+        (unsigned long)app->track_errors);
+}
+
+static void cmd_deadband(app_t *app, unsigned argc, char *argv[])
+{
+    uint32_t value;
+
+    if (argc != 2U || parse_uint(argv[1], UINT32_MAX, &value) != 0) {
+        say("CMD deadband FAIL reason=usage" EOL);
+        return;
+    }
+    if (tracker_set_deadband(&app->tracker, value) != PLAT_OK) {
+        say("CMD deadband FAIL reason=range" EOL);
+        return;
+    }
+    say("CMD deadband OK value=%u" EOL, (unsigned)app->tracker.deadband);
+}
+
+static void cmd_zero(app_t *app, unsigned argc, char *argv[])
+{
+    uint32_t az;
+    uint32_t tilt;
+    plat_status_t st;
+
+    if (argc != 3U || parse_uint(argv[1], UINT32_MAX, &az) != 0 ||
+        parse_uint(argv[2], UINT32_MAX, &tilt) != 0) {
+        say("CMD zero FAIL reason=usage" EOL);
+        return;
+    }
+    if (tracker_set_zero(&app->tracker, az, tilt) != PLAT_OK) {
+        say("CMD zero FAIL reason=range" EOL);
+        return;
+    }
+    st = apply_servos(app);
+    if (st != PLAT_OK) {
+        say("CMD zero FAIL status=%d" EOL, (int)st);
+        return;
+    }
+    say("CMD zero OK az=%u tilt=%u" EOL, (unsigned)app->tracker.zero_az,
+        (unsigned)app->tracker.zero_tilt);
+}
+
+static void cmd_stow(app_t *app)
+{
+    plat_status_t st;
+
+    (void)tracker_stow(&app->tracker);
+    st = apply_servos(app);
+    if (st != PLAT_OK) {
+        say("CMD stow FAIL status=%d" EOL, (int)st);
+        return;
+    }
+    say("CMD stow OK az=%u tilt=%u" EOL, (unsigned)app->tracker.az, (unsigned)app->tracker.tilt);
+}
+
+static void cmd_resume(app_t *app)
+{
+    tracker_resume(&app->tracker);
+    say("CMD resume OK" EOL);
+}
+
 void app_execute(app_t *app, const char *line)
 {
     char work[APP_LINE_MAX + 1U];
@@ -397,12 +537,22 @@ void app_execute(app_t *app, const char *line)
         cmd_sd(app, argc, argv);
     } else if (strcmp(argv[0], "time") == 0) {
         cmd_time();
+    } else if (strcmp(argv[0], "track") == 0) {
+        cmd_track(app);
+    } else if (strcmp(argv[0], "deadband") == 0) {
+        cmd_deadband(app, argc, argv);
+    } else if (strcmp(argv[0], "zero") == 0) {
+        cmd_zero(app, argc, argv);
+    } else if (strcmp(argv[0], "stow") == 0) {
+        cmd_stow(app);
+    } else if (strcmp(argv[0], "resume") == 0) {
+        cmd_resume(app);
     } else {
         say("CMD %s FAIL reason=unknown" EOL, argv[0]);
     }
 }
 
-void app_poll(app_t *app)
+static void console_poll(app_t *app)
 {
     uint8_t b;
 
@@ -425,4 +575,13 @@ void app_poll(app_t *app)
     } else {
         app->line_overflow = 1U;
     }
+}
+
+void app_poll(app_t *app)
+{
+    if (app == NULL) {
+        return;
+    }
+    track_poll(app);
+    console_poll(app);
 }

@@ -210,7 +210,7 @@ static void test_selftest_can_run_again(void)
 static void test_cmd_help(void)
 {
     start();
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume" EOL);
 }
 
 static void test_cmd_unknown(void)
@@ -421,10 +421,368 @@ static void test_cmd_sd_usage(void)
     CHECK_EQ(fake_sd_transfer_calls(), 0);
 }
 
+#define PERIOD  600000U
+
+static void start_tracking(void)
+{
+    start();
+    app_start(&app);
+}
+
+static void tick(uint32_t cycles)
+{
+    fake_time_set(cycles);
+    app_poll(&app);
+}
+
+static void set_all_light(uint16_t raw)
+{
+    uint8_t ch;
+
+    for (ch = 0U; ch < 4U; ch++) {
+        fake_adc_set_raw(ch, raw);
+    }
+}
+
+static void test_tracking_stays_off_until_app_start(void)
+{
+    start();
+    fake_time_set(10U * PERIOD);
+    app_poll(&app);
+    CHECK_EQ(app.tracking, 0);
+    CHECK_EQ(app.track_runs, 0);
+    CHECK_EQ(fake_pwm_calls(), 2);
+}
+
+static void test_app_start_sets_the_first_release_one_period_ahead(void)
+{
+    start_tracking();
+    CHECK_EQ(app.tracking, 1);
+    CHECK_EQ(app.track_period, PERIOD);
+    CHECK_EQ(app.track_next, PERIOD);
+    tick(PERIOD - 1U);
+    CHECK_EQ(app.track_runs, 0);
+    tick(PERIOD);
+    CHECK_EQ(app.track_runs, 1);
+    CHECK_EQ(app.track_next, 2U * PERIOD);
+    CHECK_EQ(app.track_missed, 0);
+}
+
+static void test_app_start_follows_the_clock_frequency_and_refuses_a_useless_one(void)
+{
+    start();
+    fake_time_set_hz(1000U);
+    app_start(&app);
+    CHECK_EQ(app.track_period, APP_TRACK_PERIOD_MS);
+    CHECK_EQ(app.tracking, 1);
+
+    start();
+    fake_time_set_hz(999U);
+    app_start(&app);
+    CHECK_EQ(app.track_period, 0);
+    CHECK_EQ(app.tracking, 0);
+    fake_time_set(10U * PERIOD);
+    app_poll(&app);
+    CHECK_EQ(app.track_runs, 0);
+
+    app_start(NULL);
+}
+
+static void test_a_run_moves_the_servos_toward_the_light_and_stays_silent(void)
+{
+    start_tracking();
+    tick(PERIOD);
+    CHECK_EQ(app.tracker.az, 91);
+    CHECK_EQ(app.tracker.tilt, 89);
+    CHECK_EQ(app.servo[0].pulse_us, servo_angle_to_us(91));
+    CHECK_EQ(app.servo[1].pulse_us, servo_angle_to_us(89));
+    CHECK_EQ(fake_pwm_calls(), 4);
+    CHECK_EQ(fake_pwm_channel_at(2), PLAT_PWM_CH_SERVO1);
+    CHECK_EQ(fake_pwm_channel_at(3), PLAT_PWM_CH_SERVO2);
+    CHECK_STR(fake_uart_output(), "");
+}
+
+static void test_ten_periods_give_ten_runs_and_ten_degrees(void)
+{
+    unsigned i;
+
+    start_tracking();
+    for (i = 1U; i <= 10U; i++) {
+        tick(i * PERIOD);
+    }
+    CHECK_EQ(app.track_runs, 10);
+    CHECK_EQ(app.tracker.az, 100);
+    CHECK_EQ(app.tracker.tilt, 80);
+}
+
+static void test_a_late_pass_counts_the_releases_it_skipped(void)
+{
+    start_tracking();
+    tick(PERIOD + 5U);
+    CHECK_EQ(app.track_runs, 1);
+    CHECK_EQ(app.track_missed, 0);
+    CHECK_EQ(app.track_next, 2U * PERIOD);
+
+    tick(4U * PERIOD + PERIOD / 2U);
+    CHECK_EQ(app.track_runs, 2);
+    CHECK_EQ(app.track_missed, 2);
+    CHECK_EQ(app.track_next, 5U * PERIOD);
+
+    tick(5U * PERIOD - 1U);
+    CHECK_EQ(app.track_runs, 2);
+    tick(5U * PERIOD);
+    CHECK_EQ(app.track_runs, 3);
+    CHECK_EQ(app.track_missed, 2);
+}
+
+static void test_the_schedule_survives_the_counter_wrap(void)
+{
+    uint32_t release;
+
+    start();
+    fake_time_set(0xFFFF0000U);
+    app_start(&app);
+    release = 0xFFFF0000U + PERIOD;
+    CHECK(release < 0xFFFF0000U);
+    CHECK_EQ(app.track_next, release);
+
+    tick(0xFFFFFFFFU);
+    CHECK_EQ(app.track_runs, 0);
+    tick(release);
+    CHECK_EQ(app.track_runs, 1);
+    tick(release + PERIOD);
+    CHECK_EQ(app.track_runs, 2);
+    CHECK_EQ(app.track_missed, 0);
+}
+
+static void test_adc_failure_counts_an_error_and_leaves_the_servos_alone(void)
+{
+    start_tracking();
+    fake_adc_fail_channel(1U, PLAT_ERR_TIMEOUT);
+    tick(PERIOD);
+    CHECK_EQ(app.track_runs, 1);
+    CHECK_EQ(app.track_errors, 1);
+    CHECK_EQ(fake_pwm_calls(), 2);
+    CHECK_EQ(app.tracker.az, 90);
+}
+
+static void test_servo_failure_counts_an_error_and_the_next_run_repairs_it(void)
+{
+    start_tracking();
+    fake_pwm_fail_next(PLAT_ERR_BUS);
+    tick(PERIOD);
+    CHECK_EQ(app.track_errors, 1);
+    CHECK_EQ(app.servo[0].pulse_us, 1500);
+    CHECK_EQ(app.servo[1].pulse_us, servo_angle_to_us(89));
+
+    tick(2U * PERIOD);
+    CHECK_EQ(app.track_errors, 1);
+    CHECK_EQ(app.servo[0].pulse_us, servo_angle_to_us(92));
+    CHECK_EQ(app.servo[1].pulse_us, servo_angle_to_us(88));
+}
+
+static void test_a_failing_tilt_servo_is_counted_too(void)
+{
+    start_tracking();
+    fake_pwm_fail_call(3U, PLAT_ERR_BUS);
+    tick(PERIOD);
+    CHECK_EQ(app.track_errors, 1);
+    CHECK_EQ(app.servo[0].pulse_us, servo_angle_to_us(91));
+    CHECK_EQ(app.servo[1].pulse_us, 1500);
+}
+
+static void test_failed_platform_start_counts_as_an_error_in_every_run(void)
+{
+    world();
+    fake_adc_fail_init(PLAT_ERR_BUS);
+    app_init(&app);
+    app_start(&app);
+    tick(PERIOD);
+    tick(2U * PERIOD);
+    CHECK_EQ(app.track_runs, 2);
+    CHECK_EQ(app.track_errors, 2);
+    CHECK_EQ(fake_adc_calls(), 0);
+
+    world();
+    fake_pwm_fail_init(PLAT_ERR_ARG);
+    app_init(&app);
+    app_start(&app);
+    tick(PERIOD);
+    CHECK_EQ(app.track_errors, 1);
+    CHECK_EQ(fake_pwm_calls(), 0);
+}
+
+static void test_twenty_dark_runs_park_the_panel_in_the_safe_position(void)
+{
+    unsigned i;
+
+    start_tracking();
+    tick(PERIOD);
+    CHECK_EQ(app.tracker.az, 91);
+    set_all_light(100U);
+    for (i = 2U; i <= 20U; i++) {
+        tick(i * PERIOD);
+    }
+    CHECK_EQ(app.tracker.parked, 0);
+    CHECK_EQ(app.servo[0].pulse_us, servo_angle_to_us(91));
+
+    tick(21U * PERIOD);
+    CHECK_EQ(app.tracker.parked, 1);
+    CHECK_EQ(app.servo[0].pulse_us, 1500);
+    CHECK_EQ(app.servo[1].pulse_us, 1500);
+}
+
+
+
+static void test_cmd_track_reports_the_state(void)
+{
+    start_tracking();
+    CHECK_STR(run("track\n"),
+              "CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0"
+              " runs=0 missed=0 errors=0" EOL);
+    tick(PERIOD);
+    CHECK_STR(run("track\n"),
+              "CMD track OK az=91 tilt=89 band=100 zero=90,90 parked=0 stowed=0 dark=0"
+              " runs=1 missed=0 errors=0" EOL);
+}
+
+static void test_cmd_track_longest_line_is_not_cut_off(void)
+{
+    start();
+    app.tracker.az = 180U;
+    app.tracker.tilt = 180U;
+    app.tracker.deadband = 4095U;
+    app.tracker.zero_az = 180U;
+    app.tracker.zero_tilt = 180U;
+    app.tracker.parked = 1U;
+    app.tracker.stowed = 1U;
+    app.tracker.dark_count = 20U;
+    app.track_runs = UINT32_MAX;
+    app.track_missed = UINT32_MAX;
+    app.track_errors = UINT32_MAX;
+    CHECK_STR(run("track\n"),
+              "CMD track OK az=180 tilt=180 band=4095 zero=180,180 parked=1 stowed=1 dark=20"
+              " runs=4294967295 missed=4294967295 errors=4294967295" EOL);
+}
+
+static void test_a_command_and_a_due_task_run_in_the_same_pass(void)
+{
+    start_tracking();
+    fake_time_set(PERIOD);
+    CHECK_STR(run("track\n"),
+              "CMD track OK az=91 tilt=89 band=100 zero=90,90 parked=0 stowed=0 dark=0"
+              " runs=1 missed=0 errors=0" EOL);
+}
+
+static void test_cmd_deadband_sets_the_dead_zone_and_it_changes_the_tracking(void)
+{
+    start_tracking();
+    CHECK_STR(run("deadband 4000\n"), "CMD deadband OK value=4000" EOL);
+    CHECK_EQ(app.tracker.deadband, 4000);
+    tick(PERIOD);
+    CHECK_EQ(app.tracker.az, 90);
+    CHECK_EQ(app.tracker.tilt, 90);
+    CHECK_STR(run("deadband 0\n"), "CMD deadband OK value=0" EOL);
+    tick(2U * PERIOD);
+    CHECK_EQ(app.tracker.az, 91);
+}
+
+static void test_cmd_deadband_rejects_bad_input(void)
+{
+    start();
+    CHECK_STR(run("deadband\n"), "CMD deadband FAIL reason=usage" EOL);
+    CHECK_STR(run("deadband x\n"), "CMD deadband FAIL reason=usage" EOL);
+    CHECK_STR(run("deadband 1 2\n"), "CMD deadband FAIL reason=usage" EOL);
+    CHECK_STR(run("deadband 4096\n"), "CMD deadband FAIL reason=range" EOL);
+    CHECK_STR(run("deadband 99999999999\n"), "CMD deadband FAIL reason=usage" EOL);
+    CHECK_EQ(app.tracker.deadband, 100);
+}
+
+static void test_cmd_zero_changes_the_safe_position_and_moves_a_stowed_panel(void)
+{
+    start_tracking();
+    CHECK_STR(run("zero 45 135\n"), "CMD zero OK az=45 tilt=135" EOL);
+    CHECK_EQ(app.tracker.zero_az, 45);
+    CHECK_EQ(app.tracker.zero_tilt, 135);
+    CHECK_EQ(app.servo[0].pulse_us, 1500);
+    CHECK_EQ(app.servo[1].pulse_us, 1500);
+
+    CHECK_STR(run("stow\n"), "CMD stow OK az=45 tilt=135" EOL);
+    CHECK_EQ(app.servo[0].pulse_us, servo_angle_to_us(45));
+    CHECK_EQ(app.servo[1].pulse_us, servo_angle_to_us(135));
+
+    CHECK_STR(run("zero 10 20\n"), "CMD zero OK az=10 tilt=20" EOL);
+    CHECK_EQ(app.servo[0].pulse_us, servo_angle_to_us(10));
+    CHECK_EQ(app.servo[1].pulse_us, servo_angle_to_us(20));
+}
+
+static void test_cmd_zero_rejects_bad_input(void)
+{
+    start();
+    CHECK_STR(run("zero\n"), "CMD zero FAIL reason=usage" EOL);
+    CHECK_STR(run("zero 1\n"), "CMD zero FAIL reason=usage" EOL);
+    CHECK_STR(run("zero a 1\n"), "CMD zero FAIL reason=usage" EOL);
+    CHECK_STR(run("zero 1 b\n"), "CMD zero FAIL reason=usage" EOL);
+    CHECK_STR(run("zero 181 0\n"), "CMD zero FAIL reason=range" EOL);
+    CHECK_STR(run("zero 0 181\n"), "CMD zero FAIL reason=range" EOL);
+    CHECK_EQ(app.tracker.zero_az, 90);
+    CHECK_EQ(app.tracker.zero_tilt, 90);
+}
+
+static void test_cmd_zero_reports_a_servo_failure(void)
+{
+    start();
+    fake_pwm_fail_next(PLAT_ERR_BUS);
+    CHECK_STR(run("zero 10 20\n"), "CMD zero FAIL status=3" EOL);
+}
+
+static void test_cmd_stow_holds_the_panel_until_resume(void)
+{
+    start_tracking();
+    tick(PERIOD);
+    CHECK_STR(run("stow\n"), "CMD stow OK az=90 tilt=90" EOL);
+    CHECK_EQ(app.tracker.stowed, 1);
+    CHECK_EQ(app.servo[0].pulse_us, 1500);
+    CHECK_EQ(app.servo[1].pulse_us, 1500);
+
+    tick(2U * PERIOD);
+    CHECK_EQ(app.track_runs, 2);
+    CHECK_EQ(app.tracker.az, 90);
+    CHECK_EQ(app.servo[0].pulse_us, 1500);
+
+    CHECK_STR(run("resume\n"), "CMD resume OK" EOL);
+    CHECK_EQ(app.tracker.stowed, 0);
+    tick(3U * PERIOD);
+    CHECK_EQ(app.tracker.az, 91);
+    CHECK_EQ(app.servo[0].pulse_us, servo_angle_to_us(91));
+}
+
+static void test_cmd_stow_reports_a_servo_failure(void)
+{
+    start();
+    fake_pwm_fail_next(PLAT_ERR_TIMEOUT);
+    CHECK_STR(run("stow\n"), "CMD stow FAIL status=2" EOL);
+    CHECK_EQ(app.tracker.stowed, 1);
+}
+
+static void test_cmd_servo_sets_the_position_the_tracker_continues_from(void)
+{
+    start_tracking();
+    CHECK_STR(run("servo 1 30\n"), "CMD servo OK ch=1 angle=30 pulse_us=1167" EOL);
+    CHECK_EQ(app.tracker.az, 30);
+    CHECK_EQ(app.tracker.tilt, 90);
+    CHECK_STR(run("servo 2 150\n"), "CMD servo OK ch=2 angle=150 pulse_us=1833" EOL);
+    CHECK_EQ(app.tracker.tilt, 150);
+    tick(PERIOD);
+    CHECK_EQ(app.tracker.az, 31);
+    CHECK_EQ(app.tracker.tilt, 149);
+    CHECK_EQ(app.servo[0].pulse_us, servo_angle_to_us(31));
+}
+
 static void test_line_crlf_terminator_runs_the_command_once(void)
 {
     start();
-    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time" EOL);
+    CHECK_STR(run("help\r\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume" EOL);
 }
 
 static void test_line_empty_and_blank_lines_are_ignored(void)
@@ -470,7 +828,7 @@ static void test_line_length_limit_and_recovery(void)
     CHECK_STR(run(longest), expected);
 
     CHECK_STR(run(too_long), "CMD ? FAIL reason=too-long" EOL);
-    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time" EOL);
+    CHECK_STR(run("help\n"), "CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume" EOL);
 }
 
 static void test_null_and_oversized_arguments_are_harmless(void)
@@ -523,6 +881,29 @@ int main(void)
     RUN(test_cmd_sd_write_errors);
     RUN(test_cmd_time_reports_the_cost_of_one_reading);
     RUN(test_cmd_time_counts_readings_that_go_backwards);
+    RUN(test_tracking_stays_off_until_app_start);
+    RUN(test_app_start_sets_the_first_release_one_period_ahead);
+    RUN(test_app_start_follows_the_clock_frequency_and_refuses_a_useless_one);
+    RUN(test_a_run_moves_the_servos_toward_the_light_and_stays_silent);
+    RUN(test_ten_periods_give_ten_runs_and_ten_degrees);
+    RUN(test_a_late_pass_counts_the_releases_it_skipped);
+    RUN(test_the_schedule_survives_the_counter_wrap);
+    RUN(test_adc_failure_counts_an_error_and_leaves_the_servos_alone);
+    RUN(test_servo_failure_counts_an_error_and_the_next_run_repairs_it);
+    RUN(test_a_failing_tilt_servo_is_counted_too);
+    RUN(test_failed_platform_start_counts_as_an_error_in_every_run);
+    RUN(test_twenty_dark_runs_park_the_panel_in_the_safe_position);
+    RUN(test_cmd_track_reports_the_state);
+    RUN(test_cmd_track_longest_line_is_not_cut_off);
+    RUN(test_a_command_and_a_due_task_run_in_the_same_pass);
+    RUN(test_cmd_deadband_sets_the_dead_zone_and_it_changes_the_tracking);
+    RUN(test_cmd_deadband_rejects_bad_input);
+    RUN(test_cmd_zero_changes_the_safe_position_and_moves_a_stowed_panel);
+    RUN(test_cmd_zero_rejects_bad_input);
+    RUN(test_cmd_zero_reports_a_servo_failure);
+    RUN(test_cmd_stow_holds_the_panel_until_resume);
+    RUN(test_cmd_stow_reports_a_servo_failure);
+    RUN(test_cmd_servo_sets_the_position_the_tracker_continues_from);
     RUN(test_cmd_sd_init_runs_the_whole_sequence_each_time);
     RUN(test_cmd_sd_usage);
     RUN(test_line_crlf_terminator_runs_the_command_once);

@@ -107,6 +107,7 @@ int main(void)
   (void)plat_uart_write((const uint8_t *)banner, sizeof banner - 1U);
   app_init(&app);
   (void)app_selftest(&app);
+  app_start(&app);
   /* USER CODE END 2 */
 
   /* Infinite loop */

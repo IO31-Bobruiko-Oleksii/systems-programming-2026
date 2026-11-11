@@ -6,12 +6,15 @@ static uint16_t hist_pulse[FAKE_PWM_HISTORY];
 static size_t   call_count;
 static plat_status_t next_status = PLAT_OK;
 static plat_status_t init_status = PLAT_OK;
+static size_t fail_index = (size_t)-1;
+static plat_status_t fail_index_status = PLAT_OK;
 
 void fake_pwm_reset(void)
 {
     call_count = 0U;
     next_status = PLAT_OK;
     init_status = PLAT_OK;
+    fail_index = (size_t)-1;
 }
 
 void fake_pwm_fail_next(plat_status_t status)
@@ -39,6 +42,12 @@ void fake_pwm_fail_init(plat_status_t status)
     init_status = status;
 }
 
+void fake_pwm_fail_call(size_t index, plat_status_t status)
+{
+    fail_index = index;
+    fail_index_status = status;
+}
+
 plat_status_t plat_pwm_init(void)
 {
     return init_status;
@@ -49,6 +58,9 @@ plat_status_t plat_pwm_set_pulse_us(uint8_t channel, uint16_t pulse_us)
     plat_status_t st = next_status;
 
     next_status = PLAT_OK;
+    if (call_count == fail_index) {
+        st = fail_index_status;
+    }
     if (call_count < FAKE_PWM_HISTORY) {
         hist_channel[call_count] = channel;
         hist_pulse[call_count] = pulse_us;
