@@ -1,0 +1,27 @@
+capture docs/captures/lr3/sweep-ms.vcd: 9312.507 ms, load windows on D4: 7, in the serial log: 7
+bytes sent per window: 0 (assumed: the largest rx_bytes seen); byte time 86.7 us; control window: load 1
+
+UART AND LOAD (P = work of one loop pass outside the UART wait, pin PB6; margin = byte time - largest P)
+    X us   P avg   P max  margin  fw pm  pin pm    rx  lost  err  ok  bad  T2 in burst
+    1000  1048.1  1104.5 -1017.8    161   178.7     -     -    -   -    -            -
+    2000  2047.4  2081.6 -1994.9    267   284.0     -     -    -   -    -            -
+    4000  4048.1  4081.7 -3995.0    416   431.4     -     -    -   -    -            -
+    6000  6047.0  6086.2 -5999.6    515   529.6     -     -    -   -    -            -
+   10000 10046.7 10081.2 -9994.5    638   651.7     -     -    -   -    -            -
+   20000 20047.8 20084.1 -19997.4    781   793.3     -     -    -   -    -            -
+   30000 30044.3 30048.0 -29961.3    843   855.4     -     -    -   -    -            -
+
+DEADLINES (T2: late + duration within 25 ms; E1: firmware reaction within 10 ms)
+    X us  period avg  period max  T2 runs  late max  missed      T2  presses  lat fw max  lat pin max      E1
+    1000        7070       11000       24      8091       0      ok        3        5878         5890      ok
+    2000        8088       13002       24     11679       0      ok        3        5265         5277      ok
+    4000       10110       14997       23     11305       0      ok        3        9883         9894      ok
+    6000       12142       16998       24     15955       0      ok        3       11537        11549  MISSED
+   10000       16204       21000       24     20056       0      ok        3       12403        12415  MISSED
+   20000       26339       30999       23     27154       0  MISSED        3       19397        19408  MISSED
+   30000       36481       41001       23     34241       0  MISSED        3       23945        23956  MISSED
+
+BREAKING POINTS (control window left out, rows in order of growing X)
+  console bytes lost: no console traffic in this sweep
+  E1 reaction above 10 ms: first at X = 6000 us (period max 16998 us), last good X = 4000 us (period max 14997 us)
+  T2 deadline missed: first at X = 20000 us (period max 30999 us), last good X = 10000 us (period max 21000 us)
