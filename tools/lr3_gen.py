@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes the long LR3 scenarios (S1, S2, S3) for the Wokwi CLI.
 
-usage: lr3_gen.py <s1|s2|s3|e1|burst>
+usage: lr3_gen.py <s1|s2|s3|e1|burst|nosd>
 
 The scenario is written to scenarios/<name>.yaml. The comment lines "# window" and "# press"
 in the file are read back by lr3_stats.py, so do not edit them.
@@ -14,7 +14,7 @@ import random
 import sys
 from pathlib import Path
 
-NAMES = {"s1": "s1-idle", "s2": "s2-nominal", "s3": "s3-worst", "e1": "e1-idle", "burst": "burst"}
+NAMES = {"s1": "s1-idle", "s2": "s2-nominal", "s3": "s3-worst", "e1": "e1-idle", "burst": "burst", "nosd": "nosd-log"}
 SELFTEST = "SELFTEST END total=5 passed=5 failed=0"
 SETTLE_MS = 6025                    # the servos reach their end stops, as in the other scenarios
 S1_SECONDS = 250
@@ -30,6 +30,7 @@ E1_PRESSES = 40
 E1_LEAD_MS = 100
 E1_PAUSE_MS = 250
 TIME_CALLS = 3
+NOSD_SECONDS = 12
 CHUNK_MS = 10000
 
 
@@ -140,11 +141,27 @@ def build_burst():
     return s
 
 
+def build_nosd():
+    """The SD card is absent (scenarios/nosd-log.diagram.json): what a failing log costs."""
+    s = Scenario()
+    s.wait("SELFTEST END total=5 passed=4 failed=1")
+    s.delay(SETTLE_MS)
+    s.comment("window 1 seconds=%d" % NOSD_SECONDS)
+    s.write("stats reset", "log on")
+    s.delay(NOSD_SECONDS * 1000)
+    s.write("sd write 16000", "log", "stats", "button")
+    s.wait("CMD button OK edges=")
+    s.delay(5)
+    return s
+
+
 def build(key):
     if key == "e1":
         return build_e1()
     if key == "burst":
         return build_burst()
+    if key == "nosd":
+        return build_nosd()
     s = Scenario()
     s.wait(SELFTEST)
     if key == "s1":
@@ -182,7 +199,7 @@ def main():
         sys.exit(__doc__)
     key = sys.argv[1]
     s = build(key)
-    if key in ("e1", "burst"):
+    if key in ("e1", "burst", "nosd"):
         seconds = s.ms // 1000
     else:
         seconds = S1_SECONDS if key == "s1" else TICKS[key] * TICK_MS // 1000

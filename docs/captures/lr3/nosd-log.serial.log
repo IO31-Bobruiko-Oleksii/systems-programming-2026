@@ -1,0 +1,25 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd FAIL step=init status=3
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=4 failed=1CMD stats-reset OK
+CMD log OK on=1
+CMD sd-write FAIL step=init status=3
+CMD log OK on=1 seq=0 stored=0 blocks=0 dropped=0 errors=0 flushes=0 flush_max_us=0
+STAT name=loop n=2031 min_us=42 avg_us=5918 max_us=9491
+STAT name=sense n=240 min_us=602 avg_us=602 max_us=602
+STAT name=track n=240 min_us=830 avg_us=833 max_us=833
+STAT name=late n=240 min_us=888 avg_us=2891 max_us=4894
+STAT name=period n=240 min_us=47997 avg_us=49979 max_us=54003
+STAT name=cmd n=4 min_us=1783 avg_us=5435 max_us=9428
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=12019 busy_ms=221 load_pm=18
+STAT count runs=240 missed=0 rx_bytes=32 rx_errors=0 passes=2031
+STAT rx init=0 dropped=0 ring_max=17 errors=0 isr_n=33 isr_avg=146 isr_max=157
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=916 stack_res=1024 stack_free=9076
+CMD stats OK
+CMD button OK edges=0 accepted=0 ignored=0

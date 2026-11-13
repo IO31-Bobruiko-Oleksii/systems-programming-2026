@@ -98,10 +98,18 @@ def main():
     print("burst: replies that end later than 100 ms: %d of %d; start later than 100 ms: %d of %d"
           % (over, len(burst), over_s, len(burst)))
     if len(burst) > 1:
-        step = (burst[-1] - burst[0]) / (len(burst) - 1)
-        wire = sum(len(reps[SINGLE + i][2]) + 2 for i in range(len(burst))) / float(len(burst)) * A.BYTE_US
-        print("burst: the reply end grows by %.1f us per line; one reply takes %.1f us on the wire"
-              " (%.1f us per byte)" % (step, wire, A.BYTE_US))
+        rb = reps[SINGLE:SINGLE + len(burst)]
+        cycle = (rb[-1][1] - rb[0][1]) / (len(rb) - 1) / 1000.0
+        size = sum(len(r[2]) + 2 for r in rb) / float(len(rb))
+        dur = sum(r[1] - r[0] for r in rb) / len(rb) / 1000.0
+        idle = [(b[0] - a[1]) / 1000.0 for a, b in zip(rb, rb[1:])]
+        tx = [t for t, _ in frames(cap, A.TX) if rb[0][0] <= t <= rb[-1][1]]
+        gaps = sorted(b - a for a, b in zip(tx, tx[1:]) if b - a < 200000)
+        print("burst: one reply per %.1f us, end to end" % cycle)
+        print("burst: a reply of %.0f bytes takes %.1f us: %.1f us per byte (the median of two frames),"
+              " 8N1 at this baud rate needs %.1f us" % (size, dur, gaps[len(gaps) // 2] / 1000.0, A.BYTE_US))
+        print("burst: from the end of a reply to the start of the next one: avg %.1f us, min %.1f us"
+              % (sum(idle) / len(idle), min(idle)))
     t_lo, t_hi = cmds[SINGLE][0], reps[SINGLE + len(burst) - 1][1]
     t2 = [a for a, _ in cap.pulses(A.T2) if t_lo <= a <= t_hi]
     gaps = [(b - a) / 1e6 for a, b in zip(t2, t2[1:])]

@@ -1,0 +1,12 @@
+name: 'nosd-log: 18 s (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=4 failed=1'
+  - delay: 6025ms
+  # window 1 seconds=12
+  - write-serial: "stats reset\nlog on\n"
+  - delay: 10000ms
+  - delay: 2000ms
+  - write-serial: "sd write 16000\nlog\nstats\nbutton\n"
+  - wait-serial: 'CMD button OK edges='
+  - delay: 5ms

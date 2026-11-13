@@ -1,0 +1,38 @@
+serial log docs/captures/lr3/nosd-log.serial.log: 1 statistics window(s), 0 EVT stow line(s), 1 FAIL line(s)
+  FAIL: CMD sd-write FAIL step=init status=3
+
+metric                             W1   deadline  verdict
+window_ms                       12019             
+T2 runs                           240             
+T2 skipped (missed)                 0          0  ok
+T2 start late, max us            4894      25000  ok
+T2 start late, avg us            2891             
+T2 period, avg us               49979             
+T2 period, max us               54003             
+T1 sense, max us                  602       5000  ok
+T2 body (track), max us           833             
+loop pass, avg us                5918             
+loop pass, max us                9491             
+T4 commands, n                      4             
+T4 command, avg us               5435             
+T4 command, max us               9428     100000  ok
+T5 log block writes, n              0             
+T5 log block write, max us          -             
+E1 stow, n                          0             
+E1 stow, avg us                     -             
+E1 stow, max us                     -      10000  
+CPU load, per mille                18             
+rx bytes taken                     32             
+rx bytes dropped                    0          0  ok
+rx errors                           0          0  ok
+rx ring max (of 256)               17             
+rx interrupt avg, cycles          146             
+stack used, bytes                 916             
+heap used, bytes                    0             
+W1: T2 runs 240, window_ms / 50 = 240
+
+E1 (stow) latency per window, from the EVT lines:
+  W1           none
+
+button: edges 0, accepted 0, ignored 0
+log: on 1, seq 0, stored 0, blocks 0, dropped 0, errors 0, flushes 0, flush_max_us 0

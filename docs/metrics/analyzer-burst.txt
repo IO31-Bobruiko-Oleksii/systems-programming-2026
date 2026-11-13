@@ -30,5 +30,7 @@ line to the first / last byte of its reply; the deadline is 100 ms
 single line: reply starts after 2687.2 us and ends after 12094.2 us
 burst of 20: first reply ends after 12774.2 us, last after 225874.7 us
 burst: replies that end later than 100 ms: 12 of 20; start later than 100 ms: 11 of 20
-burst: the reply end grows by 11215.8 us per line; one reply takes 8666.7 us on the wire (86.7 us per byte)
+burst: one reply per 11735.8 us, end to end
+burst: a reply of 100 bytes takes 9415.0 us: 93.9 us per byte (the median of two frames), 8N1 at this baud rate needs 86.7 us
+burst: from the end of a reply to the start of the next one: avg 2328.2 us, min 2145.5 us
 T2 in the burst: 5 runs, start to start: 59.3 ms, 47.1 ms, 47.1 ms, 47.1 ms
