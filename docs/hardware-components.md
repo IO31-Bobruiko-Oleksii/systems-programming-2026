@@ -40,8 +40,21 @@
 | Wokwi part reference | [wokwi-microsd-card](https://docs.wokwi.com/parts/wokwi-microsd-card) | — |
 | Power | active ~4 mA / standby ~1 uA | p.4 |
 
+## Pushbutton (`wokwi-pushbutton`, id `btn1`) — stow request E1 (LR3)
+Not in the PRD: added so that the system has an external event with a real deadline (`tasks.md`, E1). In Wokwi it is the part `wokwi-pushbutton`; on the real board it is any momentary switch wired between PB5 and GND.
+
+| Field | Value |
+|---|---|
+| Interface | GPIO input with the internal pull-up, falling edge, EXTI line 5 |
+| Wiring (Wokwi) | `btn1:1.l`→`PB5`, `btn1:2.l`→`GND` |
+| Part reference | [wokwi-pushbutton](https://docs.wokwi.com/parts/wokwi-pushbutton) |
+| Contact bounce | the simulated contact bounces by default (the part attribute `bounce` set to `"0"` turns it off); the firmware counts every edge and accepts the first one, then ignores edges for 200 ms |
+| Real part | no datasheet is needed for a tact switch; a real one bounces for up to a few milliseconds, so the same lockout applies; an RC filter on the pin would remove the edge storm at the cost of a delay |
+
 ## Logic analyzer (`wokwi-logic-analyzer`, id `logic1`) — simulation only
-Replaces a Saleae-class analyzer. Eight channels, buffer 1 000 000 samples, trigger off; `wokwi-cli --vcd-file` writes the capture at the end of a run (`make capture NAME=<name>`).
+Replaces a Saleae-class analyzer. Eight channels, buffer 1 000 000 samples, trigger off; `wokwi-cli --vcd-file` writes the capture at the end of a run (`make capture NAME=<name>`). Two assignments are in use: the one below (root `diagram.json`, LR2) and the one of the LR3 scenarios.
+
+LR2 assignment (root `diagram.json`):
 
 | Channel | Pin | Signal |
 |---|---|---|
@@ -54,4 +67,17 @@ Replaces a Saleae-class analyzer. Eight channels, buffer 1 000 000 samples, trig
 | D6 | PC7 | servo 2 PWM |
 | D7 | PB3 | ADC timing marker (firmware output, high while one ADC call runs) |
 
-Results: [captures/analysis.md](captures/analysis.md).
+LR3 assignment (`scenarios/lr3.diagram.json`; the pins PB4, PB6 and PB7 are firmware outputs added for the timing measurement):
+
+| Channel | Pin | Signal |
+|---|---|---|
+| D0 | PB6 | loop busy: low while the loop waits for a byte, high for the rest of the pass |
+| D1 | PB4 | T2: high while one tracking run executes |
+| D2 | PB7 | event: high while the stow handler runs |
+| D3 | PB5 | the button (`burst.diagram.json`: PA3, the UART receive line) |
+| D4 | PA2 | USART2 TX |
+| D5 | PC6 | servo 1 PWM |
+| D6 | PB9 | SD chip select |
+| D7 | PB3 | ADC timing marker |
+
+Results: [captures/analysis.md](captures/analysis.md) (LR2), [instrumentation.md](instrumentation.md) and `docs/metrics/` (LR3).

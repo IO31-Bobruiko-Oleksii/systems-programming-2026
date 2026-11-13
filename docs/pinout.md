@@ -1,6 +1,6 @@
 # Pinout, bus parameters and power budget
 
-Heliostat controller, LR2. Board: NUCLEO-C031C6 (STM32C031C6, Cortex-M0+), simulated in Wokwi.
+Heliostat controller, LR2, extended in LR3 by the stow button and the service pins of the measurement code (the rows PB4 to PB7 below). Board: NUCLEO-C031C6 (STM32C031C6, Cortex-M0+), simulated in Wokwi.
 
 Sources: DS13867 Rev 4 (STM32C031x4/x6 datasheet), RM0490 (reference manual), UM2953 (Nucleo-64 board manual, MB1717), generated code in `firmware/Core/Src/`. Values marked *(assumed)* do not come from a datasheet. The checks against the documents and the open findings are in section 6.
 
@@ -22,6 +22,9 @@ Every pin has exactly one function. The AF numbers below are the ones written by
 | PB9 | GPIO output, SD chip select (software, active low) | none | sd1:CS | must be high from reset; the generated `MX_GPIO_Init()` drives it low until `plat_spi_init()` (section 6.3) |
 | PB3 | GPIO output, ADC timing marker (high while `plat_adc_read()` runs) | none | logic analyzer D7 only | test aid, not a product signal |
 | PB5 | GPIO input with pull-up, EXTI line 5 (vector EXTI4_15), falling edge: stow request | none | btn1:1.l, the other leg btn1:2.l to GND | Arduino D4 on the usual Nucleo-64 layout; no other function on the board |
+| PB4 | GPIO output, service pin T2: high while one tracking run executes (`plat_probe_set(PLAT_PROBE_T2)`) | none | logic analyzer D1 (LR3 diagram) | test aid, not a product signal; the MB1717 schematic was not checked for a bridge on this pin (section 6.3, item 6) |
+| PB6 | GPIO output, service pin loop busy: low while the loop waits for a byte, high for the rest of the pass | none | logic analyzer D0 (LR3 diagram) | test aid, same note; the pin switches with two register writes per pass and can be disabled in `probe_pins.h` (`PROBE_BUSY_ENABLED`) |
+| PB7 | GPIO output, service pin event: high while the stow handler runs | none | logic analyzer D2 (LR3 diagram) | test aid, same note |
 | PC6 | TIM3_CH1 | AF1 | servo1:PWM | |
 | PC7 | TIM3_CH2 | AF1 | servo2:PWM | |
 
@@ -35,7 +38,7 @@ Power and ground nets:
 | 5V | servo1 V+, servo2 V+ |
 | GND | all grounds, logic analyzer GND |
 
-Logic analyzer probes: D0 PA5 (SCK), D1 PA7 (MOSI), D2 PA6 (MISO), D3 PB9 (CS), D4 PA2 (UART TX), D5 PC6 (servo 1), D6 PC7 (servo 2), D7 PB3 (ADC timing marker). Capture parameters and results: [captures/analysis.md](captures/analysis.md).
+Logic analyzer probes. The root `diagram.json` (used by `make flash` and `make capture`) keeps the LR2 assignment: D0 PA5 (SCK), D1 PA7 (MOSI), D2 PA6 (MISO), D3 PB9 (CS), D4 PA2 (UART TX), D5 PC6 (servo 1), D6 PC7 (servo 2), D7 PB3 (ADC timing marker). The LR3 scenarios use `scenarios/lr3.diagram.json`, which has the same parts and wires the analyzer to the signals of the timing measurement: D0 PB6 (loop busy), D1 PB4 (T2), D2 PB7 (event), D3 PB5 (button), D4 PA2 (UART TX), D5 PC6 (servo 1), D6 PB9 (SD chip select), D7 PB3 (ADC timing marker). Two variants of it exist: `scenarios/burst.diagram.json` has D3 on PA3 (UART RX) instead of the button, and `scenarios/nosd-log.diagram.json` is `lr3.diagram.json` without the wire `sd1:DO` (the card cannot answer). Capture parameters and results of LR2: [captures/analysis.md](captures/analysis.md); of LR3: [instrumentation.md](instrumentation.md).
 
 ## 2. Clock tree and bus parameters
 
@@ -92,6 +95,11 @@ flowchart LR
         PA6["PA6 SPI1_MISO AF0"]
         PA7["PA7 SPI1_MOSI AF0"]
         PB9["PB9 GPIO CS"]
+        PB5["PB5 EXTI5 input"]
+        PB3["PB3 marker"]
+        PB4["PB4 probe T2"]
+        PB6["PB6 probe busy"]
+        PB7["PB7 probe event"]
         PC6["PC6 TIM3_CH1 AF1"]
         PC7["PC7 TIM3_CH2 AF1"]
     end
@@ -105,6 +113,11 @@ flowchart LR
     PA6 --- SD
     PA7 --- SD
     PB9 --- SD
+    PB5 --- BTN["btn1 to GND"]
+    PB3 --- LA["logic analyzer"]
+    PB4 --- LA
+    PB6 --- LA
+    PB7 --- LA
     PC6 --- SERVO1["servo1"]
     PC7 --- SERVO2["servo2"]
     V33["3V3"] --- POT1
@@ -136,10 +149,10 @@ DS13867 is the STM32C031x4/x6 datasheet, UM2953 the Nucleo-64 board manual (MB17
 
 | Class of conflict | Result |
 |---|---|
-| Pin | None. Every pin in section 1 has one function. PB3 was added later as the timing-marker output and nothing else uses it. |
-| Peripheral block | TIM3 serves both servos. Both channels need the same 50 Hz period, so the shared prescaler and period are not a conflict (1 us tick, 20 ms period, section 2). ADC1 serves four potentiometers by one conversion per call, one channel at a time. SPI1 has one master and one slave. |
+| Pin | None. Every pin in section 1 has one function. PB3 (LR2) and PB4, PB6 and PB7 (LR3) are service outputs for the logic analyzer and nothing else uses them; PB5 is the stow button and nothing else uses it. |
+| Peripheral block | TIM3 serves both servos. Both channels need the same 50 Hz period, so the shared prescaler and period are not a conflict (1 us tick, 20 ms period, section 2). ADC1 serves four potentiometers by one conversion per call, one channel at a time. SPI1 has one master and one slave. EXTI: only line 5 (PB5) is enabled; its vector `EXTI4_15` is shared by the lines 4 to 15, and no other of them is used (PB4, PB6 and PB7 are plain outputs). The button interrupt has priority 0, the USART2 receive interrupt 1 and SysTick 3. |
 | Board wiring | PA2 and PA3 are the virtual COM port and are used as such. PA5 is also LD4 (SB26), so the LED shows the SCK activity. PC14 and PC15 (crystal X2) and PA13 and PA14 (SWD) are not used. |
-| DMA | The product uses no DMA: ADC, UART and SPI transfers are polled, so there is no request-mapping conflict. |
+| DMA | The product uses no DMA. ADC and SPI transfers and the UART transmit are polled; the UART receive is interrupt-driven (USART2 into a ring buffer, [architecture.md](architecture.md), section 3.3). There is no request-mapping conflict. |
 | Electrical | No 5 V signal reaches an MCU pin: the potentiometers are on 3V3 and the servo signal lines are MCU outputs. The 5V rail cannot carry the servos on real hardware (section 3). |
 | Package | The alternate-function tables used (DS13867 Tables 13 and 17) belong to this device; the pins were not copied from a layout made for another board. |
 
@@ -150,3 +163,4 @@ DS13867 is the STM32C031x4/x6 datasheet, UM2953 the Nucleo-64 board manual (MB17
 3. **What the simulator cannot show.** Solder bridges, the crystal on PC14 and PC15, the supply current and the sampling capacitor of the ADC are not modelled. Items 4 to 7 of section 6.1, the power budget and the ADC source impedance are therefore checked in the documents only. On hardware: read the bridges on the board, measure the supply current of the servo rail with a multimeter in series, and compare the ADC reading of a high-impedance source at 1.5 and at a longer sampling time.
 4. **MCU run current.** DS13867 Table 28 (Current consumption in Run mode from flash memory at different die temperatures), block fHCLK = fHSI48/HSIDIV, row 12 MHz, all peripherals disabled, evaluated by characterization (not tested in production): typical 1.45 mA at 25 degC and 1.50 mA at 85 degC (VDD 3.0 V); maximum 1.70 mA at 25 degC and 2.70 mA at 125 degC (VDD 3.6 V). Section 3 uses 1.45 mA and 2.70 mA.
 5. **ADC source impedance (design consequence for real hardware).** DS13867 Table 55 (Maximum ADC RAIN) is given for an ADC clock of 35 MHz and lists the sampling time in nanoseconds, so it has to be applied by time, not by the number of cycles. At 12 MHz one cycle is 83.3 ns, so the configured 1.5 cycles are 125 ns. For 12 bit the table gives 680 Ohm at 100 ns and 2200 Ohm at 214 ns; 125 ns lies between the two rows, so only 680 Ohm is guaranteed. A 10 kOhm potentiometer (assumed value) has up to 2.5 kOhm source impedance at mid travel, which is above that. The simulator does not model the sampling capacitor, so Wokwi returns exact values; on real hardware the sampling time must be raised. Up to 2.5 kOhm the table requires at least 357 ns (the 4700 Ohm row); the first available setting at or above that is 7.5 cycles, 625 ns at 12 MHz (3.5 cycles, 292 ns, is not enough). Up to 10 kOhm, for example a photoresistor divider, it requires at least 1129 ns (the 15000 Ohm row); the first available setting is 19.5 cycles, 1.625 us (12.5 cycles, 1.04 us, is not enough). The price is a longer conversion, 20 cycles = 1.67 us (7.5) or 32 cycles = 2.67 us (19.5) instead of 14 cycles = 1.17 us, which does not matter for a slowly changing light measurement.
+6. **Service pins on real hardware (LR3).** PB4, PB6 and PB7 are outputs that exist only for the measurement. The simulator does not model board wiring, and the MB1717 schematic and UM2953 were not read for these three pins in LR3, so a solder bridge or a shield on them is not excluded. On hardware: read the schematic for PB4, PB6 and PB7 before connecting an analyzer, and keep the probes off the final build (`probe_pins.h` switches the PB6 writes off; each of the other two costs one register write per edge). The button on PB5 needs the internal pull-up and a debounce: Wokwi simulates the contact bounce by default (dozens to hundreds of falling edges per press were counted in the runs of `stow.yaml` and `stow-busy.yaml`), and the firmware absorbs it with a 200 ms lockout, so the 10 ms deadline of E1 holds with a bouncing contact.
