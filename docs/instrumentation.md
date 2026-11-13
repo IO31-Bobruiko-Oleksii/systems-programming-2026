@@ -8,7 +8,7 @@ clock 12 MHz), see the report for what that means.
 
 | Command | Reply |
 |---|---|
-| `stats` | eleven lines starting with `STAT`, then `CMD stats OK` |
+| `stats` | twelve lines starting with `STAT`, then `CMD stats OK` |
 | `stats reset` | `CMD stats-reset OK`, starts a new measurement window |
 | anything else after `stats` | `CMD stats FAIL reason=usage` |
 | `load <us> <ms>` | `CMD load OK us=<us> ms=<ms>`; at the end of the window the `STAT` lines and `EVT load done us=<us> ms=<window>` |
@@ -23,6 +23,7 @@ state of the product (`track`, `button` and `log` keep their own counters).
 STAT name=<n> n=<count> min_us=<min> avg_us=<avg> max_us=<max>
 STAT load window_ms=<ms> busy_ms=<ms> load_pm=<permille>
 STAT count runs=<n> missed=<n> rx_bytes=<n> rx_errors=<n> passes=<n>
+STAT rx init=<status> dropped=<n> ring_max=<n> errors=<n> isr_n=<n> isr_avg=<cycles> isr_max=<cycles>
 STAT mem ram=<B> static=<B> heap_used=<B> heap_res=<B> stack_used=<B> stack_res=<B> stack_free=<B>
 ```
 
@@ -46,6 +47,12 @@ stow button and the printing of its `EVT` line (a few milliseconds per accepted 
 `count`: `runs` is the number of T2 runs in the window, `missed` the releases skipped in the
 window, `rx_bytes` the bytes received by the console, `rx_errors` the UART overrun, framing and
 noise events (every one of them means at least one byte is lost), `passes` the loop passes.
+
+`rx` describes the receive buffer (section "The receive buffer"): `init` is the status of
+`plat_uart_rx_start()` (0 is good), `dropped` the bytes that found the ring full, `ring_max` the
+most bytes it held at one time, `errors` the overrun, framing and noise events seen by the
+interrupt, `isr_n`, `isr_avg` and `isr_max` the number of interrupts and the time spent in the
+handler in CPU cycles. `stats reset` and every `load` window start them again.
 
 `mem` comes from `plat_mem_info()`: `ram` total RAM, `static` the `.data` and `.bss` sections,
 `heap_used` the bytes taken with `_sbrk`, `heap_res` and `stack_res` the reserved sizes from the
@@ -124,10 +131,57 @@ Measuring changes the thing measured, so the cost is written down.
   about 25 us in every 50 ms (0.05 %).
 - **Command.** Two clock readings per command line.
 - **Memory.** Flash grows by 2.2 KB, RAM by 168 bytes (`app` is 0x580 bytes, was 0x4d8).
-- **Output.** The reply to `stats` is 666 characters. The loop is busy for 82.7 ms (measured on
-  PB6): 57.7 ms of UART transmission and about 25 ms of formatting, and it does nothing else. A
+- **Output.** The reply to `stats` was 666 characters. The loop was busy for 82.7 ms (measured on
+  PB6): 57.7 ms of UART transmission and about 25 ms of formatting, and it does nothing else.
+  The `STAT rx` line is about 80 characters, 7 ms more of transmission, so the
+  reply is now about 750 characters and the busy time about 90 ms (an estimate, to be read from
+  PB6 in the next `stats` capture). A
   release of T2 that falls into this time is late by up to about 83 ms, and one release is skipped
   when the lateness exceeds 50 ms. Read the statistics at the end of a measurement, not during it.
+  
+## The receive buffer
+
+Until previously, the console took one byte per loop pass with a blocking call of the HAL. The USART
+holds one byte, so the next byte overwrote it whenever a pass lasted longer than a byte time
+(86.7 us); the simulator does not even set the overrun flag, so `rx_errors` stayed 0 while bytes
+were lost. `sweep-uart` measured the limit: bytes received = sent x 86.7 / (P + 32.1 us), and the
+bytes start to go at P = 54.6 us, 21 us above the longest plain pass.
+
+This stage moves the reception out of the loop:
+
+- The USART2 interrupt (RXNE) copies every byte into a ring buffer of 256 bytes
+  (`plat_ring.c`, one producer and one consumer, free-running 16-bit indices, no lock). The
+  priority is 1, below the stow button (EXTI, priority 0), so the console cannot delay the
+  interrupt that reads the stow button; it can still add its own handler time to the reaction
+  of the loop.
+- A byte that finds the ring full is dropped and counted (`dropped`). A byte with a framing or
+  noise error is discarded; the flags are cleared, `errors` is incremented, and the next call of
+  `plat_uart_read_byte()` returns `PLAT_ERR_BUS` once.
+- `plat_uart_read_byte(byte, timeout_ms)` takes one byte from the ring and waits for it by
+  polling the millisecond tick. The timeout is still 5 ms, so an idle pass is still about 6 ms
+  and PB6 is still low while the loop waits.
+- 256 bytes are 22 ms of a stream at full speed. That is more than one SD write of the log
+  (13.4 ms).
+
+Cost, counted from the build: flash +492 bytes (text 31452 to 31944), RAM +288 bytes (the ring
+268, five counters 20), so about 730 bytes of the 32 KB are left. The handler is 144 bytes.
+
+The time of the handler is measured by the firmware and not by the analyzer, because the pins
+cannot show a 10 us pulse inside a pass: SysTick `VAL` is read at the entry and at the exit of the
+handler and the difference is added up (`isr_sum`, `isr_max`, in cycles of the 12 MHz clock). The
+exception entry and return (about 15 cycles each by the core documentation) are outside it.
+Prediction before the first run: 90 to 130 cycles per byte, which at full speed is a little more
+than 10 % of the CPU. The first run of `sweep-uart` with this firmware replaces the prediction.
+
+What changes in the measurements:
+
+- `P` on PB6 now contains the handler when a byte arrives during a pass, so the longest plain
+  pass can grow by one handler time (about 10 us) per byte.
+- The break point of `sweep-uart` moves from the length of the pass to the size of the ring. The
+  expected result of the same sweep is 192 of 192 bytes in every window, including the control
+  window, and `ring_max` of about 26 at the worst window.
+- New breaking points: a stream longer than the ring during the 65 ms transmission of the
+  `stats` reply or during an SD write, and a sustained flood. They need their own scenario.
   
 ## Service pins and the logic analyzer (the second method)
 

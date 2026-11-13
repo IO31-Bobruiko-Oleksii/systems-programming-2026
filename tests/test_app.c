@@ -1389,6 +1389,7 @@ static void test_cmd_stats_prints_every_statistic_and_ends_with_the_verdict(void
               "STAT name=stow n=0 min_us=0 avg_us=0 max_us=0" EOL
               "STAT load window_ms=54 busy_ms=3 load_pm=55" EOL
               "STAT count runs=1 missed=0 rx_bytes=6 rx_errors=0 passes=7" EOL
+              "STAT rx init=0 dropped=0 ring_max=0 errors=0 isr_n=0 isr_avg=0 isr_max=0" EOL
               "STAT mem ram=12288 static=3668 heap_used=0 heap_res=512 stack_used=312"
               " stack_res=1024 stack_free=8316" EOL
               "CMD stats OK" EOL);
@@ -1408,9 +1409,54 @@ static void test_cmd_stats_before_tracking_shows_an_empty_loop_and_no_load(void)
               "STAT name=stow n=0 min_us=0 avg_us=0 max_us=0" EOL
               "STAT load window_ms=0 busy_ms=0 load_pm=0" EOL
               "STAT count runs=0 missed=0 rx_bytes=6 rx_errors=0 passes=0" EOL
+              "STAT rx init=0 dropped=0 ring_max=0 errors=0 isr_n=0 isr_avg=0 isr_max=0" EOL
               "STAT mem ram=12288 static=3668 heap_used=0 heap_res=512 stack_used=312"
               " stack_res=1024 stack_free=8316" EOL
               "CMD stats OK" EOL);
+}
+
+static void test_init_starts_the_receive_buffer_and_clears_its_statistics(void)
+{
+    start();
+    CHECK_EQ(fake_uart_rx_starts(), 1);
+    CHECK_EQ(fake_uart_rx_resets(), 1);
+    CHECK_EQ(app.rx_init, PLAT_OK);
+}
+
+static void test_a_failed_receive_start_is_kept_and_shown(void)
+{
+    world();
+    fake_uart_fail_rx_start(PLAT_ERR_BUS);
+    app_init(&app);
+    CHECK_EQ(app.rx_init, PLAT_ERR_BUS);
+    CHECK(strstr(run("stats\n"), "STAT rx init=3 dropped=0") != NULL);
+}
+
+static void test_stats_report_the_receive_buffer_with_the_average_interrupt_time(void)
+{
+    plat_uart_rx_info_t ri = {3U, 17U, 2U, 10U, 700U, 90U};
+
+    start();
+    fake_uart_set_rx_info(&ri);
+    CHECK(strstr(run("stats\n"),
+                 "STAT rx init=0 dropped=3 ring_max=17 errors=2 isr_n=10 isr_avg=70 isr_max=90" EOL) != NULL);
+}
+
+static void test_stats_report_a_receive_info_that_cannot_be_read(void)
+{
+    start();
+    fake_uart_fail_rx_info(PLAT_ERR_BUS);
+    CHECK(strstr(run("stats\n"), "STAT rx FAIL init=0" EOL) != NULL);
+}
+
+static void test_a_new_window_clears_the_receive_statistics(void)
+{
+    start();
+    CHECK_EQ(fake_uart_rx_resets(), 1);
+    run("stats reset\n");
+    CHECK_EQ(fake_uart_rx_resets(), 2);
+    run("load 0 100\n");
+    CHECK_EQ(fake_uart_rx_resets(), 3);
 }
 
 static void test_the_load_never_shows_more_than_one_thousand_permille(void)
@@ -1983,6 +2029,11 @@ int main(void)
     RUN(test_received_bytes_and_bus_errors_are_counted_separately);
     RUN(test_cmd_stats_prints_every_statistic_and_ends_with_the_verdict);
     RUN(test_cmd_stats_before_tracking_shows_an_empty_loop_and_no_load);
+    RUN(test_init_starts_the_receive_buffer_and_clears_its_statistics);
+    RUN(test_a_failed_receive_start_is_kept_and_shown);
+    RUN(test_stats_report_the_receive_buffer_with_the_average_interrupt_time);
+    RUN(test_stats_report_a_receive_info_that_cannot_be_read);
+    RUN(test_a_new_window_clears_the_receive_statistics);
     RUN(test_the_load_never_shows_more_than_one_thousand_permille);
     RUN(test_a_clock_below_one_kilohertz_gives_no_window_and_no_division);
     RUN(test_cmd_stats_shows_the_longest_memory_line_in_full);

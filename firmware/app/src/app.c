@@ -66,6 +66,7 @@ static void meter_reset(app_t *app)
     app->pass_max = 0U;
     app->rx_bytes = 0U;
     m->rx_errors = 0U;
+    plat_uart_rx_reset_stats();
 }
 
 
@@ -76,6 +77,7 @@ void app_init(app_t *app)
     }
     memset(app, 0, sizeof *app);
     plat_probe_init();
+    app->rx_init = plat_uart_rx_start();
     app->adc_init = plat_adc_init();
     app->spi_init = plat_spi_init();
     app->pwm_init = plat_pwm_init();
@@ -821,6 +823,24 @@ static void print_count(const app_t *app)
         (unsigned long)app->rx_bytes, (unsigned long)m->rx_errors, (unsigned long)app->passes);
 }
 
+static void print_rx(const app_t *app)
+{
+    plat_uart_rx_info_t ri;
+    uint32_t avg = 0U;
+
+    if (plat_uart_rx_info(&ri) != PLAT_OK) {
+        say("STAT rx FAIL init=%d" EOL, (int)app->rx_init);
+        return;
+    }
+    if (ri.isr_n != 0U) {
+        avg = ri.isr_sum / ri.isr_n;
+    }
+    say("STAT rx init=%d dropped=%lu ring_max=%lu errors=%lu isr_n=%lu isr_avg=%lu isr_max=%lu" EOL,
+        (int)app->rx_init, (unsigned long)ri.dropped, (unsigned long)ri.high,
+        (unsigned long)ri.errors, (unsigned long)ri.isr_n, (unsigned long)avg,
+        (unsigned long)ri.isr_max);
+}
+
 static void print_mem(void)
 {
     plat_mem_info_t mi;
@@ -849,6 +869,7 @@ static void print_stats(const app_t *app)
     print_stat(&app->stow_latency);
     print_load(app);
     print_count(app);
+    print_rx(app);
     print_mem();
 }
 

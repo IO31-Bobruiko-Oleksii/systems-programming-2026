@@ -71,6 +71,7 @@ typedef struct {
     plat_status_t spi_init;
     plat_status_t pwm_init;
     plat_status_t button_init;
+    plat_status_t rx_init;
 } app_t;
 
 void app_init(app_t *app);

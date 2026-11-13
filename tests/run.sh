@@ -15,6 +15,7 @@ TESTS=(
   "test_sdcard|../firmware/devices/src/sdcard.c fakes/fake_sdcard.c"
   "test_logger|../firmware/devices/src/logger.c ../firmware/devices/src/sdcard.c fakes/fake_sdcard.c"
   "test_app|../firmware/app/src/app.c ../firmware/devices/src/servo.c ../firmware/devices/src/pots.c ../firmware/devices/src/sdcard.c ../firmware/devices/src/perf.c ../firmware/devices/src/tracker.c ../firmware/devices/src/logger.c fakes/fake_uart.c fakes/fake_pwm.c fakes/fake_adc.c fakes/fake_sdcard.c fakes/fake_time.c fakes/fake_button.c fakes/fake_mem.c fakes/fake_probe.c"
+  "test_ring|../firmware/platform/src/plat_ring.c"
   "test_sd_replay|../firmware/devices/src/sdcard.c fakes/replay_spi.c"
 )
 

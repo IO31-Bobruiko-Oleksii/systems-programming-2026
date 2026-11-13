@@ -17,6 +17,7 @@ steps:
   - wait-serial: 'STAT name=stow n=0 '
   - wait-serial: 'STAT load window_ms='
   - wait-serial: 'STAT count runs=60 missed=0 rx_bytes=6 rx_errors=0 passes='
+  - wait-serial: 'STAT rx init=0 dropped=0 ring_max='
   - wait-serial: 'STAT mem ram=12288 static='
   - wait-serial: 'CMD stats OK'
   - delay: 5ms
