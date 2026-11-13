@@ -136,12 +136,36 @@ time of a `resume`). If this is more than 4.16 ms, the backlog grows by 48 x (1 
 Notes for reading the result:
 
 - A dropped byte can be a line end, so two lines run together and the next command is damaged
-  (column `bad`). After the `stats-reply` window a half line stays in the line buffer; the scenario
-  sends one empty line to clear it before the next window.
+  (column `bad`). A half line can stay in the line buffer and swallow the next command, so the
+  scenario sends one empty line after every window to clear it (the first run without it timed
+  out in the X = 8 window).
 - The table `RECEIVE BUFFER` gives the bytes that arrived (counted by the interrupt), those the
   console read, those dropped, those still in the ring at the end of the window and the highest
   ring fill. `arrived` should be 1440, 486 and 255; a smaller number would mean that the
   simulator did not deliver the whole write, and the run must not be used.
+  
+Result (`docs/metrics/analyzer-flood.txt`, `docs/captures/lr3/flood.*`): every write arrived whole
+(1440, 486 and 255 bytes), so the table can be used.
+
+- Sweep windows: dropped 53, 134, 238, 415, 575 and 657 of 1440 bytes at X = 0, 8, 17, 34, 68 and
+  100 us, with the ring full (256) in every one. The bytes taken out during the 125 ms stream are
+  1440 - 256 - dropped, so the loop needed 110 us per byte at X = 0 and 237 us at X = 100 (replies
+  and T2 included) while a byte arrives every 86.7 us. At X = 0 (the `load` window active, adding
+  nothing) a stream of about 1200 bytes, 25 lines or 100 ms, already fills the ring. The plain
+  firmware without a `load` window is faster; that was not measured.
+- The model written before the run was too low in every window (it predicted 0, 0, 50 to 130,
+  170 to 300, 320 to 520 and 420 to 650 bytes).
+- `stats-reply`: 224 dropped, as predicted (486 - 6 - 256). The reply held the loop for 86.9 ms
+  (`cmd` maximum), one T2 run was skipped (`missed` 1), T2 started 55.3 ms late against the
+  25 ms deadline, and two T2 starts were 105.3 ms apart.
+- `sd-write`: nothing dropped, but the ring held 240 of 256 bytes (predicted 170 to 200). The
+  receive interrupts ran inside the write: it took 16.1 ms (`us=16129`) instead of 13.5 ms, and
+  the command with its reply 22.5 ms, longer than the 20.8 ms of the whole stream. One more
+  line would have overflowed the ring.
+- Damaged lines: 28, 22, 19, 12, 11 and 9 of 30 lines were answered as `resume` at X = 0 to 100;
+  the others were cut or joined, and at X = 100 the console ran fragments such as
+  `eue13579135791357913579` as commands.
+- T2 and E1: no T2 run was missed or late by more than 5.9 ms in the six sweep windows.
 
 Run (about 25 s), report in `docs/metrics/analyzer-flood.txt`:
 

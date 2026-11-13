@@ -34,3 +34,5 @@ if [ "$mode" = "sweep" ]; then
 elif [ "$mode" = "flood" ]; then
     python3 tools/lr3_sweep.py "$vcd" --serial "$serial" --names 1=stats-reply,2=sd-write | tee "$report"
 else
+    python3 tools/lr3_analyze.py "$vcd" "$mode" --serial "$serial" | tee "$report"
+fi
