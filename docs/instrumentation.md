@@ -115,6 +115,38 @@ run `tools/lr3_sweep.py` prints one row per window.
   reaction against 10 ms (firmware and pin). The last lines give the first window that broke each
   limit and the last window that did not.
 
+## Flood runs: where the receive buffer breaks
+
+With the ring buffer a long pass no longer loses console bytes, so the next limit is the ring
+itself: it overflows when bytes arrive faster than the loop takes them out for longer than the
+ring can store them. `scenarios/flood.yaml` sends lines of 48 bytes (`resume` and 40 digits) in
+one write, so that they arrive back to back at the full speed of the line (4.16 ms per line):
+
+| Window | Stream | What it shows |
+|--------|--------|---------------|
+| `load X 600`, X = 0, 8, 17, 34, 68, 100 us | 30 lines, 1440 bytes, 125 ms | the loop takes one byte per pass and answers every line with a 1.8 ms reply; when 48 passes and one reply last longer than the 4.16 ms of a line, the backlog grows until the ring is full |
+| `load 1 800`, called `stats-reply` | the line `stats` and 10 lines, 486 bytes | the reply to `stats` blocks the loop for about 90 ms, so 22 ms of the stream fit into the ring and the rest is dropped |
+| `load 2 600`, called `sd-write` | the line `sd write 16000` and 5 lines, 255 bytes | the SD write blocks the loop for 13.4 ms and the reply for 3 ms, so about 190 bytes arrive; the ring holds them |
+
+Model before the run: one line needs 48 P + R in the loop, with P the work of a pass from
+`sweep-uart` (46.5 us at X = 0 to 156.1 us at X = 100) and R about 1.76 ms (the smallest `cmd`
+time of a `resume`). If this is more than 4.16 ms, the backlog grows by 48 x (1 - 4.16 ms /
+(48 P + R)) bytes per line, and the ring drops what does not fit.
+
+Notes for reading the result:
+
+- A dropped byte can be a line end, so two lines run together and the next command is damaged
+  (column `bad`). After the `stats-reply` window a half line stays in the line buffer; the scenario
+  sends one empty line to clear it before the next window.
+- The table `RECEIVE BUFFER` gives the bytes that arrived (counted by the interrupt), those the
+  console read, those dropped, those still in the ring at the end of the window and the highest
+  ring fill. `arrived` should be 1440, 486 and 255; a smaller number would mean that the
+  simulator did not deliver the whole write, and the run must not be used.
+
+Run (about 25 s), report in `docs/metrics/analyzer-flood.txt`:
+
+    tools/lr3_capture.sh flood flood 60000
+
 ## Cost of the instrumentation
 
 Measuring changes the thing measured, so the cost is written down.
