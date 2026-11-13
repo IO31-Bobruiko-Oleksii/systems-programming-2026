@@ -1,0 +1,35 @@
+serial log docs/captures/lr3/s1-idle.serial.log: 1 statistics window(s), 0 EVT stow line(s), 0 FAIL line(s)
+
+metric                             W1   deadline  verdict
+window_ms                      250024             
+T2 runs                          5000             
+T2 skipped (missed)                 0          0  ok
+T2 start late, max us            5861      25000  ok
+T2 start late, avg us            3858             
+T2 period, avg us               50000             
+T2 period, max us               54005             
+T1 sense, max us                  602       5000  ok
+T2 body (track), max us           833             
+loop pass, avg us                5999             
+loop pass, max us                6007             
+T4 commands, n                      1             
+T4 command, avg us               2332             
+T4 command, max us               2332     100000  ok
+T5 log block writes, n              0             
+T5 log block write, max us          -             
+E1 stow, n                          0             
+E1 stow, avg us                     -             
+E1 stow, max us                     -      10000  
+CPU load, per mille                16             
+rx bytes taken                      6             
+rx bytes dropped                    0          0  ok
+rx errors                           0          0  ok
+rx ring max (of 256)                1             
+rx interrupt avg, cycles          145             
+stack used, bytes                 916             
+heap used, bytes                    0             
+W1: firmware clock 250024 ms for 250000 ms of scenario delays (+96 ppm)
+W1: T2 runs 5000, window_ms / 50 = 5000
+
+E1 (stow) latency per window, from the EVT lines:
+  W1           none

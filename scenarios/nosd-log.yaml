@@ -1,0 +1,44 @@
+name: 'nosd-log: 18 s (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=4 failed=1'
+  - delay: 6025ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot3
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot4
+      control: position
+      value: 0.5
+  - write-serial: "stow\nresume\n"
+  - delay: 100ms
+  # window 1 seconds=12
+  - write-serial: "stats reset\nlog on\n"
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - delay: 4000ms
+  # window 2 seconds=1
+  - write-serial: "log\nstats\nstats reset\nsd write 16000\nsd write 16000\nsd write 16000\nstats\nbutton\n"
+  - wait-serial: 'CMD button OK edges='
+  - delay: 5ms

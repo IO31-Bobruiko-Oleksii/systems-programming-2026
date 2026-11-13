@@ -1,0 +1,33 @@
+name: 'track: follows the light to the end stops, stow and resume, night park (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 6025ms
+  - write-serial: "track\n"
+  - wait-serial: 'CMD track OK az=180 tilt=0 band=100 zero=90,90 parked=0 stowed=0'
+  - delay: 5ms
+  - write-serial: "stow\n"
+  - wait-serial: 'CMD stow OK az=90 tilt=90'
+  - delay: 5ms
+  - write-serial: "resume\n"
+  - wait-serial: 'CMD resume OK'
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0
+  - set-control:
+      part-id: pot3
+      control: position
+      value: 0
+  - set-control:
+      part-id: pot4
+      control: position
+      value: 0
+  - delay: 1480ms
+  - write-serial: "track\n"
+  - wait-serial: 'CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20'
+  - delay: 5ms

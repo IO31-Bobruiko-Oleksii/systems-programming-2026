@@ -1,0 +1,453 @@
+name: 'e1-idle: 18 s (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 6025ms
+  # window 1 seconds=12
+  - write-serial: "stats reset\n"
+  - delay: 50ms
+  # press idle offset=16
+  - delay: 16ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=41
+  - delay: 291ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=65
+  - delay: 315ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=66
+  - delay: 316ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=83
+  - delay: 333ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=14
+  - delay: 264ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=29
+  - delay: 279ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=77
+  - delay: 327ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=80
+  - delay: 330ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=72
+  - delay: 322ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=54
+  - delay: 304ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=74
+  - delay: 324ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=71
+  - delay: 321ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=94
+  - delay: 344ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=99
+  - delay: 349ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=63
+  - delay: 313ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=97
+  - delay: 347ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=99
+  - delay: 349ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=76
+  - delay: 326ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=57
+  - delay: 307ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=31
+  - delay: 281ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=1
+  - delay: 251ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=79
+  - delay: 329ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=11
+  - delay: 261ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=15
+  - delay: 265ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=37
+  - delay: 287ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=13
+  - delay: 263ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=58
+  - delay: 308ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=2
+  - delay: 252ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=88
+  - delay: 338ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=63
+  - delay: 313ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=87
+  - delay: 337ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=41
+  - delay: 291ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=27
+  - delay: 277ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=51
+  - delay: 301ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=33
+  - delay: 283ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=45
+  - delay: 295ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=46
+  - delay: 296ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=49
+  - delay: 299ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  # press idle offset=96
+  - delay: 346ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 50ms
+  # window 2 seconds=1
+  - write-serial: "resume\nstats\nstats reset\ntime\ntime\ntime\nstats\nbutton\n"
+  - wait-serial: 'CMD button OK edges='
+  - delay: 5ms

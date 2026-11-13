@@ -10,6 +10,7 @@
 #define SDCARD_R1_POLLS        8U
 #define SDCARD_ACMD41_TRIES    1000U
 #define SDCARD_TOKEN_POLLS     50000U
+#define SDCARD_BUSY_POLLS      5000U
 
 typedef enum {
     SD_TYPE_NONE = 0,
@@ -25,6 +26,8 @@ typedef struct {
 plat_status_t sdcard_init(sdcard_t *sd);
 
 plat_status_t sdcard_read_block(const sdcard_t *sd, uint32_t block, uint8_t *buf);
+
+plat_status_t sdcard_write_block(const sdcard_t *sd, uint32_t block, const uint8_t *buf);
 
 int sdcard_boot_signature_ok(const uint8_t *block);
 

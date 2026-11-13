@@ -16,3 +16,6 @@ docs/screenshots/last-run-serial.log
 tests/build/
 tests/build-cov/
 docs/captures/*.cli.log
+__pycache__/
+*.pyc
+scenarios/soak.yaml

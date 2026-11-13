@@ -1,0 +1,54 @@
+serial log docs/captures/lr3/e1-idle.serial.log: 2 statistics window(s), 40 EVT stow line(s), 0 FAIL line(s)
+
+metric                             W1         W2   deadline  verdict
+window_ms                       12453       1032             
+T2 runs                           249          3             
+T2 skipped (missed)                 0         18          0  MISSED
+T2 start late, max us           10238     318074      25000  MISSED
+T2 start late, avg us            3370     310989             
+T2 period, avg us               49988     343862             
+T2 period, max us               58379     345755             
+T1 sense, max us                  659        602       5000  ok
+T2 body (track), max us           875        865             
+loop pass, avg us                6051      49143             
+loop pass, max us               10564     341868             
+T4 commands, n                      2          4             
+T4 command, avg us               1993     256931             
+T4 command, max us               2332     341805     100000  MISSED
+T5 log block writes, n              0          0             
+T5 log block write, max us          -          -             
+E1 stow, n                         40          0             
+E1 stow, avg us                  2942          -             
+E1 stow, max us                  6113          -      10000  ok
+CPU load, per mille                16        998             
+rx bytes taken                     13         21             
+rx bytes dropped                    0          0          0  ok
+rx errors                           0          0          0  ok
+rx ring max (of 256)               40         28             
+rx interrupt avg, cycles          149          0             
+stack used, bytes                 916        916             
+heap used, bytes                    0          0             
+W1: T2 runs 249, window_ms / 50 = 249
+W2: T2 runs 3, window_ms / 50 = 21
+
+E1 (stow) latency per window, from the EVT lines:
+  W1           n  40  min    338  avg   2942  median   2685  p90   5510  p99   6113  max   6113 us  over 10 ms: 0
+  W2           none
+
+E1 by kind of press (scenario scenarios/e1-idle.yaml):
+  idle         n  40  min    338  avg   2942  median   2685  p90   5510  p99   6113  max   6113 us  over 10 ms: 0
+
+  press in an idle system: latency in bins of 1 ms
+     0.. 1 ms:  6 ######
+     1.. 2 ms:  6 ######
+     2.. 3 ms: 11 ###########
+     3.. 4 ms:  5 #####
+     4.. 5 ms:  5 #####
+     5.. 6 ms:  6 ######
+     6.. 7 ms:  1 #
+     7.. 8 ms:  0 
+     8.. 9 ms:  0 
+     9..10 ms:  0 
+
+button: edges 3854, accepted 40, ignored 3814 (presses sent: 40)
+time command: 3 reads, backsteps max 0, read_cycles 88..88

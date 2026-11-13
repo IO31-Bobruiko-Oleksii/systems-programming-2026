@@ -1,0 +1,57 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0CMD stow OK az=90 tilt=90
+CMD resume OK
+CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=19 runs=28 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=30 missed=0 errors=0
+CMD track OK az=85 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=55 missed=0 errors=0
+CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=76 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=78 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=104 missed=0 errors=0
+CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=125 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=127 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=153 missed=0 errors=0
+CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=173 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=176 missed=0 errors=0
+CMD track OK az=85 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=201 missed=0 errors=0
+CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=222 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=224 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=250 missed=0 errors=0
+CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=271 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=273 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=299 missed=0 errors=0
+CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=320 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=322 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=348 missed=0 errors=0
+CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=369 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=371 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=397 missed=0 errors=0
+CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=19 runs=419 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=421 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=447 missed=0 errors=0
+CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=468 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=470 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=496 missed=0 errors=0
+CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=517 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=520 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=545 missed=0 errors=0
+CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=19 runs=566 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=568 missed=0 errors=0
+CMD track OK az=85 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=593 missed=0 errors=0
+CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=614 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=616 missed=0 errors=0
+CMD track OK az=85 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=641 missed=0 errors=0
+CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=662 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=664 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=690 missed=0 errors=0
+CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=710 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=712 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=738 missed=0 errors=0
+CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=758 missed=0 errors=0
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=760 missed=0 errors=0
+CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=786 missed=0 errors=0

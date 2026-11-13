@@ -1,0 +1,23 @@
+name: 'log: tracking moves are stored on the SD card in 32-byte records and read back (LR3, FR-05)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 25ms
+  - write-serial: "log on\n"
+  - wait-serial: 'CMD log OK on=1'
+  - delay: 5998ms
+  - write-serial: "log\n"
+  - wait-serial: 'CMD log OK on=1 seq=90 stored=80 blocks=5 dropped=0 errors=0 flushes=5'
+  - delay: 43ms
+  - write-serial: "log flush\n"
+  - wait-serial: 'CMD log-flush OK stored=90 blocks=5'
+  - delay: 33ms
+  - write-serial: "log get 0\n"
+  - wait-serial: 'az=91 tilt=89 flags=3 ok=1'
+  - delay: 33ms
+  - write-serial: "log get 89\n"
+  - wait-serial: 'az=180 tilt=0 flags=3 ok=1'
+  - delay: 32ms
+  - write-serial: "log get 90\n"
+  - wait-serial: 'CMD log-get FAIL reason=range stored=90'
+  - delay: 5ms

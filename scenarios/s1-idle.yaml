@@ -1,0 +1,36 @@
+name: 's1-idle: 250 s (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 6025ms
+  # window 1 seconds=250 pure
+  - write-serial: "stats reset\n"
+  - wait-serial: 'CMD stats-reset OK'
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - delay: 10000ms
+  - write-serial: "stats\n"
+  - wait-serial: 'CMD stats OK'
+  - delay: 5ms

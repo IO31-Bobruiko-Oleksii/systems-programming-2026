@@ -1,0 +1,28 @@
+soak of 2.00 h of virtual time: S2 load, idle pass 6 ms, T2 every 50 ms
+     4 s  wraps  0  T2 runs     81 missed 0  rx errors 0  clock skew -24 ms  log seq 81 blocks 5 dropped 0
+   600 s  wraps  1  T2 runs  12010 missed 0  rx errors 0  clock skew -6 ms  log seq 6024 blocks 376 dropped 0
+  1201 s  wraps  3  T2 runs  24020 missed 0  rx errors 0  clock skew -24 ms  log seq 12047 blocks 752 dropped 0
+  1801 s  wraps  5  T2 runs  36030 missed 0  rx errors 0  clock skew -24 ms  log seq 18070 blocks 1129 dropped 0
+  2402 s  wraps  6  T2 runs  48039 missed 0  rx errors 0  clock skew -18 ms  log seq 24094 blocks 1505 dropped 0
+  3002 s  wraps  8  T2 runs  60049 missed 0  rx errors 0  clock skew -6 ms  log seq 30118 blocks 1882 dropped 0
+  3603 s  wraps 10  T2 runs  72059 missed 0  rx errors 0  clock skew -24 ms  log seq 36142 blocks 2258 dropped 0
+  4203 s  wraps 11  T2 runs  84069 missed 0  rx errors 0  clock skew -24 ms  log seq 42164 blocks 2635 dropped 0
+  4804 s  wraps 13  T2 runs  96078 missed 0  rx errors 0  clock skew -12 ms  log seq 48187 blocks 3011 dropped 0
+  5400 s  wraps 15  T2 runs 108008 missed 0  rx errors 0  clock skew -24 ms  log seq 54210 blocks 3388 dropped 0
+  6000 s  wraps 16  T2 runs 120018 missed 0  rx errors 0  clock skew -24 ms  log seq 60234 blocks 3764 dropped 0
+  6601 s  wraps 18  T2 runs 132028 missed 0  rx errors 0  clock skew -24 ms  log seq 65536 blocks 4096 dropped 722
+  7201 s  wraps 20  T2 runs 144037 missed 0  rx errors 0  clock skew -6 ms  log seq 65536 blocks 4096 dropped 6747
+  7201 s  wraps 20  T2 runs 144038 missed 0  rx errors 0  clock skew -24 ms  log seq 65536 blocks 4096 dropped 6747
+
+button: 225 presses, edges 225 accepted 225 ignored 0
+T2 runs 144040, expected about 144040, missed 0, errors 0
+replies that did not match: 0
+
+log read back from the card: 65536 records in 4096 blocks
+  bad checksum 0, wrong sequence number 0, time going back 0, bad flags/angles 0
+  records with az moved 65382, tilt moved 65382, parked 0, stow 204
+
+card: 4096 block writes, 0 outside the log area, highest block 12287 (the area ends at 12287)
+the log was full after 6533 s (108.9 min); records dropped since: 6748, flush errors 0
+
+SOAK PASSED

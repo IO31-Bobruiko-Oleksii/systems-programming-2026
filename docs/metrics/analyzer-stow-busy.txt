@@ -1,0 +1,12 @@
+capture docs/captures/lr3/stow-busy.vcd: 6187.103 ms
+edges per channel: D0=2078  D1=244  D2=2  D3=173  D4=2283  D5=617  D6=7  D7=984
+
+button presses found: 1 (falling edges on PB5: 86), EVENT pulses (accepted presses): 1, EVT lines in the serial log: 1
+
+press 1: first falling edge at 6075.617 ms, 86 falling edge(s) in the bounce, loop BUSY at the edge
+  the busy stretch that contained the edge: 6074.905 .. 6099.709 ms (24804.1 us), edge 712.2 us after its start
+  EVENT pulse: starts 18929.1 us after the edge, ends 19031.0 us after the edge (handler 101.9 us)
+  firmware EVT line: lat_us=19020 (cycle counter, from the interrupt time stamp to the end of the handler)
+  difference analyzer - firmware: +11.0 us (the analyzer starts at the pin edge, the firmware at the time stamp taken in the interrupt)
+  servo 1 pulse: 2000 us before, 1500 us after; the new pulse starts 31370.9 us and ends 32870.9 us after the edge (task deadline: 30000 us)
+  SD chip select was low around this press: 6076.833 .. 6090.259 ms

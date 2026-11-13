@@ -1,0 +1,502 @@
+name: 's3-worst: 36 s (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot3
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot4
+      control: position
+      value: 0.5
+  - write-serial: "stow\nresume\nlog on\n"
+  - delay: 100ms
+  # window 1 seconds=36
+  - write-serial: "stats reset\n"
+  - delay: 50ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "track\nadc\nhelp\nbutton\n"
+  - delay: 100ms
+  - write-serial: "sd write 16000\n"
+  - delay: 100ms
+  - write-serial: "sd write 16000\n"
+  - delay: 3ms
+  # press sd offset=3
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 5ms
+  # press sd offset=5
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 7ms
+  # press sd offset=7
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "log\ntrack\nadc\nhelp\n"
+  - delay: 100ms
+  - delay: 121ms
+  # press random offset=-
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 9ms
+  # press sd offset=9
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 11ms
+  # press sd offset=11
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 13ms
+  # press sd offset=13
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "button\nlog\ntrack\nadc\n"
+  - delay: 100ms
+  # burst 20
+  - write-serial: "track\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\n"
+  - delay: 300ms
+  - write-serial: "sd write 16000\n"
+  - delay: 15ms
+  # press sd offset=15
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 17ms
+  # press sd offset=17
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 19ms
+  # press sd offset=19
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "help\nbutton\nlog\ntrack\n"
+  - delay: 100ms
+  - write-serial: "sd write 16000\n"
+  - delay: 100ms
+  - write-serial: "sd write 16000\n"
+  - delay: 21ms
+  # press sd offset=21
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 23ms
+  # press sd offset=23
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 25ms
+  # press sd offset=25
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "adc\nhelp\nbutton\nlog\n"
+  - delay: 100ms
+  - delay: 327ms
+  # press random offset=-
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 27ms
+  # press sd offset=27
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 3ms
+  # press sd offset=3
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 5ms
+  # press sd offset=5
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "track\nadc\nhelp\nbutton\n"
+  - delay: 100ms
+  # burst 20
+  - write-serial: "track\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\n"
+  - delay: 300ms
+  - write-serial: "sd write 16000\n"
+  - delay: 7ms
+  # press sd offset=7
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 9ms
+  # press sd offset=9
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 11ms
+  # press sd offset=11
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "log\ntrack\nadc\nhelp\n"
+  - delay: 100ms
+  - write-serial: "sd write 16000\n"
+  - delay: 100ms
+  - write-serial: "sd write 16000\n"
+  - delay: 13ms
+  # press sd offset=13
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 15ms
+  # press sd offset=15
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 17ms
+  # press sd offset=17
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "button\nlog\ntrack\nadc\n"
+  - delay: 100ms
+  - delay: 514ms
+  # press random offset=-
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 19ms
+  # press sd offset=19
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 21ms
+  # press sd offset=21
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 23ms
+  # press sd offset=23
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "help\nbutton\nlog\ntrack\n"
+  - delay: 100ms
+  # burst 20
+  - write-serial: "track\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\n"
+  - delay: 300ms
+  - write-serial: "sd write 16000\n"
+  - delay: 25ms
+  # press sd offset=25
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 27ms
+  # press sd offset=27
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "sd write 16000\n"
+  - delay: 3ms
+  # press sd offset=3
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - write-serial: "stats\nlog flush\nlog\nlog get 0\nlog get 90\nlog get 180\nbutton\n"
+  - wait-serial: 'CMD button OK edges='
+  - delay: 5ms

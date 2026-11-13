@@ -1,0 +1,36 @@
+capture docs/captures/lr3/burst.vcd: 1448.664 ms, 21 `track` lines on the receive line, 21 replies on the transmit line
+serial log: 21 replies
+
+lines of the burst are sent back to back; reply start / end = time from the end of the
+line to the first / last byte of its reply; the deadline is 100 ms
+
+  #    line end   reply bytes   reply start   reply end   verdict (end)
+ single     0.000 ms      100      2687.2 us   12094.2 us   ok
+      1   300.000 ms      100      3219.8 us   12774.2 us   ok
+      2   300.520 ms      100     14400.6 us   23807.5 us   ok
+      3   301.040 ms      100     25435.9 us   34843.1 us   ok
+      4   301.560 ms      100     36468.8 us   45875.4 us   ok
+      5   302.080 ms      100     47503.9 us   56911.2 us   ok
+      6   302.600 ms      100     59398.4 us   68804.6 us   ok
+      7   303.120 ms      100     70432.9 us   79839.9 us   ok
+      8   303.640 ms      100     81465.7 us   90874.7 us   ok
+      9   304.160 ms      100     92500.4 us  101907.5 us   MISSED
+     10   304.680 ms      100    104393.4 us  113800.4 us   MISSED
+     11   305.200 ms      100    115428.4 us  124835.9 us   MISSED
+     12   305.720 ms      100    126461.7 us  135871.0 us   MISSED
+     13   306.240 ms      100    137496.9 us  146903.8 us   MISSED
+     14   306.760 ms      100    149391.2 us  158800.1 us   MISSED
+     15   307.280 ms      100    160425.9 us  169833.4 us   MISSED
+     16   307.800 ms      100    171458.8 us  180867.6 us   MISSED
+     17   308.320 ms      100    182493.4 us  191899.7 us   MISSED
+     18   308.840 ms      100    194389.4 us  203798.6 us   MISSED
+     19   309.360 ms      100    205428.6 us  214835.2 us   MISSED
+     20   309.880 ms      100    216465.2 us  225874.7 us   MISSED
+
+single line: reply starts after 2687.2 us and ends after 12094.2 us
+burst of 20: first reply ends after 12774.2 us, last after 225874.7 us
+burst: replies that end later than 100 ms: 12 of 20; start later than 100 ms: 11 of 20
+burst: one reply per 11735.8 us, end to end
+burst: a reply of 100 bytes takes 9415.0 us: 93.9 us per byte (the median of two frames), 8N1 at this baud rate needs 86.7 us
+burst: from the end of a reply to the start of the next one: avg 2328.2 us, min 2145.5 us
+T2 in the burst: 5 runs, start to start: 59.3 ms, 47.1 ms, 47.1 ms, 47.1 ms

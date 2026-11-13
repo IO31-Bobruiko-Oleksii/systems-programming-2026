@@ -1,0 +1,268 @@
+name: 's2-nominal: 128 s (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot3
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot4
+      control: position
+      value: 0.5
+  - write-serial: "stow\nresume\nlog on\n"
+  - delay: 100ms
+  # window 1 seconds=128
+  - write-serial: "stats reset\n"
+  - delay: 50ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "track\nadc\nhelp\nbutton\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "log\ntrack\nadc\nhelp\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "button\nlog\ntrack\nadc\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "help\nbutton\nlog\ntrack\n"
+  # press nominal offset=-
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "adc\nhelp\nbutton\nlog\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "track\nadc\nhelp\nbutton\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "log\ntrack\nadc\nhelp\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "button\nlog\ntrack\nadc\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "help\nbutton\nlog\ntrack\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "adc\nhelp\nbutton\nlog\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "track\nadc\nhelp\nbutton\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "log\ntrack\nadc\nhelp\n"
+  # press nominal offset=-
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "button\nlog\ntrack\nadc\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "help\nbutton\nlog\ntrack\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "adc\nhelp\nbutton\nlog\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "track\nadc\nhelp\nbutton\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "log\ntrack\nadc\nhelp\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "button\nlog\ntrack\nadc\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "help\nbutton\nlog\ntrack\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "adc\nhelp\nbutton\nlog\n"
+  # press nominal offset=-
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "track\nadc\nhelp\nbutton\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "log\ntrack\nadc\nhelp\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "button\nlog\ntrack\nadc\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "help\nbutton\nlog\ntrack\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "adc\nhelp\nbutton\nlog\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "track\nadc\nhelp\nbutton\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "log\ntrack\nadc\nhelp\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "button\nlog\ntrack\nadc\n"
+  # press nominal offset=-
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 250ms
+  - write-serial: "resume\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - write-serial: "help\nbutton\nlog\ntrack\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "adc\nhelp\nbutton\nlog\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - write-serial: "track\nadc\nhelp\nbutton\n"
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - write-serial: "log\ntrack\nadc\nhelp\n"
+  - delay: 4000ms
+  - write-serial: "stats\nlog flush\nlog\nlog get 0\nlog get 320\nlog get 640\nbutton\n"
+  - wait-serial: 'CMD button OK edges='
+  - delay: 5ms

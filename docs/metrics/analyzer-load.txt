@@ -1,0 +1,34 @@
+capture docs/captures/lr3/load.vcd: 498.390 ms
+edges per channel: D0=154  D1=14  D2=0  D3=1  D4=5979  D5=48  D6=5  D7=64
+
+window 75.828 .. 379.429 ms (303.6 ms)
+
+LOOP PASS (D0: rising edge to rising edge = one pass; high width = work of one pass outside the UART wait)
+  pass period      n=49    min=    5991.5  avg=    5999.6  max=    6008.0 us
+  pass work P      n=43    min=     85.75  avg=     85.78  max=     86.00 us   (passes without a T2 run and up to 300 us)
+  longer passes without a T2 run: 1 (commands, log flushes), 82733 .. 82733 us
+  byte time 86.7 us, so the margin before a received byte is lost = 0.7 us (largest P), 0.9 us (average P)
+  P includes the two stores of the probe itself (about 1 us)
+
+TASK T2 (D1)
+  start to start   n=5     min=   47994.8  avg=   50396.7  max=   54003.8 us
+  pulse width      n=6     min=     839.5  avg=     841.9  max=     843.7 us
+  start jitter (largest minus smallest offset from the ideal 50 ms grid): 4008.0 us
+T1 SENSE (D7: from the start of the first to the end of the fourth conversion)
+  burst length     n=6     min=     581.2  avg=     581.4  max=     581.5 us   (conversions per run: [4])
+
+CPU TIME
+  T2 pulses add up to 5.05 ms = 16.6 permille of the window
+  loop-busy pin high  13.65 ms = 45.0 permille (all work outside the UART wait, the per-pass cost P included)
+
+COMPARISON with the firmware (STAT lines, cycle counter), all in us unless noted: min / avg / max
+  metric                     firmware (cycle counter)           logic analyzer                     difference
+  loop pass period           3641.0 / 5922.0 / 6009.0           5991.5 / 5999.6 / 6008.0           avg +77.6, max -1.0  the firmware counts passes with tracking on
+  T2 duration                845.0 / 847.0 / 849.0              839.5 / 841.9 / 843.7              avg -5.1, max -5.3  analyzer pulse starts after the time stamp
+  T2 start to start          47999.0 / 50815.0 / 54008.0        47994.8 / 50396.7 / 54003.8        avg -418.4, max -4.2
+  T1 sense                   602.0 / 602.0 / 602.0              581.2 / 581.4 / 581.5              avg -20.6, max -20.6  analyzer: first start to last end only, firmware: whole call
+  passes counted             51                                 50                                 
+  T2 start jitter (us)       4008.0                             4008.0                             difference +0.0
+  T2 runs                    6                                  6                                  
+  busy time (ms)             10                                 5.1 (T2 only)                      firmware busy = T2 + commands + log flushes
+  load (permille)            35                                 16.6 (T2 only)                     

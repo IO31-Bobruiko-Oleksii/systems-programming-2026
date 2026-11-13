@@ -11,6 +11,7 @@
     { "type": "wokwi-servo", "id": "servo1", "top": 94, "left": 412.8, "attrs": {} },
     { "type": "wokwi-servo", "id": "servo2", "top": 238, "left": 412.8, "attrs": {} },
     { "type": "wokwi-microsd-card", "id": "sd1", "top": 192.23, "left": -403.13, "attrs": {} },
+    { "type": "wokwi-pushbutton", "id": "btn1", "top": -20, "left": 380, "attrs": { "color": "red" } },
     { "type": "wokwi-logic-analyzer", "id": "logic1", "top": 300, "left": 100,
   "attrs": { "bufferSize": "1000000", "triggerMode": "off" } } ],
   "connections": [
@@ -40,6 +41,8 @@
     [ "pot4:VCC", "nucleo:3V3.2", "red", [ "v0" ] ],
     [ "sd1:GND", "nucleo:GND.6", "black", [ "h0" ] ],
     [ "sd1:VCC", "nucleo:3V3.2", "red", [ "h0" ] ],
+    [ "btn1:1.l", "nucleo:PB5", "green", [ "h0" ] ],
+    [ "btn1:2.l", "nucleo:GND.5", "black", [ "h0" ] ],
     ["nucleo:PA5",  "logic1:D0", "gray", []],
     ["nucleo:PA7",  "logic1:D1", "gray", []],
     ["nucleo:PA6",  "logic1:D2", "gray", []],

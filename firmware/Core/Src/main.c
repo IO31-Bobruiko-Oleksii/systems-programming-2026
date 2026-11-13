@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "plat_uart.h"
+#include "plat_mem.h"
 #include "app.h"
 /* USER CODE END Includes */
 
@@ -77,6 +78,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+  plat_mem_init();
 
   /* USER CODE END 1 */
 
@@ -107,6 +109,7 @@ int main(void)
   (void)plat_uart_write((const uint8_t *)banner, sizeof banner - 1U);
   app_init(&app);
   (void)app_selftest(&app);
+  app_start(&app);
   /* USER CODE END 2 */
 
   /* Infinite loop */

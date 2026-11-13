@@ -1,0 +1,194 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0CMD load OK us=0 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=238 min_us=81 avg_us=1286 max_us=6004
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=845 avg_us=847 max_us=849
+STAT name=late n=6 min_us=1607 avg_us=3608 max_us=5610
+STAT name=period n=6 min_us=47999 avg_us=50935 max_us=54003
+STAT name=cmd n=5 min_us=1758 avg_us=2082 max_us=3379
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=306 busy_ms=15 load_pm=50
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=238
+STAT rx init=0 dropped=0 ring_max=1 errors=0 isr_n=192 isr_avg=143 isr_max=153
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=0 ms=306
+CMD load OK us=17 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=238 min_us=80 avg_us=1286 max_us=6007
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=844 avg_us=847 max_us=849
+STAT name=late n=6 min_us=1615 avg_us=3618 max_us=5617
+STAT name=period n=6 min_us=47994 avg_us=50936 max_us=54002
+STAT name=cmd n=5 min_us=1758 avg_us=2115 max_us=3543
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=306 busy_ms=22 load_pm=73
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=238
+STAT rx init=0 dropped=0 ring_max=1 errors=0 isr_n=192 isr_avg=143 isr_max=153
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=17 ms=306
+CMD load OK us=25 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=238 min_us=80 avg_us=1286 max_us=6002
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=844 avg_us=846 max_us=849
+STAT name=late n=6 min_us=1490 avg_us=3490 max_us=5485
+STAT name=period n=6 min_us=47998 avg_us=50914 max_us=53996
+STAT name=cmd n=5 min_us=1758 avg_us=2115 max_us=3545
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=306 busy_ms=22 load_pm=74
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=238
+STAT rx init=0 dropped=0 ring_max=1 errors=0 isr_n=192 isr_avg=143 isr_max=153
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=25 ms=306
+CMD load OK us=34 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=237 min_us=92 avg_us=1270 max_us=6003
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=847 avg_us=848 max_us=849
+STAT name=late n=6 min_us=491 avg_us=3492 max_us=4495
+STAT name=period n=6 min_us=47998 avg_us=50082 max_us=54490
+STAT name=cmd n=5 min_us=1758 avg_us=2115 max_us=3545
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=301 busy_ms=25 load_pm=84
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=237
+STAT rx init=0 dropped=0 ring_max=11 errors=0 isr_n=192 isr_avg=143 isr_max=157
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=34 ms=301
+CMD load OK us=42 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=237 min_us=99 avg_us=1270 max_us=6004
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=845 avg_us=846 max_us=847
+STAT name=late n=6 min_us=474 avg_us=3472 max_us=4474
+STAT name=period n=6 min_us=48001 avg_us=50079 max_us=54474
+STAT name=cmd n=5 min_us=1758 avg_us=2115 max_us=3544
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=301 busy_ms=26 load_pm=89
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=237
+STAT rx init=0 dropped=0 ring_max=13 errors=0 isr_n=192 isr_avg=143 isr_max=157
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=42 ms=301
+CMD load OK us=51 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=237 min_us=109 avg_us=1274 max_us=6006
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=844 avg_us=846 max_us=848
+STAT name=late n=6 min_us=1466 avg_us=4465 max_us=5466
+STAT name=period n=6 min_us=48000 avg_us=50244 max_us=55466
+STAT name=cmd n=5 min_us=1758 avg_us=2115 max_us=3544
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=302 busy_ms=29 load_pm=96
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=237
+STAT rx init=0 dropped=0 ring_max=16 errors=0 isr_n=192 isr_avg=143 isr_max=153
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=51 ms=302
+CMD load OK us=59 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=237 min_us=117 avg_us=1274 max_us=6007
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=840 avg_us=842 max_us=844
+STAT name=late n=6 min_us=1251 avg_us=4248 max_us=5249
+STAT name=period n=6 min_us=47999 avg_us=50209 max_us=55247
+STAT name=cmd n=5 min_us=1758 avg_us=2115 max_us=3544
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=302 busy_ms=30 load_pm=101
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=237
+STAT rx init=0 dropped=0 ring_max=16 errors=0 isr_n=192 isr_avg=143 isr_max=154
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=59 ms=302
+CMD load OK us=68 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=234 min_us=124 avg_us=1295 max_us=6032
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=839 avg_us=841 max_us=844
+STAT name=late n=6 min_us=127 avg_us=1130 max_us=4132
+STAT name=period n=6 min_us=48001 avg_us=50355 max_us=54005
+STAT name=cmd n=5 min_us=1758 avg_us=2116 max_us=3546
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=303 busy_ms=32 load_pm=107
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=234
+STAT rx init=0 dropped=0 ring_max=19 errors=0 isr_n=192 isr_avg=144 isr_max=153
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=68 ms=303
+CMD load OK us=85 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=234 min_us=141 avg_us=1295 max_us=6005
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=839 avg_us=841 max_us=842
+STAT name=late n=6 min_us=283 avg_us=1283 max_us=4281
+STAT name=period n=6 min_us=48002 avg_us=50380 max_us=53998
+STAT name=cmd n=5 min_us=1758 avg_us=2115 max_us=3544
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=303 busy_ms=36 load_pm=119
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=234
+STAT rx init=0 dropped=0 ring_max=22 errors=0 isr_n=192 isr_avg=144 isr_max=153
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=85 ms=303
+CMD load OK us=100 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=234 min_us=158 avg_us=1308 max_us=7005
+STAT name=sense n=6 min_us=602 avg_us=602 max_us=602
+STAT name=track n=6 min_us=840 avg_us=842 max_us=845
+STAT name=late n=6 min_us=100 avg_us=1600 max_us=5099
+STAT name=period n=6 min_us=49003 avg_us=50850 max_us=54999
+STAT name=cmd n=5 min_us=1758 avg_us=2147 max_us=3705
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=306 busy_ms=41 load_pm=134
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=234
+STAT rx init=0 dropped=0 ring_max=24 errors=0 isr_n=192 isr_avg=144 isr_max=153
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=100 ms=306
+CMD load OK us=1 ms=300CMD resume OK
+CMD resume OK
+CMD resume OK
+CMD resume OK
+STAT name=loop n=238 min_us=64 avg_us=1265 max_us=6006
+STAT name=sense n=6 min_us=602 avg_us=646 max_us=740
+STAT name=track n=6 min_us=840 avg_us=900 max_us=1020
+STAT name=late n=6 min_us=5 avg_us=1166 max_us=4247
+STAT name=period n=6 min_us=47998 avg_us=50041 max_us=54003
+STAT name=cmd n=5 min_us=1755 avg_us=2128 max_us=3380
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=301 busy_ms=18 load_pm=60
+STAT count runs=6 missed=0 rx_bytes=192 rx_errors=0 passes=238
+STAT rx init=0 dropped=0 ring_max=33 errors=0 isr_n=192 isr_avg=144 isr_max=154
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=820 stack_res=1024 stack_free=9172
+EVT load done us=1 ms=301

@@ -5,6 +5,7 @@
 #define CMD0    0U
 #define CMD8    8U
 #define CMD17   17U
+#define CMD24   24U
 #define CMD41   41U
 #define CMD55   55U
 #define CMD58   58U
@@ -19,6 +20,8 @@
 #define CMD8_ARG           0x000001AAU
 #define ACMD41_ARG_HCS     0x40000000U
 #define TOKEN_START_BLOCK  0xFEU
+#define TOKEN_DATA_MASK      0x1FU
+#define TOKEN_DATA_ACCEPTED  0x05U
 #define IDLE_BYTE          0xFFU
 #define POWER_UP_BYTES     10U
 
@@ -251,6 +254,19 @@ static plat_status_t read_block_selected(uint32_t arg, uint8_t *buf)
     return st;
 }
 
+static int block_address(const sdcard_t *sd, uint32_t block, uint32_t *arg)
+{
+    if (sd->type == SD_TYPE_V2_HC) {
+        *arg = block;
+        return 0;
+    }
+    if (block > (UINT32_MAX / SDCARD_BLOCK_SIZE)) {
+        return -1;
+    }
+    *arg = block * SDCARD_BLOCK_SIZE;
+    return 0;
+}
+
 plat_status_t sdcard_read_block(const sdcard_t *sd, uint32_t block, uint8_t *buf)
 {
     uint32_t arg;
@@ -260,17 +276,85 @@ plat_status_t sdcard_read_block(const sdcard_t *sd, uint32_t block, uint8_t *buf
     if (sd == NULL || buf == NULL || sd->type == SD_TYPE_NONE) {
         return PLAT_ERR_ARG;
     }
-    if (sd->type == SD_TYPE_V2_HC) {
-        arg = block;
-    } else {
-        if (block > (UINT32_MAX / SDCARD_BLOCK_SIZE)) {
-            return PLAT_ERR_ARG;
-        }
-        arg = block * SDCARD_BLOCK_SIZE;
+    if (block_address(sd, block, &arg) != 0) {
+        return PLAT_ERR_ARG;
     }
 
     plat_spi_cs(1U);
     st = read_block_selected(arg, buf);
+    end = release();
+    return (st != PLAT_OK) ? st : end;
+}
+
+static plat_status_t write_block_selected(uint32_t arg, const uint8_t *buf)
+{
+    static const uint8_t crc[2] = { IDLE_BYTE, IDLE_BYTE };
+    uint8_t r1 = 0U;
+    uint8_t b = IDLE_BYTE;
+    plat_status_t st = command(CMD24, arg, CRC_DUMMY, &r1);
+    unsigned i;
+
+    if (st != PLAT_OK) {
+        return st;
+    }
+    if (r1 != 0U) {
+        return PLAT_ERR_BUS;
+    }
+    st = xfer_byte(IDLE_BYTE, NULL);
+    if (st == PLAT_OK) {
+        st = xfer_byte(TOKEN_START_BLOCK, NULL);
+    }
+    if (st == PLAT_OK) {
+        st = plat_spi_transfer(buf, NULL, SDCARD_BLOCK_SIZE);
+    }
+    if (st == PLAT_OK) {
+        st = plat_spi_transfer(crc, NULL, sizeof crc);
+    }
+    if (st != PLAT_OK) {
+        return st;
+    }
+    for (i = 0U; i < SDCARD_R1_POLLS; i++) {
+        st = xfer_byte(IDLE_BYTE, &b);
+        if (st != PLAT_OK) {
+            return st;
+        }
+        if (b != IDLE_BYTE) {
+            break;
+        }
+    }
+    if (i == SDCARD_R1_POLLS) {
+        return PLAT_ERR_TIMEOUT;
+    }
+    if ((b & TOKEN_DATA_MASK) != TOKEN_DATA_ACCEPTED) {
+        return PLAT_ERR_BUS;
+    }
+    for (i = 0U; i < SDCARD_BUSY_POLLS; i++) {
+        st = xfer_byte(IDLE_BYTE, &b);
+        if (st != PLAT_OK) {
+            return st;
+        }
+        if (b == IDLE_BYTE) {
+            return PLAT_OK;
+        }
+    }
+    return PLAT_ERR_TIMEOUT;
+}
+
+plat_status_t sdcard_write_block(const sdcard_t *sd, uint32_t block, const uint8_t *buf)
+{
+    uint32_t arg;
+    plat_status_t st;
+    plat_status_t end;
+
+    if (sd == NULL || buf == NULL || sd->type == SD_TYPE_NONE) {
+        return PLAT_ERR_ARG;
+    }
+    if (block_address(sd, block, &arg) != 0) {
+        return PLAT_ERR_ARG;
+    }
+
+    plat_spi_cs(1U);
+    st = write_block_selected(arg, buf);
     end = release();
     return (st != PLAT_OK) ? st : end;
 }

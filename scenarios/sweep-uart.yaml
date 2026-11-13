@@ -1,0 +1,134 @@
+name: 'sweep-uart: four 48-byte console lines per window under a growing extra load per loop pass (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 25ms
+  - write-serial: "load 0 300\n"
+  - wait-serial: 'CMD load OK us=0 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=0 ms='
+  - delay: 30ms
+  - write-serial: "load 17 300\n"
+  - wait-serial: 'CMD load OK us=17 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=17 ms='
+  - delay: 30ms
+  - write-serial: "load 25 300\n"
+  - wait-serial: 'CMD load OK us=25 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=25 ms='
+  - delay: 30ms
+  - write-serial: "load 34 300\n"
+  - wait-serial: 'CMD load OK us=34 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=34 ms='
+  - delay: 30ms
+  - write-serial: "load 42 300\n"
+  - wait-serial: 'CMD load OK us=42 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=42 ms='
+  - delay: 30ms
+  - write-serial: "load 51 300\n"
+  - wait-serial: 'CMD load OK us=51 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=51 ms='
+  - delay: 30ms
+  - write-serial: "load 59 300\n"
+  - wait-serial: 'CMD load OK us=59 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=59 ms='
+  - delay: 30ms
+  - write-serial: "load 68 300\n"
+  - wait-serial: 'CMD load OK us=68 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=68 ms='
+  - delay: 30ms
+  - write-serial: "load 85 300\n"
+  - wait-serial: 'CMD load OK us=85 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=85 ms='
+  - delay: 30ms
+  - write-serial: "load 100 300\n"
+  - wait-serial: 'CMD load OK us=100 ms=300'
+  - delay: 15ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=100 ms='
+  - delay: 30ms
+  - write-serial: "load 1 300\n"
+  - wait-serial: 'CMD load OK us=1 ms=300'
+  - delay: 44ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\nresume 1234567890123456789012345678901234567890\n"
+  - delay: 50ms
+  - write-serial: "resume 1234567890123456789012345678901234567890\nresume 1234567890123456789012345678901234567890\n"
+  - wait-serial: 'EVT load done us=1 ms='
+  - delay: 5ms
+  
