@@ -18,3 +18,4 @@ tests/build-cov/
 docs/captures/*.cli.log
 __pycache__/
 *.pyc
+scenarios/soak.yaml
