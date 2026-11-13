@@ -150,9 +150,11 @@ def summary(name, vals):
     if not vals:
         return "  %-12s none" % name
     late = sum(1 for v in vals if v > DEADLINES["stow"][0])
-    return "  %-12s n %3d  min %6d  median %6d  p90 %6d  max %6d us  over 10 ms: %d" % (
-        name, len(vals), min(vals), int(statistics.median(vals)), percentile(vals, 90), max(vals),
-        late)
+    return ("  %-12s n %3d  min %6d  avg %6d  median %6d  p90 %6d  p99 %6d  max %6d us"
+            "  over 10 ms: %d" % (
+                name, len(vals), min(vals), int(statistics.mean(vals)), int(statistics.median(vals)),
+                percentile(vals, 90), percentile(vals, 99), max(vals), late))
+
 
 
 def phase_lines(events, presses):
@@ -165,6 +167,13 @@ def phase_lines(events, presses):
         by_kind.setdefault(kind, []).append((off, lat))
     for kind, items in sorted(by_kind.items()):
         lines.append(summary(kind, [lat for _, lat in items]))
+    idle = by_kind.get("idle", [])
+    if idle:
+        lines.append("")
+        lines.append("  press in an idle system: latency in bins of 1 ms")
+        for b in range(max(10, max(lat for _, lat in idle) // 1000 + 1)):
+            n = sum(1 for _, lat in idle if lat // 1000 == b)
+            lines.append("    %2d..%2d ms: %2d %s" % (b, b + 1, n, "#" * n))
     sd = by_kind.get("sd", [])
     if sd:
         lines.append("")

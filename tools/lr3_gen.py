@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes the long LR3 scenarios (S1, S2, S3) for the Wokwi CLI.
 
-usage: lr3_gen.py <s1|s2|s3>
+usage: lr3_gen.py <s1|s2|s3|e1>
 
 The scenario is written to scenarios/<name>.yaml. The comment lines "# window" and "# press"
 in the file are read back by lr3_stats.py, so do not edit them.
@@ -14,7 +14,7 @@ import random
 import sys
 from pathlib import Path
 
-NAMES = {"s1": "s1-idle", "s2": "s2-nominal", "s3": "s3-worst"}
+NAMES = {"s1": "s1-idle", "s2": "s2-nominal", "s3": "s3-worst", "e1": "e1-idle"}
 SELFTEST = "SELFTEST END total=5 passed=5 failed=0"
 SETTLE_MS = 6025                    # the servos reach their end stops, as in the other scenarios
 S1_SECONDS = 250
@@ -26,6 +26,10 @@ GROUP = 4                           # commands per tick
 SD_OFFSETS = tuple(range(3, 28, 2))  # button press, ms after the sd write line was sent
 SD_PRESSES = 3                      # per tick in S3
 BURST = 20
+E1_PRESSES = 40
+E1_LEAD_MS = 100
+E1_PAUSE_MS = 250
+TIME_CALLS = 3
 CHUNK_MS = 10000
 
 
@@ -33,6 +37,7 @@ class Scenario:
     def __init__(self):
         self.lines = []
         self.steps = 0
+        self.ms = 0
 
     def comment(self, text):
         self.lines.append("  # " + text)
@@ -51,6 +56,7 @@ class Scenario:
             part = min(ms, CHUNK_MS)
             self.lines.append("  - delay: %dms" % part)
             self.steps += 1
+            self.ms += part
             ms -= part
 
     def control(self, part, name, value):
@@ -98,7 +104,33 @@ def tick(s, t, key, rnd, offsets):
     s.delay(TICK_MS)
 
 
+def build_e1():
+    """E1 in an idle system: presses at random phases, then a window with long `time` commands."""
+    s = Scenario()
+    rnd = random.Random(2026)
+    leads = [rnd.randrange(1, E1_LEAD_MS) for _ in range(E1_PRESSES)]
+    s.wait(SELFTEST)
+    s.delay(SETTLE_MS)
+    s.comment("window 1 seconds=%d" % ((sum(leads) + E1_PRESSES * (E1_PAUSE_MS + 10)) // 1000))
+    s.write("stats reset")
+    s.delay(50)
+    for i, lead in enumerate(leads):
+        s.comment("press idle offset=%d" % lead)
+        s.delay(lead if i == 0 else E1_PAUSE_MS + lead)
+        s.control("btn1", "pressed", 1)
+        s.delay(10)
+        s.control("btn1", "pressed", 0)
+    s.delay(50)
+    s.comment("window 2 seconds=1")
+    s.write("resume", "stats", "stats reset", *["time"] * TIME_CALLS, "stats", "button")
+    s.wait("CMD button OK edges=")
+    s.delay(5)
+    return s
+
+
 def build(key):
+    if key == "e1":
+        return build_e1()
     s = Scenario()
     s.wait(SELFTEST)
     if key == "s1":
@@ -136,7 +168,7 @@ def main():
         sys.exit(__doc__)
     key = sys.argv[1]
     s = build(key)
-    seconds = S1_SECONDS if key == "s1" else TICKS[key] * TICK_MS // 1000
+    seconds = s.ms // 1000 if key == "e1" else S1_SECONDS if key == "s1" else TICKS[key] * TICK_MS // 1000
     path = Path(__file__).resolve().parent.parent / "scenarios" / (NAMES[key] + ".yaml")
     head = ["name: '%s: %d s (LR3)'" % (NAMES[key], seconds), "version: 1", "steps:"]
     with open(path, "w", newline="\n") as f:
