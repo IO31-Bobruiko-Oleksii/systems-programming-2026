@@ -86,12 +86,12 @@ Memory region         Used Size  Region Size  %age Used
     print_stat                  104 B  static   app.c
     cmd_log_get                  88 B  static   app.c
     app_execute                  88 B  static   app.c
+    HAL_ADC_MspInit              80 B  static   stm32c0xx_hal_msp.c
     cmd_track                    72 B  static   app.c
     HAL_SPI_MspInit              64 B  static   stm32c0xx_hal_msp.c
     plat_spi_transfer            64 B  static   plat_spi_hal.c
-    cmd_sd_read                  64 B  static   app.c
   functions with a frame that is not 'static': none
-  frame read from the machine code == frame from the compiler: 208 of 210 functions; differ (code/compiler): say 192/176, HAL_ADC_MspInit 80/0
+  frame read from the machine code == frame from the compiler: 209 of 210 functions; differ (code/compiler): say 192/176
   (the same reading is used for the library functions, which have no .su file)
 
   deepest call chain from main, every direct call followed: 864 B

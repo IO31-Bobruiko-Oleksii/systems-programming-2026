@@ -269,7 +269,10 @@ def read_su(build):
         for line in open(path):
             f = line.rstrip("\n").split("\t")
             if len(f) == 3:
-                su[f[0].split(":")[-1]] = (int(f[1]), f[2], os.path.basename(f[0].split(":")[0]))
+                key = f[0].split(":")[-1]
+                item = (int(f[1]), f[2], os.path.basename(f[0].split(":")[0]))
+                if key not in su or item[0] > su[key][0]:   # a weak stub and the real function share a name
+                    su[key] = item
     return su
 
 
