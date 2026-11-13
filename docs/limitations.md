@@ -511,7 +511,7 @@ These must still hold in LR4, so each has the value to compare with.
 |---|---|---|
 | Determinism of the periodic schedule | S1: 5000 T2 runs, 0 skipped, late max 5.86 ms, period max 54.0 ms ([stats-s1-idle.txt](metrics/stats-s1-idle.txt)); 2 h host soak: 144040 runs, 0 skipped ([soak.txt](metrics/soak.txt), real `app.c` on the host, not the ARM build) | T2 start is not later than one tick in S1 |
 | Memory | heap 0 B, one stack, RAM 31.18 %, 8456 B unused | totals from the same tool; heap pool of the kernel reported |
-| Start-up | first transmitted frame 4.8 ms, self-test ends 48.9 ms, first normal loop pass 54.7 ms, first T2 run 102.7 ms (edges of D4, D0 and D1 in [burst.vcd](captures/lr3/burst.vcd), read from the capture; a script for it is planned in `docs/baseline-lab4.md`) | the same milestones with the scheduler started |
+| Start-up | first transmitted frame 4.8 ms, self-test ends 48.9 ms, first normal loop pass 54.7 ms, first T2 run 102.7 ms (edges of D4, D0 and D1 in [burst.vcd](captures/lr3/burst.vcd), read by `tools/lr3_startup.py`, output in [startup.txt](metrics/startup.txt)) | the same milestones with the scheduler started |
 | Explainability and debugging | every large latency is a sum of known sections: 11.74 ms per queued reply = 8.667 + 0.75 + 2.33; E1 about 21 ms minus `d`; one thread, one stack, deterministic scenarios | whether the same latencies can still be explained once tasks preempt each other |
 | No bugs between tasks | no mutex, queue, priority inversion or deadlock; the only concurrency is three interrupts with fixed priorities | the number of kernel objects used and every inversion or deadlock met |
 | Low overhead | no tick work beyond SysTick, no context switch | S1 CPU load: 16 per mille now |

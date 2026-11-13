@@ -4,18 +4,33 @@ LR3 measures the firmware with code that runs inside the firmware. This file say
 measured, how, and what the measuring itself costs. All times are simulator times (Wokwi, core
 clock 12 MHz), see the report for what that means.
 
+The scenarios, the final numbers and the steps to repeat every run are in
+`docs/baseline-lab4.md`. The firmware changed while the measurements were made, so a result
+below carries the letter of the build it was taken on (A to D) where the build matters;
+`docs/baseline-lab4.md` (section 2) lists the commits and the captures of each build. Where a
+number was written down before a run as a prediction, it is kept next to the measured value.
+
 ## Commands
 
 | Command | Reply |
 |---|---|
-| `stats` | twelve lines starting with `STAT`, then `CMD stats OK` |
+| `stats` | twelve lines starting with `STAT`, then `CMD stats OK`: 13 lines, about 760 characters (S1 log, build C) |
 | `stats reset` | `CMD stats-reset OK`, starts a new measurement window |
 | anything else after `stats` | `CMD stats FAIL reason=usage` |
 | `load <us> <ms>` | `CMD load OK us=<us> ms=<ms>`; at the end of the window the `STAT` lines and `EVT load done us=<us> ms=<window>` |
 | `load` | `CMD load OK us=<last value> active=<0 or 1>` |
+| `time` | `CMD time OK hz=<clock> read_cycles=<n> backsteps=<n>`; a diagnostic, not a product command |
 
 `stats reset` clears the statistics, the counters and the window start. It does not touch the
 state of the product (`track`, `button` and `log` keep their own counters).
+
+`time` reads the cycle counter 40000 times in a row (20000 pairs). `read_cycles` is the smallest
+difference between the two reads of a pair, `backsteps` the number of pairs in which the second
+read was smaller than the first. Measured (build D, the three calls in window 2 of
+`docs/metrics/stats-e1-idle.txt`): `read_cycles` 88 (7.3 us at 12 MHz), `backsteps` 0. The command
+blocks the loop for about 342 ms (the `cmd` maximum of that window is 341805 us, which is 8.5 us
+per read on average), so it serves as the "long operation" of the e1-idle scenario: three calls
+skip 18 T2 releases and make T2 start up to 318 ms late.
 
 ## Lines of the reply
 
@@ -70,6 +85,11 @@ RAM was used by the stack at some time. Limits of the method:
 - a stack word that is rewritten with exactly the pattern is counted as untouched;
 - the result is a high-water mark since reset, it is not cleared by `stats reset`.
 
+Measured: `stack_used` is 916 B in S1 and e1-idle, 924 B in S2 and 940 B in S3 (builds C and D);
+`heap_used` is 0 in every run. The static worst case from `-fstack-usage` is 1016 B (864 B for the
+deepest call chain, 152 B for the three nested interrupts) against the 1024 B reserve, so the
+painted 940 B is 76 B below the static bound (ratio 1.08); see `docs/metrics/memory.txt`.
+
 ## The load window: an extra load for breaking-point runs
 
 `load <us> <ms>` is a test aid, not a product function. One command does three things: it starts a
@@ -87,7 +107,14 @@ least `<us>` and longer by up to one clock reading), and it ends by itself.
   after it, and the release that was pending is replaced, not counted as missed. The phase of T2
   inside the window is then known, so test bytes can be sent into the gap between two runs.
 - Limits: `<us>` up to 50000, `<ms>` from 1 to 60000. There is no way to leave a window open.
-- Cost while no window is open: one byte is tested in `app_poll`. Flash grew by 636 bytes.
+- Cost while no window is open: one byte is tested in `app_poll`. Flash grew by 636 bytes
+  (counted on a local build with arm-none-eabi-gcc 13.2.1, not with the 10.3.1 of the image that
+  `make build` uses, so the absolute size differs).
+- Smoke run `load 40 300` (build B, `docs/metrics/analyzer-load.txt`): P was 85.8 us on average
+  (85.75 to 86.00 us), 0.7 us below the byte time. That is more than the 70 to 80 us predicted from
+  28 + 40 us: the wait is a whole number of clock reads (8 to 9 us each) and a pass in a window
+  costs about 19 us more than a plain pass even at X = 0 (P = 47.2 us in `sweep-uart-poll`, plain
+  pass 28.06 us in `analyzer-stats.txt`).
 
 ## Breaking-point sweeps
 
@@ -115,6 +142,29 @@ run `tools/lr3_sweep.py` prints one row per window.
   reaction against 10 ms (firmware and pin). The last lines give the first window that broke each
   limit and the last window that did not.
 
+Results (both sweeps were run on build B, before the receive ring; the ring changes the first
+sweep, see "The receive buffer"):
+
+- `sweep-uart` (`docs/metrics/analyzer-sweep-uart-poll.txt`, 11 windows, 192 bytes sent in each):
+  no byte lost at X = 0 (P 47.2 us on average, 53.8 us at most); 30 lost at X = 17 us (P 69.6 us),
+  60 at X = 42 us, 100 at X = 100 us (P 151.5 us); 62 lost in the control window, where two lines
+  overlap a T2 run. `rx_errors` stayed 0 in every window, so the firmware did not see the loss.
+  The prediction written before the run (first loss at X = 42 or 51 us) was wrong, because the
+  per-byte cost outside the busy pin was left out; the fitted model is in "The receive buffer".
+- `sweep-ms` (`docs/metrics/analyzer-sweep-ms.txt`, 7 windows, 3 presses in each): the loop pass
+  period is about X + 6 ms on average (7.07 ms at X = 1 ms, 36.48 ms at X = 30 ms) and at most
+  11.0, 13.0, 15.0, 17.0, 21.0, 31.0 and 41.0 ms at X = 1, 2, 4, 6, 10, 20 and 30 ms.
+
+  | X per pass | 1 ms | 2 ms | 4 ms | 6 ms | 10 ms | 20 ms | 30 ms |
+  |---|---|---|---|---|---|---|---|
+  | E1 reaction, firmware, max | 5.88 | 5.27 | 9.88 | 11.54 | 12.40 | 19.40 | 23.95 ms |
+  | E1 reaction, pin, max | 5.89 | 5.28 | 9.89 | 11.55 | 12.42 | 19.41 | 23.96 ms |
+  | T2 start late, max | 8.09 | 11.68 | 11.31 | 15.96 | 20.06 | 27.15 | 34.24 ms |
+
+  E1 missed its 10 ms from X = 6 ms (last good X = 4 ms, 9.88 ms) and T2 its 25 ms from X = 20 ms
+  (last good X = 10 ms); no T2 release was skipped in any window. Both break points are those that
+  were predicted before the run (E1 between 4 and 6 ms, T2 at about 20 ms).
+
 ## Flood runs: where the receive buffer breaks
 
 With the ring buffer a long pass no longer loses console bytes, so the next limit is the ring
@@ -125,8 +175,8 @@ one write, so that they arrive back to back at the full speed of the line (4.16 
 | Window | Stream | What it shows |
 |--------|--------|---------------|
 | `load X 600`, X = 0, 8, 17, 34, 68, 100 us | 30 lines, 1440 bytes, 125 ms | the loop takes one byte per pass and answers every line with a 1.8 ms reply; when 48 passes and one reply last longer than the 4.16 ms of a line, the backlog grows until the ring is full |
-| `load 1 800`, called `stats-reply` | the line `stats` and 10 lines, 486 bytes | the reply to `stats` blocks the loop for about 90 ms, so 22 ms of the stream fit into the ring and the rest is dropped |
-| `load 2 600`, called `sd-write` | the line `sd write 16000` and 5 lines, 255 bytes | the SD write blocks the loop for 13.4 ms and the reply for 3 ms, so about 190 bytes arrive; the ring holds them |
+| `load 1 800`, called `stats-reply` | the line `stats` and 10 lines, 486 bytes | the reply to `stats` blocks the loop for about 90 ms (measured: 86.9 ms), so 22 ms of the stream fit into the ring and the rest is dropped |
+| `load 2 600`, called `sd-write` | the line `sd write 16000` and 5 lines, 255 bytes | the SD write blocks the loop for 13.4 ms and the reply for 3 ms, so about 190 bytes arrive; the ring holds them (measured: the write took 16.1 ms with the receive interrupts, and 240 bytes were in the ring) |
 
 Model before the run: one line needs 48 P + R in the loop, with P the work of a pass from
 `sweep-uart` (46.5 us at X = 0 to 156.1 us at X = 100) and R about 1.76 ms (the smallest `cmd`
@@ -144,8 +194,8 @@ Notes for reading the result:
   ring fill. `arrived` should be 1440, 486 and 255; a smaller number would mean that the
   simulator did not deliver the whole write, and the run must not be used.
   
-Result (`docs/metrics/analyzer-flood.txt`, `docs/captures/lr3/flood.*`): every write arrived whole
-(1440, 486 and 255 bytes), so the table can be used.
+Result (build C, `docs/metrics/analyzer-flood.txt`, `docs/captures/lr3/flood.*`): every write
+arrived whole (1440, 486 and 255 bytes), so the table can be used.
 
 - Sweep windows: dropped 53, 134, 238, 415, 575 and 657 of 1440 bytes at X = 0, 8, 17, 34, 68 and
   100 us, with the ring full (256) in every one. The bytes taken out during the 125 ms stream are
@@ -186,15 +236,26 @@ Measuring changes the thing measured, so the cost is written down.
 - **Tracking run.** Two extra clock readings around the conversion, one at the end of the run:
   about 25 us in every 50 ms (0.05 %).
 - **Command.** Two clock readings per command line.
-- **Memory.** Flash grows by 2.2 KB, RAM by 168 bytes (`app` is 0x580 bytes, was 0x4d8).
-- **Output.** The reply to `stats` was 666 characters. The loop was busy for 82.7 ms (measured on
-  PB6): 57.7 ms of UART transmission and about 25 ms of formatting, and it does nothing else.
-  The `STAT rx` line is about 80 characters, 7 ms more of transmission, so the
-  reply is now about 750 characters and the busy time about 90 ms (an estimate, to be read from
-  PB6 in the next `stats` capture). A
-  release of T2 that falls into this time is late by up to about 83 ms, and one release is skipped
-  when the lateness exceeds 50 ms. Read the statistics at the end of a measurement, not during it.
-  
+- **Memory.** Flash grew by 2.2 KB and RAM by 168 bytes when the meters were added (`app` went
+  from 0x4d8 to 0x580 bytes). The flash figure was counted on a local build with
+  arm-none-eabi-gcc 13.2.1, not with the 10.3.1 of the image, so it is not the size of the
+  simulated firmware. In the final image (build D, `docs/metrics/memory.txt`) `app_t` is 1416 bytes,
+  62 % of the static RAM.
+- **Output.** The reply to `stats` was 666 characters when the meters were added, and the loop was
+  busy for 82.7 ms (build A, measured on PB6, the longest pass in `docs/metrics/analyzer-stats.txt`):
+  57.7 ms of UART transmission at the theoretical 86.7 us per byte and about 25 ms of formatting,
+  and it does nothing else. The transmission is slower than the theory (93.9 us per byte in
+  `analyzer-burst.txt`), so 666 characters take 62.5 ms and the formatting about 20 ms.
+  The `STAT rx` line added about 94 characters: the reply is now 760 characters in 13 lines (S1
+  log, build C), 71.4 ms of transmission at 93.9 us per byte. The busy time of about 90 ms that
+  was written down as an estimate has not been read from PB6 again (this is part of the re-run
+  group 1 in `docs/baseline-lab4.md`). The nearest measurement is the `cmd` maximum of the same
+  reply in the `stats-reply` window of the flood (build C): 86.9 ms, with the receive interrupts
+  running during it. A release of T2 that falls into this time is late by up to about the length
+  of the reply, and a release is skipped when the lateness exceeds 50 ms. Measured in that window:
+  one release skipped, T2 started 55.3 ms late, and two T2 starts were 105.3 ms apart (firmware
+  `period` maximum). Read the statistics at the end of a measurement, not during it.
+
 ## The receive buffer
 
 Before this change the console took one byte per loop pass with a blocking call of the HAL. The USART
@@ -219,8 +280,14 @@ This stage moves the reception out of the loop:
 - 256 bytes are 22 ms of a stream at full speed. That is more than one SD write of the log
   (13.4 ms).
 
-Cost, counted from the build: flash +492 bytes (text 31452 to 31944), RAM +288 bytes (the ring
-268, five counters 20), so about 730 bytes of the 32 KB are left. The handler is 144 bytes.
+Cost: RAM +288 bytes (the ring 268, five counters 20). That figure does not depend on the compiler
+and is confirmed by the final image (`docs/metrics/memory.txt`: `rx_ring` 268 bytes,
+`plat_uart_hal.o` 288 bytes of RAM). Flash: the final image holds `plat_ring.o` 204 bytes and
+`plat_uart_hal.o` 552 bytes. The increase of the whole image by this change was +492 bytes
+(text 31452 to 31944) and the handler 144 bytes, both counted on a local build with
+arm-none-eabi-gcc 13.2.1, which is not the compiler of the image. The flash that is left was
+written down here as about 730 bytes, from the same local build; the image built with the 10.3.1
+toolchain uses 31708 of 32768 bytes (96.77 %), so **1060 bytes are free** (`memory.txt`).
 
 The time of the handler is measured by the firmware and not by the analyzer, because the pins
 cannot show a 10 us pulse inside a pass: SysTick `VAL` is read at the entry and at the exit of the
@@ -276,7 +343,7 @@ What the analyzer gives that the counter cannot:
 - **E1.** From the first falling edge on PB5 to the start and to the end of the PB7 pulse, and to
   the first servo pulse with a new width. The firmware counter cannot see the last one.
 
-Where the two methods are expected to differ:
+Where the two methods differ, and by how much (measured values in the table below the list):
 
 - The PB4 pulse starts a few microseconds after the time stamp that starts `track` (the gap
   bookkeeping and the call of `plat_probe_set` come first) and ends one call after the time stamp
@@ -287,6 +354,36 @@ Where the two methods are expected to differ:
 - The firmware `load` counts task code only (T2, log flushes, console commands). PB6 also shows
   the work of every plain pass (28 us, about 5 permille), so the busy time of the pin is larger
   than `busy_ms`; the report prints both.
+
+Measured (maxima; reports `docs/metrics/analyzer-stats.txt`, `analyzer-load.txt`,
+`analyzer-stow.txt`, `analyzer-stow-busy.txt`; the letter is the build):
+
+| Metric | Firmware (counter) | Logic analyzer | Analyzer minus firmware | Capture |
+|---|---|---|---|---|
+| T2 duration | 850 us | 844.7 us | -5.3 us | `stats` (A) |
+| T2 duration | 849 us | 843.7 us | -5.3 us | `load` (B) |
+| T2 start to start | 54005 us | 54000.5 us | -4.5 us | `stats` (A) |
+| loop pass period | 6005 us | 6004.2 us | -0.8 us | `stats` (A) |
+| T1 sense (four conversions) | 602 us | 581.5 us | -20.6 us | `stats` (A) |
+| passes counted | 505 | 505 | 0 | `stats` (A); 51 against 50 in `load` (B) |
+| T2 start jitter | 4007 us | 4228 us | +221 us | `stats` (A); 4008 against 4008 in `load` (B) |
+| `stow` latency, loop waiting | 4666 us and 1938 us | 4678.7 us and 1954.8 us | +12.7 and +16.8 us | `stow` (A) |
+| `stow` latency, loop busy (SD write) | 19020 us | 19031 us | +11.0 us | `stow-busy` (A) |
+| CPU load | 17 permille (task code) | 16.8 permille (T2 pulses), 23.1 permille (PB6 high) | see below | `stats` (A) |
+
+How the differences are explained:
+
+- T2 duration, start to start, pass period: the PB4 pulse is 5.3 us shorter than the span of the
+  counter, the other two agree within 5 us.
+- T1: the counter times the whole call, the analyzer only the span from the first to the last ADC
+  marker, so it reads 20.6 us less.
+- Jitter: the +221 us comes from the clock scale. The firmware clock runs 74 to 96 ppm fast
+  against the simulation, so over the 3 s of the `stats` capture it gains 74 ppm x 3.0 s = 221 us.
+  In the 0.3 s `load` capture the two agree.
+- `stow`: 11 to 17 us more on the analyzer, the interrupt entry that comes before the time stamp.
+- CPU load: the pin is high for 23.1 permille and the T2 pulses take 16.8 permille; the other
+  6.3 permille are the plain passes (28.06 us in every 6 ms, 4.7 permille) and the commands in the
+  window (the rest, about 1.6 permille).
 
 Cost of the pins:
 
@@ -305,3 +402,54 @@ in `docs/captures/lr3/`:
     tools/lr3_capture.sh stats loop
     tools/lr3_capture.sh stow event
     tools/lr3_capture.sh stow-busy event
+
+## Long runs without the analyzer
+
+The long scenarios (S1, S2, S3, e1-idle, nosd-log, park) are measured by the firmware only: a VCD
+of minutes would be hundreds of megabytes. `tools/lr3_run.sh <scenario> [timeout_ms]` runs a
+scenario with `wokwi-cli`, keeps the serial log in `docs/captures/lr3/<name>.serial.log` and the
+CLI log with real-time stamps in `<name>.cli.log`, and writes `docs/metrics/stats-<name>.txt` with
+`tools/lr3_stats.py` (`tools/lr3_park.py` for `park`).
+
+- A window is everything between a `stats reset` and the next `stats`. The comment lines
+  `# window` and `# press` in the scenario file say how long each window is meant to be and what
+  kind of press (`idle`, `sd`, `random`, `nominal`) each `EVT stow` line belongs to; the script reads
+  them back with `--scenario`.
+- Every time comes from the firmware (`STAT` lines, `EVT stow t_us`), never from the moment a line
+  reaches the host.
+- For each window the report gives the statistics against the deadlines of `docs/tasks.md` with a
+  verdict (ok or MISSED), E1 per kind of press with average, median, p90, p99 and maximum, a 1 ms
+  histogram for the `idle` kind, the latency against the press offset in an `sd write`, the button
+  counters, the log counters and the records read back with `log get` (checksum).
+- In S1 the scenario is pure delays, so the firmware clock can be compared with the scenario
+  clock: 250024 ms for 250000 ms, +96 ppm (`docs/metrics/stats-s1-idle.txt`).
+- Do not use `tools/lr3_stats.py` on the flood log: a `stats` inside a `load` window would be read
+  as a window of its own. Use `tools/lr3_sweep.py` there.
+- `tools/lr3_regen.sh` rebuilds all these reports from the committed logs without the simulator.
+
+## Start-up time
+
+The start-up milestones are read from a capture that contains the reset, with no extra pin:
+`python3 tools/lr3_startup.py <capture.vcd>` (output in `docs/metrics/startup.txt`, made from
+`docs/captures/lr3/burst.vcd`, build D). It uses D4 (UART TX, for the banner and the self-test
+lines), D7 (ADC marker), D6 (SD chip select), D5 (servo 1 PWM), D0 (loop busy) and D1 (T2). The time
+zero is the first sample of the capture, which is the reset.
+
+| Milestone | After reset |
+|---|---|
+| first byte on the UART (start of the banner) | 4.8 ms |
+| first ADC conversion (self-test) | 10.1 ms |
+| first SD chip select low after the configuration | 18.2 ms |
+| first servo 1 PWM pulse (width 1500 us) | 27.0 ms |
+| self-test report finished, first wait for a byte (D0 falls) | 48.9 ms |
+| first normal loop pass (D0 rises again) | 54.7 ms |
+| first T2 run starts, ends (first tracking decision) | 102.7 ms, 103.5 ms |
+
+T6 asks for the main loop within 1000 ms of the reset: met, with 54.7 ms. The start-up did not
+change with the builds: the first loop pass is at 54.63 ms in `stats.vcd` (build A) and 54.66 ms
+in `burst.vcd` (build D). The first T2 run starts about 100 ms after the reset and then depends on
+the capture: 100.7 ms in `stats.vcd` and 102.7 ms in `burst.vcd` (the phase of the 6 ms idle
+pass), and 125.1 ms in `flood.vcd`, where a `load` command came first and restarted the 50 ms
+grid. The simulator cannot show a restart (there is no reset command) or a sensor that is
+connected but not ready; the only device with an init sequence is the card, which was tested
+absent in nosd-log.
