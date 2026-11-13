@@ -1,4 +1,4 @@
-capture docs/captures/lr3/sweep-uart.vcd: 4640.285 ms, load windows on D4: 11, in the serial log: 11
+capture docs/captures/lr3/sweep-uart-poll.vcd: 4640.285 ms, load windows on D4: 11, in the serial log: 11
 bytes sent per window: 192 (assumed: the largest rx_bytes seen); byte time 86.7 us; control window: load 1
 
 UART AND LOAD (P = work of one loop pass outside the UART wait, pin PB6; margin = byte time - largest P)
@@ -29,7 +29,7 @@ DEADLINES (T2: late + duration within 25 ms; E1: firmware reaction within 10 ms)
      100        2178        8502        6      4762       0      ok        0           -            -       -
        1        1684       10737        6      5909       0      ok        0           -            -       -
 
-BREAKING POINTS (control window left out, rows in order of growing X)
+BREAKING POINTS (control and named windows left out, rows in order of growing X)
   console bytes lost: first at X = 17 us (P avg 69.6 us, max 74.9 us), last good X = 0 us (P avg 47.2 us, max 53.8 us)
   E1 reaction above 10 ms: not reached in this sweep
   T2 deadline missed: not reached in this sweep

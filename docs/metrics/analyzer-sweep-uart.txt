@@ -1,5 +1,5 @@
 capture docs/captures/lr3/sweep-uart.vcd: 4737.958 ms, load windows on D4: 11, in the serial log: 11
-bytes sent per window: 192 (assumed: the largest rx_bytes seen); byte time 86.7 us; control window: load 1
+bytes sent per window: counted by the receive interrupt (isr_n); bytes lost: counted by the ring (dropped); byte time 86.7 us
 
 UART AND LOAD (P = work of one loop pass outside the UART wait, pin PB6; margin = byte time - largest P)
     X us   P avg   P max  margin  fw pm  pin pm    rx  lost  err  ok  bad  T2 in burst
@@ -15,6 +15,21 @@ UART AND LOAD (P = work of one loop pass outside the UART wait, pin PB6; margin 
      100   156.1   173.1   -86.4    134   172.1   192     0    0   4    0     0 of 4  
        1    58.5    74.8   +11.9     60   101.6   192     0    0   4    0     2 of 4    control
 
+RECEIVE BUFFER (STAT rx; arrived = bytes the interrupt took, read = bytes the console took from the ring,
+left = still in the ring at the end of the window; isr times in CPU cycles of the 12 MHz clock)
+    X us  arrived   read  dropped  left  ring max  errors  isr avg  isr max
+       0      192    192        0     0         1       0      143      153
+      17      192    192        0     0         1       0      143      153
+      25      192    192        0     0         1       0      143      153
+      34      192    192        0     0        11       0      143      157
+      42      192    192        0     0        13       0      143      157
+      51      192    192        0     0        16       0      143      153
+      59      192    192        0     0        16       0      143      154
+      68      192    192        0     0        19       0      144      153
+      85      192    192        0     0        22       0      144      153
+     100      192    192        0     0        24       0      144      153
+       1      192    192        0     0        33       0      144      154  control
+
 DEADLINES (T2: late + duration within 25 ms; E1: firmware reaction within 10 ms)
     X us  period avg  period max  T2 runs  late max  missed      T2  presses  lat fw max  lat pin max      E1
        0        1258        7568        6      5610       0      ok        0           -            -       -
@@ -29,7 +44,7 @@ DEADLINES (T2: late + duration within 25 ms; E1: firmware reaction within 10 ms)
      100        1276        7075        6      5099       0      ok        0           -            -       -
        1        1237        6979        6      4247       0      ok        0           -            -       -
 
-BREAKING POINTS (control window left out, rows in order of growing X)
-  console bytes lost: not reached in this sweep
+BREAKING POINTS (control and named windows left out, rows in order of growing X)
+  bytes dropped by the ring: not reached in this sweep
   E1 reaction above 10 ms: not reached in this sweep
   T2 deadline missed: not reached in this sweep

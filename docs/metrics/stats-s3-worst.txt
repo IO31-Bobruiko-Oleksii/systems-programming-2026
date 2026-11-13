@@ -31,11 +31,11 @@ heap used, bytes                    0
 W1: T2 runs 946, window_ms / 50 = 946
 
 E1 (stow) latency per window, from the EVT lines:
-  W1           n  30  min    576  median   5439  p90  16403  max  18511 us  over 10 ms: 10
+  W1           n  30  min    576  avg   7766  median   5439  p90  16403  p99  18511  max  18511 us  over 10 ms: 10
 
 E1 by kind of press (scenario scenarios/s3-worst.yaml):
-  random       n   3  min   3664  median   3685  p90   5017  max   5017 us  over 10 ms: 0
-  sd           n  27  min    576  median   5831  p90  16403  max  18511 us  over 10 ms: 10
+  random       n   3  min   3664  avg   4122  median   3685  p90   5017  p99   5017  max   5017 us  over 10 ms: 0
+  sd           n  27  min    576  avg   8171  median   5831  p90  16403  p99  18511  max  18511 us  over 10 ms: 10
 
   press during an sd write: ms after the line was sent -> latency us
      3 ms:  18511   18279   17987

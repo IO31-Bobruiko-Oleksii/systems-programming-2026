@@ -21,7 +21,7 @@ DEADLINES (T2: late + duration within 25 ms; E1: firmware reaction within 10 ms)
    20000       26339       30999       23     27154       0  MISSED        3       19397        19408  MISSED
    30000       36481       41001       23     34241       0  MISSED        3       23945        23956  MISSED
 
-BREAKING POINTS (control window left out, rows in order of growing X)
+BREAKING POINTS (control and named windows left out, rows in order of growing X)
   console bytes lost: no console traffic in this sweep
   E1 reaction above 10 ms: first at X = 6000 us (period max 16998 us), last good X = 4000 us (period max 14997 us)
   T2 deadline missed: first at X = 20000 us (period max 30999 us), last good X = 10000 us (period max 21000 us)

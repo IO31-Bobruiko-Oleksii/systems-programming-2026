@@ -31,7 +31,7 @@ heap used, bytes                    0
 W1: T2 runs 2582, window_ms / 50 = 2582
 
 E1 (stow) latency per window, from the EVT lines:
-  W1           n   5  min    270  median    292  p90   5610  max   5610 us  over 10 ms: 0
+  W1           n   5  min    270  avg   1356  median    292  p90   5610  p99   5610  max   5610 us  over 10 ms: 0
 
 E1 by kind of press (scenario scenarios/s2-nominal.yaml):
   the scenario has 4 presses, the log 5 EVT lines: phases not listed

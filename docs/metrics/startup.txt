@@ -1,0 +1,27 @@
+start-up from docs/captures/lr3/burst.vcd (t = 0 is the reset, 1448.664 ms of capture)
+
+MILESTONES
+  first byte on the UART (start of the boot banner)                   4.814 ms  
+  first ADC conversion (self-test)                                   10.106 ms  
+  last of the 4 first conversions ends (all channels read once)      10.688 ms  
+  first SD chip select low after configuration                       18.197 ms  
+  last SD chip select release of the self-test                       33.400 ms  (init and the read of one block)
+  first servo 1 PWM pulse                                            27.048 ms  (width 1500 us)
+  self-test report finished, first wait for a byte                   48.855 ms  (D0 falls)
+  first normal loop pass starts                                      54.661 ms  (D0 rises again)
+  first T2 run starts                                               102.687 ms  
+  first T2 run ends: first tracking decision                        103.530 ms  
+
+UART LINES UNTIL THE FIRST T2 RUN (start of the first byte)
+       4.814 ms  Heliostat boot OK
+       7.727 ms  SELFTEST BEGIN version=1
+      11.539 ms  SELFTEST adc OK raw=1025,2050,3074,4095
+      15.421 ms  SELFTEST spi OK
+      34.087 ms  SELFTEST sd OK type=V2HC sig=55AA
+      37.801 ms  SELFTEST servo1 OK pulse_us=1500
+      41.419 ms  SELFTEST servo2 OK pulse_us=1500
+      45.099 ms  SELFTEST END total=5 passed=5 failed=0
+
+VERDICT
+  main loop running 54.7 ms after reset, deadline 1000 ms: ok
+  tracking decided 103.5 ms after reset
