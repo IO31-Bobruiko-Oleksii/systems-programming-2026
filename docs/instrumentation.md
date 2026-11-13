@@ -141,7 +141,7 @@ Measuring changes the thing measured, so the cost is written down.
   
 ## The receive buffer
 
-Until previously, the console took one byte per loop pass with a blocking call of the HAL. The USART
+Before this change the console took one byte per loop pass with a blocking call of the HAL. The USART
 holds one byte, so the next byte overwrote it whenever a pass lasted longer than a byte time
 (86.7 us); the simulator does not even set the overrun flag, so `rx_errors` stayed 0 while bytes
 were lost. `sweep-uart` measured the limit: bytes received = sent x 86.7 / (P + 32.1 us), and the
@@ -170,16 +170,21 @@ The time of the handler is measured by the firmware and not by the analyzer, bec
 cannot show a 10 us pulse inside a pass: SysTick `VAL` is read at the entry and at the exit of the
 handler and the difference is added up (`isr_sum`, `isr_max`, in cycles of the 12 MHz clock). The
 exception entry and return (about 15 cycles each by the core documentation) are outside it.
-Prediction before the first run: 90 to 130 cycles per byte, which at full speed is a little more
-than 10 % of the CPU. The first run of `sweep-uart` with this firmware replaces the prediction.
+Measured in `sweep-uart` (192 bytes in each of 11 windows): `isr_avg` 143 to 144 cycles (11.9 us),
+`isr_max` 153 to 157 cycles. The prediction written before the run was 90 to 130 cycles and was
+too low. At full speed one byte arrives every 1040 cycles, so the handler takes 13.8 % of the CPU,
+about 16.6 % with the entry and return added.
 
 What changes in the measurements:
 
-- `P` on PB6 now contains the handler when a byte arrives during a pass, so the longest plain
-  pass can grow by one handler time (about 10 us) per byte.
-- The break point of `sweep-uart` moves from the length of the pass to the size of the ring. The
-  expected result of the same sweep is 192 of 192 bytes in every window, including the control
-  window, and `ring_max` of about 26 at the worst window.
+- `P` on PB6 contains the handler when a byte arrives during a pass: the longest plain pass at
+  X = 17 is 88.2 us against 74.9 us before the ring (+13.3 us).
+- The break point of `sweep-uart` is no longer reached. All 11 windows received 192 of 192 bytes
+  with `dropped` = 0, `errors` = 0 and four intact replies, up to a longest pass of 173 us (twice
+  the byte time) at X = 100. Before the ring the loss began at X = 17 and X = 100 lost 100 of 192
+  bytes; the control window, where two lines overlap a T2 run, lost 62 bytes before and none now.
+  `ring_max` was 1 up to X = 25, 11 to 24 from X = 34 to 100 and 33 in the control window, so at
+  most 13 % of the ring was used.
 - New breaking points: a stream longer than the ring during the 65 ms transmission of the
   `stats` reply or during an SD write, and a sustained flood. They need their own scenario.
   
