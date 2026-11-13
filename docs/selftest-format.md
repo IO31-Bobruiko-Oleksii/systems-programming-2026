@@ -54,11 +54,12 @@ Rules:
 After the report the firmware reads commands from the same port. A command is one line
 terminated by CR or LF; empty lines are ignored; tabs and spaces separate arguments; the
 line is at most 48 characters. Every command answers with exactly one `CMD ...` line,
-except `selftest`, which prints the report first.
+except `selftest`, which prints the report first, and `stats`, which prints its `STAT` lines
+first.
 
 | Command | Reply on success | Reply on failure |
 |---|---|---|
-| `help` | `CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log` | none |
+| `help` | `CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load` | none |
 | `selftest` | the report from section 1, then `CMD selftest OK failed=0` | the report, then `CMD selftest FAIL failed=<n>` |
 | `adc` | `CMD adc OK raw=<a>,<b>,<c>,<d>` | `CMD adc FAIL status=<s> at=<n>` |
 | `servo <1\|2> <0..180>` | `CMD servo OK ch=<c> angle=<deg> pulse_us=<us>` (1000 us at 0, 2000 us at 180) | `CMD servo FAIL reason=usage`, `reason=range` (angle above 180) or `status=<s>` |
@@ -77,10 +78,14 @@ except `selftest`, which prints the report first.
 | `log on`, `log off` | `CMD log OK on=<0\|1>`: starts or stops recording tracking events (off after reset) | `CMD log FAIL reason=usage` |
 | `log flush` | `CMD log-flush OK stored=<n> blocks=<n> us=<us>`: writes the records that are not yet on the card now | `CMD log-flush FAIL status=<s>` |
 | `log get <n>` | `CMD log-get OK n=<n> t_ms=<ms> raw=<a>,<b>,<c>,<d> az=<a> tilt=<t> flags=<f> ok=<0\|1>`: record number n read back from the card, `ok=1` if its check word is right | `CMD log-get FAIL reason=usage`, `reason=range stored=<n>` or `step=<init\|read> status=<s>` |
+| `stats` | twelve `STAT` lines (statistics of the loop, the tasks, the receive ring and the memory; format in [instrumentation.md](instrumentation.md)), then `CMD stats OK` | `CMD stats FAIL reason=usage` |
+| `stats reset` | `CMD stats-reset OK`: clears the statistics and the counters and starts a new window; the state of the product is not touched | `CMD stats FAIL reason=usage` (any other argument) |
+| `load` | `CMD load OK us=<last> active=<0\|1>`: the state of the load test | none |
+| `load <us> <ms>` | `CMD load OK us=<us> ms=<ms>`: a test aid that starts a new window and makes every pass of the loop spend `<us>` microseconds in a busy wait for `<ms>` milliseconds; the window ends by itself with the `STAT` lines and `EVT load done us=<us> ms=<window>` | `CMD load FAIL reason=usage`, or `reason=range` (`<us>` above 50000, `<ms>` 0 or above 60000) |
 | anything else | none | `CMD <word> FAIL reason=unknown` |
 | a line longer than 48 characters | none | `CMD ? FAIL reason=too-long` |
 
-Besides replies the firmware prints event lines on its own. `EVT stow t_us=<t> lat_us=<l>` follows a pushbutton press (falling edge on PB5) that has stowed the panel: `t_us` is the time of the edge in microseconds on the free-running time base (a 32-bit cycle counter that wraps every 357.9 s), `lat_us` the time from the edge until both servo outputs were written. `EVT stow FAIL status=<s>` means a servo write failed. A press less than 200 ms after the last accepted one is ignored and only counted.
+Besides replies the firmware prints event lines on its own. `EVT stow t_us=<t> lat_us=<l>` follows a pushbutton press (falling edge on PB5) that has stowed the panel: `t_us` is the time of the edge in microseconds on the free-running time base (a 32-bit cycle counter that wraps every 357.9 s), `lat_us` the time from the edge until both servo outputs were written. `EVT stow FAIL status=<s>` means a servo write failed. `EVT load done us=<us> ms=<window>` closes a `load` window; the `STAT` lines before it have the same format as the reply of `stats` ([instrumentation.md](instrumentation.md)). A press less than 200 ms after the last accepted one is ignored and only counted.
 
 ## 2.1 Event log on the SD card (FR-05)
 
