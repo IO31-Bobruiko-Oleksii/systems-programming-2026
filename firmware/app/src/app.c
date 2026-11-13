@@ -643,6 +643,8 @@ static void button_poll(app_t *app)
     uint32_t count = plat_button_take(&first);
     uint32_t hz;
     uint32_t lockout;
+    uint32_t slack;
+    uint32_t since;
     uint32_t now;
     uint32_t cycles;
     tracker_result_t moved;
@@ -653,8 +655,10 @@ static void button_poll(app_t *app)
     }
     hz = plat_time_hz();
     lockout = (hz / 1000U) * APP_STOW_LOCKOUT_MS;
+    slack = (hz / 1000U) * APP_STAMP_SLACK_MS;
     app->button_edges += count;
-    if (app->button_accepted != 0U && (uint32_t)(first - app->button_last) < lockout) {
+    since = first - app->button_last + slack;
+    if (app->button_accepted != 0U && since < lockout + slack) {
         app->button_ignored += count;
         return;
     }

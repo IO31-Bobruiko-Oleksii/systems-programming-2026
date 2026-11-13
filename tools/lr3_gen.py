@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""Writes the long LR3 scenarios (S1, S2, S3) for the Wokwi CLI.
+
+usage: lr3_gen.py <s1|s2|s3>
+
+The scenario is written to scenarios/<name>.yaml. The comment lines "# window" and "# press"
+in the file are read back by lr3_stats.py, so do not edit them.
+
+A Wokwi CLI session of the free plan ends after 5 minutes of real time, and every scenario step
+costs about 0.7 s of it. So the scenarios use few steps: the commands of 4 s are sent in one
+write (one command per second on average) and no step waits for a reply except the last one.
+"""
 import random
 import sys
 from pathlib import Path

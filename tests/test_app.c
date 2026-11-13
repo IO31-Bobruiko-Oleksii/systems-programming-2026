@@ -858,6 +858,46 @@ static void test_presses_inside_the_lockout_are_ignored_and_counted(void)
     CHECK_EQ(app.button_edges, 4);
 }
 
+static void test_an_edge_stamped_a_little_before_the_last_press_stays_locked_out(void)
+{
+    start();
+    press_at(100000U, 101000U);
+    CHECK_EQ(app.button_accepted, 1);
+
+    press_at(100000U - 12000U, 130000U);
+    CHECK_STR(fake_uart_output(), "");
+    CHECK_EQ(app.button_accepted, 1);
+    CHECK_EQ(app.button_ignored, 1);
+
+    press_at(100000U - 24000U, 160000U);
+    CHECK_STR(fake_uart_output(), "");
+    CHECK_EQ(app.button_accepted, 1);
+    CHECK_EQ(app.button_ignored, 2);
+}
+
+static void test_a_press_long_after_the_last_one_is_accepted(void)
+{
+    start();
+    press_at(1000U, 2000U);
+    press_at(1000U + 2400000000U, 2400003000U);
+    CHECK_EQ(app.button_accepted, 2);
+    CHECK_EQ(app.button_ignored, 0);
+}
+
+static void test_the_lockout_works_across_the_counter_wrap(void)
+{
+    start();
+    press_at(0xFFFFF000U, 0xFFFFF800U);
+    CHECK_EQ(app.button_accepted, 1);
+
+    press_at(0xFFFFF000U + LOCKOUT / 2U, 0xFFFFF900U);
+    CHECK_EQ(app.button_accepted, 1);
+    CHECK_EQ(app.button_ignored, 1);
+
+    press_at(0xFFFFF000U + LOCKOUT, 0xFFFFFA00U);
+    CHECK_EQ(app.button_accepted, 2);
+}
+
 static void test_edges_that_arrive_together_count_as_one_press(void)
 {
     start();
@@ -1989,6 +2029,9 @@ int main(void)
     RUN(test_a_press_is_handled_before_a_due_tracking_run);
     RUN(test_a_press_works_before_tracking_has_started);
     RUN(test_presses_inside_the_lockout_are_ignored_and_counted);
+    RUN(test_an_edge_stamped_a_little_before_the_last_press_stays_locked_out);
+    RUN(test_a_press_long_after_the_last_one_is_accepted);
+    RUN(test_the_lockout_works_across_the_counter_wrap);
     RUN(test_edges_that_arrive_together_count_as_one_press);
     RUN(test_a_servo_failure_during_the_stow_is_reported);
     RUN(test_reaction_times_are_collected_for_every_accepted_press);
