@@ -7,23 +7,23 @@ metric                             W1         W2   deadline  verdict
 window_ms                       12011         29             
 T2 runs                           240          1             
 T2 skipped (missed)                 0          0          0  ok
-T2 start late, max us            4894       7621      25000  ok
-T2 start late, avg us            2891       7621             
-T2 period, avg us               49979      29296             
-T2 period, max us               54003      29296             
-T1 sense, max us                  602        604       5000  ok
-T2 body (track), max us           833        832             
-loop pass, avg us                5958        569             
-loop pass, max us                9963       7926             
+T2 start late, max us            5894         38      25000  ok
+T2 start late, avg us            3765         38             
+T2 period, avg us               50004      21115             
+T2 period, max us               55005      21115             
+T1 sense, max us                  602        602       5000  ok
+T2 body (track), max us           960        866             
+loop pass, avg us                5991        569             
+loop pass, max us               10356       7931             
 T4 commands, n                      3          4             
-T4 command, avg us               4689       6475             
-T4 command, max us               9850       7863     100000  ok
+T4 command, avg us               4822       6479             
+T4 command, max us              10251       7868     100000  ok
 T5 log block writes, n              0          0             
 T5 log block write, max us          -          -             
 E1 stow, n                          0          0             
 E1 stow, avg us                     -          -             
 E1 stow, max us                     -          -      10000  
-CPU load, per mille                17        921             
+CPU load, per mille                22        923             
 rx bytes taken                     17         51             
 rx bytes dropped                    0          0          0  ok
 rx errors                           0          0          0  ok
@@ -39,4 +39,4 @@ E1 (stow) latency per window, from the EVT lines:
   W2           none
 
 button: edges 0, accepted 0, ignored 0
-log: on 1, seq 0, stored 0, blocks 0, dropped 0, errors 0, flushes 0, flush_max_us 0
+log: on 1, seq 16, stored 0, blocks 0, dropped 144, errors 12, flushes 0, flush_max_us 0

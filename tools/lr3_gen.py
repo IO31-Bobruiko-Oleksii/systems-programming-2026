@@ -112,11 +112,7 @@ def build_e1():
     leads = [rnd.randrange(1, E1_LEAD_MS) for _ in range(E1_PRESSES)]
     s.wait(SELFTEST)
     s.delay(SETTLE_MS)
-    for pot in ("pot1", "pot2", "pot3", "pot4"):
-        s.control(pot, "position", 0.5)
-    s.write("stow", "resume")
-    s.delay(100)
-    s.comment("window 1 seconds=%d" % (NOSD_TICKS * TICK_MS // 1000))
+    s.comment("window 1 seconds=%d" % ((sum(leads) + E1_PRESSES * (E1_PAUSE_MS + 10)) // 1000))
     s.write("stats reset")
     s.delay(50)
     for i, lead in enumerate(leads):
@@ -150,6 +146,10 @@ def build_nosd():
     s = Scenario()
     s.wait("SELFTEST END total=5 passed=4 failed=1")
     s.delay(SETTLE_MS)
+    for pot in ("pot1", "pot2", "pot3", "pot4"):
+        s.control(pot, "position", 0.5)
+    s.write("stow", "resume")
+    s.delay(100)
     s.comment("window 1 seconds=%d" % (NOSD_TICKS * TICK_MS // 1000))
     s.write("stats reset", "log on")
     for t in range(NOSD_TICKS):

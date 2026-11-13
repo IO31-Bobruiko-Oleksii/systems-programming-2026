@@ -5,35 +5,37 @@ SELFTEST spi OK
 SELFTEST sd FAIL step=init status=3
 SELFTEST servo1 OK pulse_us=1500
 SELFTEST servo2 OK pulse_us=1500
-SELFTEST END total=5 passed=4 failed=1CMD stats-reset OK
+SELFTEST END total=5 passed=4 failed=1CMD stow OK az=90 tilt=90
+CMD resume OK
+CMD stats-reset OK
 CMD log OK on=1
-CMD log OK on=1 seq=0 stored=0 blocks=0 dropped=0 errors=0 flushes=0 flush_max_us=0
-STAT name=loop n=2016 min_us=42 avg_us=5958 max_us=9963
+CMD log OK on=1 seq=16 stored=0 blocks=0 dropped=144 errors=12 flushes=0 flush_max_us=0
+STAT name=loop n=2005 min_us=42 avg_us=5991 max_us=10356
 STAT name=sense n=240 min_us=602 avg_us=602 max_us=602
-STAT name=track n=240 min_us=830 avg_us=833 max_us=833
-STAT name=late n=240 min_us=888 avg_us=2891 max_us=4894
-STAT name=period n=240 min_us=47997 avg_us=49979 max_us=54003
-STAT name=cmd n=3 min_us=1783 avg_us=4689 max_us=9850
+STAT name=track n=240 min_us=844 avg_us=864 max_us=960
+STAT name=late n=240 min_us=888 avg_us=3765 max_us=5894
+STAT name=period n=240 min_us=47993 avg_us=50004 max_us=55005
+STAT name=cmd n=3 min_us=1783 avg_us=4822 max_us=10251
 STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
 STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
-STAT load window_ms=12011 busy_ms=213 load_pm=17
-STAT count runs=240 missed=0 rx_bytes=17 rx_errors=0 passes=2016
-STAT rx init=0 dropped=0 ring_max=76 errors=0 isr_n=81 isr_avg=149 isr_max=156
+STAT load window_ms=12011 busy_ms=265 load_pm=22
+STAT count runs=240 missed=0 rx_bytes=17 rx_errors=0 passes=2005
+STAT rx init=0 dropped=0 ring_max=76 errors=0 isr_n=82 isr_avg=149 isr_max=156
 STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=916 stack_res=1024 stack_free=9076
 CMD stats OK
 CMD stats-reset OK
 CMD sd-write FAIL step=init status=3
 CMD sd-write FAIL step=init status=3
 CMD sd-write FAIL step=init status=3
-STAT name=loop n=51 min_us=42 avg_us=569 max_us=7926
-STAT name=sense n=1 min_us=604 avg_us=604 max_us=604
-STAT name=track n=1 min_us=832 avg_us=832 max_us=832
-STAT name=late n=1 min_us=7621 avg_us=7621 max_us=7621
-STAT name=period n=1 min_us=29296 avg_us=29296 max_us=29296
-STAT name=cmd n=4 min_us=2314 avg_us=6475 max_us=7863
+STAT name=loop n=51 min_us=42 avg_us=569 max_us=7931
+STAT name=sense n=1 min_us=602 avg_us=602 max_us=602
+STAT name=track n=1 min_us=866 avg_us=866 max_us=866
+STAT name=late n=1 min_us=38 avg_us=38 max_us=38
+STAT name=period n=1 min_us=21115 avg_us=21115 max_us=21115
+STAT name=cmd n=4 min_us=2312 avg_us=6479 max_us=7868
 STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
 STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
-STAT load window_ms=29 busy_ms=26 load_pm=921
+STAT load window_ms=29 busy_ms=26 load_pm=923
 STAT count runs=1 missed=0 rx_bytes=51 rx_errors=0 passes=51
 STAT rx init=0 dropped=0 ring_max=58 errors=0 isr_n=0 isr_avg=0 isr_max=0
 STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=916 stack_res=1024 stack_free=9076
