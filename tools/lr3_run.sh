@@ -8,6 +8,8 @@ timeout_ms="${2:-600000}"
 scn="scenarios/$name.yaml"
 [ -r "$scn" ] || { echo "lr3_run: no such scenario: $scn" >&2; exit 2; }
 mkdir -p docs/captures/lr3 docs/metrics
+diagram="scenarios/lr3.diagram.json"
+[ -r "scenarios/$name.diagram.json" ] && diagram="scenarios/$name.diagram.json"
 serial="docs/captures/lr3/$name.serial.log"
 report="docs/metrics/stats-$name.txt"
 rm -f "$serial" "$report"
@@ -23,7 +25,7 @@ stamp() {
         printf '%4d.%03d %s\n' $((ms / 1000)) $((ms % 1000)) "$line"
     done
 }
-wokwi-cli --timeout "$timeout_ms" --scenario "$scn" --diagram-file scenarios/lr3.diagram.json \
+wokwi-cli --timeout "$timeout_ms" --scenario "$scn" --diagram-file "$diagram" \
     --serial-log-file "$serial" 2>&1 | stamp | tee "$log" || rc=$?
 
 t1=$(date +%s)

@@ -2,13 +2,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-name="${1:?usage: $0 <scenario> <loop|event|sweep|flood> [timeout_ms]}"
-mode="${2:?usage: $0 <scenario> <loop|event|sweep|flood> [timeout_ms]}"
+name="${1:?usage: $0 <scenario> <loop|event|sweep|flood|burst> [timeout_ms]}"
+mode="${2:?usage: $0 <scenario> <loop|event|sweep|flood|burst> [timeout_ms]}"
 timeout_ms="${3:-20000}"
 
 scn="scenarios/$name.yaml"
 [ -r "$scn" ] || { echo "lr3_capture: no such scenario: $scn" >&2; exit 2; }
 mkdir -p docs/captures/lr3 docs/metrics
+diagram="scenarios/lr3.diagram.json"
+[ -r "scenarios/$name.diagram.json" ] && diagram="scenarios/$name.diagram.json"
 vcd="docs/captures/lr3/$name.vcd"
 serial="docs/captures/lr3/$name.serial.log"
 report="docs/metrics/analyzer-$name.txt"
@@ -16,7 +18,7 @@ rm -f "$vcd" "$serial" "$report"
 
 log="$(mktemp)"
 rc=0
-wokwi-cli --timeout "$timeout_ms" --scenario "$scn" --diagram-file scenarios/lr3.diagram.json \
+wokwi-cli --timeout "$timeout_ms" --scenario "$scn" --diagram-file "$diagram" \
     --vcd-file "$vcd" --serial-log-file "$serial" 2>&1 | tee "$log" || rc=$?
 
 ok=1
@@ -31,6 +33,8 @@ fi
 
 if [ "$mode" = "sweep" ]; then
     python3 tools/lr3_sweep.py "$vcd" --serial "$serial" | tee "$report"
+elif [ "$mode" = "burst" ]; then
+    python3 tools/lr3_burst.py "$vcd" --serial "$serial" | tee "$report"
 elif [ "$mode" = "flood" ]; then
     python3 tools/lr3_sweep.py "$vcd" --serial "$serial" --names 1=stats-reply,2=sd-write | tee "$report"
 else

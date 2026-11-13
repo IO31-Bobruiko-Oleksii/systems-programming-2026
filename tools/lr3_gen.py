@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes the long LR3 scenarios (S1, S2, S3) for the Wokwi CLI.
 
-usage: lr3_gen.py <s1|s2|s3|e1>
+usage: lr3_gen.py <s1|s2|s3|e1|burst>
 
 The scenario is written to scenarios/<name>.yaml. The comment lines "# window" and "# press"
 in the file are read back by lr3_stats.py, so do not edit them.
@@ -14,7 +14,7 @@ import random
 import sys
 from pathlib import Path
 
-NAMES = {"s1": "s1-idle", "s2": "s2-nominal", "s3": "s3-worst", "e1": "e1-idle"}
+NAMES = {"s1": "s1-idle", "s2": "s2-nominal", "s3": "s3-worst", "e1": "e1-idle", "burst": "burst"}
 SELFTEST = "SELFTEST END total=5 passed=5 failed=0"
 SETTLE_MS = 6025                    # the servos reach their end stops, as in the other scenarios
 S1_SECONDS = 250
@@ -128,9 +128,23 @@ def build_e1():
     return s
 
 
+def build_burst():
+    """One `track` line alone, then BURST of them back to back: time from each line to its reply."""
+    s = Scenario()
+    s.wait(SELFTEST)
+    s.delay(500)
+    s.write("track")
+    s.delay(300)
+    s.write(*["track"] * BURST)
+    s.delay(600)
+    return s
+
+
 def build(key):
     if key == "e1":
         return build_e1()
+    if key == "burst":
+        return build_burst()
     s = Scenario()
     s.wait(SELFTEST)
     if key == "s1":
@@ -168,7 +182,10 @@ def main():
         sys.exit(__doc__)
     key = sys.argv[1]
     s = build(key)
-    seconds = s.ms // 1000 if key == "e1" else S1_SECONDS if key == "s1" else TICKS[key] * TICK_MS // 1000
+    if key in ("e1", "burst"):
+        seconds = s.ms // 1000
+    else:
+        seconds = S1_SECONDS if key == "s1" else TICKS[key] * TICK_MS // 1000
     path = Path(__file__).resolve().parent.parent / "scenarios" / (NAMES[key] + ".yaml")
     head = ["name: '%s: %d s (LR3)'" % (NAMES[key], seconds), "version: 1", "steps:"]
     with open(path, "w", newline="\n") as f:

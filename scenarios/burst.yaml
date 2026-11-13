@@ -1,0 +1,9 @@
+name: 'burst: 1 s (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 500ms
+  - write-serial: "track\n"
+  - delay: 300ms
+  - write-serial: "track\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\ntrack\n"
+  - delay: 600ms
