@@ -1,0 +1,176 @@
+   0.121 Wokwi CLI v0.27.1 (ffde06bde1ae)
+   2.362 Connected to Wokwi Simulation API 1.0.0-20261111-ga74d4d0e
+   6.204 Starting simulation...
+   9.026 Heliostat boot OK
+   9.028 SELFTEST BEGIN version=1
+   9.030 SELFTEST adc OK raw=1025,2050,3074,4095
+   9.031 SELFTEST spi OK
+   9.122 SELFTEST sd OK type=V2HC sig=55AA
+   9.124 SELFTEST servo1 OK pulse_us=1500
+   9.126 SELFTEST servo2 OK pulse_us=1500
+   9.127 SELFTEST END total=5 passed=5 failed=0
+   9.128 [park: 39 s (LR3)] Expected text matched: "SELFTEST END total=5 passed=5 failed=0"
+  14.518 [park: 39 s (LR3)] delay 500ms
+  15.218 CMD stow OK az=90 tilt=90
+  15.219 CMD resume OK
+  16.403 [park: 39 s (LR3)] delay 920ms
+  18.691 [park: 39 s (LR3)] delay 110ms
+  19.389 CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=19 runs=28 missed=0 errors=0
+  20.144 [park: 39 s (LR3)] delay 100ms
+  20.841 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=30 missed=0 errors=0
+  21.589 [park: 39 s (LR3)] delay 157ms
+  23.078 [park: 39 s (LR3)] delay 900ms
+  25.362 [park: 39 s (LR3)] delay 100ms
+  26.805 [park: 39 s (LR3)] delay 120ms
+  27.520 CMD track OK az=85 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=55 missed=0 errors=0
+  28.262 [park: 39 s (LR3)] delay 920ms
+  30.554 [park: 39 s (LR3)] delay 110ms
+  31.259 CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=76 missed=0 errors=0
+  31.991 [park: 39 s (LR3)] delay 100ms
+  32.710 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=78 missed=0 errors=0
+  33.440 [park: 39 s (LR3)] delay 182ms
+  34.947 [park: 39 s (LR3)] delay 900ms
+  37.214 [park: 39 s (LR3)] delay 100ms
+  38.632 [park: 39 s (LR3)] delay 132ms
+  39.329 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=104 missed=0 errors=0
+  40.123 [park: 39 s (LR3)] delay 920ms
+  42.415 [park: 39 s (LR3)] delay 110ms
+  43.124 CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=125 missed=0 errors=0
+  43.855 [park: 39 s (LR3)] delay 100ms
+  44.575 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=127 missed=0 errors=0
+  45.331 [park: 39 s (LR3)] delay 191ms
+  46.907 [park: 39 s (LR3)] delay 900ms
+  49.268 [park: 39 s (LR3)] delay 100ms
+  50.714 [park: 39 s (LR3)] delay 106ms
+  51.415 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=153 missed=0 errors=0
+  52.164 [park: 39 s (LR3)] delay 920ms
+  54.450 [park: 39 s (LR3)] delay 110ms
+  55.157 CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=173 missed=0 errors=0
+  55.918 [park: 39 s (LR3)] delay 100ms
+  56.626 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=176 missed=0 errors=0
+  57.353 [park: 39 s (LR3)] delay 164ms
+  58.852 [park: 39 s (LR3)] delay 900ms
+  61.116 [park: 39 s (LR3)] delay 100ms
+  62.543 [park: 39 s (LR3)] delay 138ms
+  63.270 CMD track OK az=85 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=201 missed=0 errors=0
+  64.077 [park: 39 s (LR3)] delay 920ms
+  66.384 [park: 39 s (LR3)] delay 110ms
+  67.098 CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=222 missed=0 errors=0
+  67.846 [park: 39 s (LR3)] delay 100ms
+  68.548 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=224 missed=0 errors=0
+  69.288 [park: 39 s (LR3)] delay 189ms
+  70.801 [park: 39 s (LR3)] delay 900ms
+  73.065 [park: 39 s (LR3)] delay 100ms
+  74.498 [park: 39 s (LR3)] delay 135ms
+  75.196 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=250 missed=0 errors=0
+  75.968 [park: 39 s (LR3)] delay 920ms
+  78.257 [park: 39 s (LR3)] delay 110ms
+  78.954 CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=271 missed=0 errors=0
+  79.691 [park: 39 s (LR3)] delay 100ms
+  80.394 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=273 missed=0 errors=0
+  81.115 [park: 39 s (LR3)] delay 176ms
+  82.635 [park: 39 s (LR3)] delay 900ms
+  84.991 [park: 39 s (LR3)] delay 100ms
+  86.423 [park: 39 s (LR3)] delay 136ms
+  87.123 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=299 missed=0 errors=0
+  87.891 [park: 39 s (LR3)] delay 920ms
+  90.236 [park: 39 s (LR3)] delay 110ms
+  90.930 CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=320 missed=0 errors=0
+  91.668 [park: 39 s (LR3)] delay 100ms
+  92.379 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=322 missed=0 errors=0
+  93.109 [park: 39 s (LR3)] delay 185ms
+  94.635 [park: 39 s (LR3)] delay 900ms
+  96.937 [park: 39 s (LR3)] delay 100ms
+  98.363 [park: 39 s (LR3)] delay 146ms
+  99.060 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=348 missed=0 errors=0
+  99.827 [park: 39 s (LR3)] delay 920ms
+ 102.104 [park: 39 s (LR3)] delay 110ms
+ 102.808 CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=369 missed=0 errors=0
+ 103.536 [park: 39 s (LR3)] delay 100ms
+ 104.230 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=371 missed=0 errors=0
+ 104.958 [park: 39 s (LR3)] delay 199ms
+ 106.477 [park: 39 s (LR3)] delay 900ms
+ 108.747 [park: 39 s (LR3)] delay 100ms
+ 110.181 [park: 39 s (LR3)] delay 149ms
+ 110.878 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=397 missed=0 errors=0
+ 111.652 [park: 39 s (LR3)] delay 920ms
+ 113.969 [park: 39 s (LR3)] delay 110ms
+ 114.662 CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=19 runs=419 missed=0 errors=0
+ 115.403 [park: 39 s (LR3)] delay 100ms
+ 116.100 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=421 missed=0 errors=0
+ 116.819 [park: 39 s (LR3)] delay 181ms
+ 118.353 [park: 39 s (LR3)] delay 900ms
+ 120.625 [park: 39 s (LR3)] delay 100ms
+ 122.043 [park: 39 s (LR3)] delay 148ms
+ 122.739 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=447 missed=0 errors=0
+ 123.511 [park: 39 s (LR3)] delay 920ms
+ 125.802 [park: 39 s (LR3)] delay 110ms
+ 126.498 CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=468 missed=0 errors=0
+ 127.236 [park: 39 s (LR3)] delay 100ms
+ 127.934 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=470 missed=0 errors=0
+ 128.652 [park: 39 s (LR3)] delay 199ms
+ 130.178 [park: 39 s (LR3)] delay 900ms
+ 132.457 [park: 39 s (LR3)] delay 100ms
+ 133.896 [park: 39 s (LR3)] delay 137ms
+ 134.592 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=496 missed=0 errors=0
+ 135.370 [park: 39 s (LR3)] delay 920ms
+ 137.845 [park: 39 s (LR3)] delay 110ms
+ 138.545 CMD track OK az=81 tilt=99 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=517 missed=0 errors=0
+ 139.285 [park: 39 s (LR3)] delay 100ms
+ 139.988 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=520 missed=0 errors=0
+ 140.705 [park: 39 s (LR3)] delay 178ms
+ 142.231 [park: 39 s (LR3)] delay 900ms
+ 143.995 [park: 39 s (LR3)] delay 100ms
+ 145.431 [park: 39 s (LR3)] delay 115ms
+ 146.128 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=545 missed=0 errors=0
+ 146.868 [park: 39 s (LR3)] delay 920ms
+ 149.148 [park: 39 s (LR3)] delay 110ms
+ 149.845 CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=19 runs=566 missed=0 errors=0
+ 150.596 [park: 39 s (LR3)] delay 100ms
+ 151.295 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=568 missed=0 errors=0
+ 152.019 [park: 39 s (LR3)] delay 150ms
+ 153.498 [park: 39 s (LR3)] delay 900ms
+ 155.775 [park: 39 s (LR3)] delay 100ms
+ 157.196 [park: 39 s (LR3)] delay 139ms
+ 157.903 CMD track OK az=85 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=593 missed=0 errors=0
+ 158.657 [park: 39 s (LR3)] delay 920ms
+ 160.941 [park: 39 s (LR3)] delay 110ms
+ 161.638 CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=614 missed=0 errors=0
+ 162.380 [park: 39 s (LR3)] delay 100ms
+ 163.082 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=616 missed=0 errors=0
+ 163.803 [park: 39 s (LR3)] delay 155ms
+ 165.279 [park: 39 s (LR3)] delay 900ms
+ 167.562 [park: 39 s (LR3)] delay 100ms
+ 168.988 [park: 39 s (LR3)] delay 107ms
+ 169.686 CMD track OK az=85 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=641 missed=0 errors=0
+ 170.414 [park: 39 s (LR3)] delay 920ms
+ 172.704 [park: 39 s (LR3)] delay 110ms
+ 173.405 CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=662 missed=0 errors=0
+ 174.180 [park: 39 s (LR3)] delay 100ms
+ 174.880 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=664 missed=0 errors=0
+ 175.601 [park: 39 s (LR3)] delay 168ms
+ 177.153 [park: 39 s (LR3)] delay 900ms
+ 179.434 [park: 39 s (LR3)] delay 100ms
+ 180.864 [park: 39 s (LR3)] delay 106ms
+ 181.560 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=690 missed=0 errors=0
+ 182.293 [park: 39 s (LR3)] delay 920ms
+ 184.604 [park: 39 s (LR3)] delay 110ms
+ 185.302 CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=710 missed=0 errors=0
+ 186.048 [park: 39 s (LR3)] delay 100ms
+ 186.747 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=712 missed=0 errors=0
+ 187.469 [park: 39 s (LR3)] delay 178ms
+ 189.009 [park: 39 s (LR3)] delay 900ms
+ 191.298 [park: 39 s (LR3)] delay 100ms
+ 192.739 [park: 39 s (LR3)] delay 100ms
+ 193.437 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=738 missed=0 errors=0
+ 194.164 [park: 39 s (LR3)] delay 920ms
+ 196.505 [park: 39 s (LR3)] delay 110ms
+ 197.201 CMD track OK az=82 tilt=98 band=100 zero=90,90 parked=0 stowed=0 dark=18 runs=758 missed=0 errors=0
+ 197.937 [park: 39 s (LR3)] delay 100ms
+ 198.638 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20 runs=760 missed=0 errors=0
+ 199.359 [park: 39 s (LR3)] delay 193ms
+ 200.884 [park: 39 s (LR3)] delay 900ms
+ 203.160 [park: 39 s (LR3)] delay 100ms
+ 204.741 [park: 39 s (LR3)] delay 131ms
+ 205.441 CMD track OK az=84 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=786 missed=0 errors=0
+ 205.528 [park: 39 s (LR3)] Scenario completed successfully

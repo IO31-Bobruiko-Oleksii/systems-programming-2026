@@ -43,4 +43,8 @@ if [ "$ok" -ne 1 ]; then
     exit 1
 fi
 
-python3 tools/lr3_stats.py "$serial" --scenario "$scn" | tee "$report"
+if [ "$name" = "park" ]; then
+    python3 tools/lr3_park.py "$serial" --scenario "$scn" | tee "$report"
+else
+    python3 tools/lr3_stats.py "$serial" --scenario "$scn" | tee "$report"
+fi

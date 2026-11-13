@@ -1,0 +1,498 @@
+name: 'park: 39 s (LR3)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot3
+      control: position
+      value: 0.5
+  - set-control:
+      part-id: pot4
+      control: position
+      value: 0.5
+  - write-serial: "stow\nresume\n"
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0
+  - set-control:
+      part-id: pot3
+      control: position
+      value: 0
+  - set-control:
+      part-id: pot4
+      control: position
+      value: 0
+  - delay: 500ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=0 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=0 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 157ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=0 offset=900
+  - write-serial: "track\n"
+  - delay: 120ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=1 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=1 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 182ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=1 offset=900
+  - write-serial: "track\n"
+  - delay: 132ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=2 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=2 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 191ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=2 offset=900
+  - write-serial: "track\n"
+  - delay: 106ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=3 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=3 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 164ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=3 offset=900
+  - write-serial: "track\n"
+  - delay: 138ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=4 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=4 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 189ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=4 offset=900
+  - write-serial: "track\n"
+  - delay: 135ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=5 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=5 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 176ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=5 offset=900
+  - write-serial: "track\n"
+  - delay: 136ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=6 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=6 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 185ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=6 offset=900
+  - write-serial: "track\n"
+  - delay: 146ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=7 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=7 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 199ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=7 offset=900
+  - write-serial: "track\n"
+  - delay: 149ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=8 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=8 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 181ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=8 offset=900
+  - write-serial: "track\n"
+  - delay: 148ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=9 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=9 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 199ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=9 offset=900
+  - write-serial: "track\n"
+  - delay: 137ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=10 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=10 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 178ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=10 offset=900
+  - write-serial: "track\n"
+  - delay: 115ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=11 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=11 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 150ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=11 offset=900
+  - write-serial: "track\n"
+  - delay: 139ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=12 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=12 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 155ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=12 offset=900
+  - write-serial: "track\n"
+  - delay: 107ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=13 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=13 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 168ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=13 offset=900
+  - write-serial: "track\n"
+  - delay: 106ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=14 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=14 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 178ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=14 offset=900
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 920ms
+  # probe before cycle=15 offset=920
+  - write-serial: "track\n"
+  - delay: 110ms
+  # probe after cycle=15 offset=1030
+  - write-serial: "track\n"
+  - delay: 100ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 193ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0
+  - delay: 900ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.5
+  - delay: 100ms
+  # probe cloud cycle=15 offset=900
+  - write-serial: "track\n"
+  - delay: 131ms

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes the long LR3 scenarios (S1, S2, S3) for the Wokwi CLI.
 
-usage: lr3_gen.py <s1|s2|s3|e1|burst|nosd>
+usage: lr3_gen.py <s1|s2|s3|e1|burst|nosd|park>
 
 The scenario is written to scenarios/<name>.yaml. The comment lines "# window" and "# press"
 in the file are read back by lr3_stats.py, so do not edit them.
@@ -14,7 +14,7 @@ import random
 import sys
 from pathlib import Path
 
-NAMES = {"s1": "s1-idle", "s2": "s2-nominal", "s3": "s3-worst", "e1": "e1-idle", "burst": "burst", "nosd": "nosd-log"}
+NAMES = {"s1": "s1-idle", "s2": "s2-nominal", "s3": "s3-worst", "e1": "e1-idle", "burst": "burst", "nosd": "nosd-log", "park": "park"}
 SELFTEST = "SELFTEST END total=5 passed=5 failed=0"
 SETTLE_MS = 6025                    # the servos reach their end stops, as in the other scenarios
 S1_SECONDS = 250
@@ -32,6 +32,10 @@ E1_PAUSE_MS = 250
 TIME_CALLS = 3
 NOSD_TICKS = 3
 CHUNK_MS = 10000
+PARK_CYCLES = 16
+PARK_BEFORE_MS = 920                # probe 1: at most 19 dark samples have been taken
+PARK_AFTER_MS = 1030                # probe 2: the 20th dark sample is certainly done
+PARK_CLOUD_MS = 900                 # a cloud shorter than 1 s: the panel must not park
 
 
 class Scenario:
@@ -162,6 +166,38 @@ def build_nosd():
     return s
 
 
+def build_park():
+    """T3: the light goes out; `track` is read before and after the 20th dark sample; a short cloud."""
+    s = Scenario()
+    rnd = random.Random(2026)
+    s.wait(SELFTEST)
+    for pot in ("pot1", "pot2", "pot3", "pot4"):
+        s.control(pot, "position", 0.5)
+    s.write("stow", "resume")
+    for pot in ("pot2", "pot3", "pot4"):    # light on the TL channel only: the panel keeps moving
+        s.control(pot, "position", 0)
+    s.delay(500)
+    for c in range(PARK_CYCLES):
+        s.control("pot1", "position", 0)    # the light goes out
+        s.delay(PARK_BEFORE_MS)
+        s.comment("probe before cycle=%d offset=%d" % (c, PARK_BEFORE_MS))
+        s.write("track")
+        s.delay(PARK_AFTER_MS - PARK_BEFORE_MS)
+        s.comment("probe after cycle=%d offset=%d" % (c, PARK_AFTER_MS))
+        s.write("track")
+        s.delay(100)
+        s.control("pot1", "position", 0.5)  # the light is back
+        s.delay(150 + rnd.randrange(50))
+        s.control("pot1", "position", 0)    # a cloud
+        s.delay(PARK_CLOUD_MS)
+        s.control("pot1", "position", 0.5)
+        s.delay(100)
+        s.comment("probe cloud cycle=%d offset=%d" % (c, PARK_CLOUD_MS))
+        s.write("track")
+        s.delay(100 + rnd.randrange(50))    # the phase against the T2 grid differs from cycle to cycle
+    return s
+
+
 def build(key):
     if key == "e1":
         return build_e1()
@@ -169,6 +205,8 @@ def build(key):
         return build_burst()
     if key == "nosd":
         return build_nosd()
+    if key == "park":
+        return build_park()
     s = Scenario()
     s.wait(SELFTEST)
     if key == "s1":
@@ -206,7 +244,7 @@ def main():
         sys.exit(__doc__)
     key = sys.argv[1]
     s = build(key)
-    if key in ("e1", "burst", "nosd"):
+    if key in ("e1", "burst", "nosd", "park"):
         seconds = s.ms // 1000
     else:
         seconds = S1_SECONDS if key == "s1" else TICKS[key] * TICK_MS // 1000
