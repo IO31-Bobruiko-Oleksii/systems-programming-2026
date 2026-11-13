@@ -5,8 +5,22 @@ steps:
   - delay: 6025ms
   # window 1 seconds=12
   - write-serial: "stats reset\nlog on\n"
-  - delay: 10000ms
-  - delay: 2000ms
-  - write-serial: "sd write 16000\nlog\nstats\nbutton\n"
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.9
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.5
+  - delay: 4000ms
+  - set-control:
+      part-id: pot2
+      control: position
+      value: 0.1
+  - delay: 4000ms
+  # window 2 seconds=1
+  - write-serial: "log\nstats\nstats reset\nsd write 16000\nsd write 16000\nsd write 16000\nstats\nbutton\n"
   - wait-serial: 'CMD button OK edges='
   - delay: 5ms

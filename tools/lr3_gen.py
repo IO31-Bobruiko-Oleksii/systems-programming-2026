@@ -30,7 +30,7 @@ E1_PRESSES = 40
 E1_LEAD_MS = 100
 E1_PAUSE_MS = 250
 TIME_CALLS = 3
-NOSD_SECONDS = 12
+NOSD_TICKS = 3
 CHUNK_MS = 10000
 
 
@@ -112,7 +112,11 @@ def build_e1():
     leads = [rnd.randrange(1, E1_LEAD_MS) for _ in range(E1_PRESSES)]
     s.wait(SELFTEST)
     s.delay(SETTLE_MS)
-    s.comment("window 1 seconds=%d" % ((sum(leads) + E1_PRESSES * (E1_PAUSE_MS + 10)) // 1000))
+    for pot in ("pot1", "pot2", "pot3", "pot4"):
+        s.control(pot, "position", 0.5)
+    s.write("stow", "resume")
+    s.delay(100)
+    s.comment("window 1 seconds=%d" % (NOSD_TICKS * TICK_MS // 1000))
     s.write("stats reset")
     s.delay(50)
     for i, lead in enumerate(leads):
@@ -142,14 +146,17 @@ def build_burst():
 
 
 def build_nosd():
-    """The SD card is absent (scenarios/nosd-log.diagram.json): what a failing log costs."""
+    """The SD card is absent (scenarios/nosd-log.diagram.json): a failing log, a failing command."""
     s = Scenario()
     s.wait("SELFTEST END total=5 passed=4 failed=1")
     s.delay(SETTLE_MS)
-    s.comment("window 1 seconds=%d" % NOSD_SECONDS)
+    s.comment("window 1 seconds=%d" % (NOSD_TICKS * TICK_MS // 1000))
     s.write("stats reset", "log on")
-    s.delay(NOSD_SECONDS * 1000)
-    s.write("sd write 16000", "log", "stats", "button")
+    for t in range(NOSD_TICKS):
+        s.control("pot2", "position", POT_CYCLE[t % len(POT_CYCLE)])
+        s.delay(TICK_MS)
+    s.comment("window 2 seconds=1")
+    s.write("log", "stats", "stats reset", *["sd write 16000"] * 3, "stats", "button")
     s.wait("CMD button OK edges=")
     s.delay(5)
     return s
