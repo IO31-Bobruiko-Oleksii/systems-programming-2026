@@ -9,17 +9,30 @@ All times are simulator times (Wokwi, 12 MHz core clock). Judging is by the **ma
 `docs/tasks.md`. Task names (T1..T6, E1) and deadlines are from `docs/tasks.md`; the way every
 number was measured is in `docs/instrumentation.md`. Files are linked next to each number.
 
+**Builds.** The firmware changed while the measurements were being made, and its banner has no git
+hash. The build of each result is reconstructed from the commit in which the capture was committed
+and is named A to D in `docs/baseline-lab4.md`, section 2. A result taken on build A or B carries
+its letter in brackets, for example "(A)". A result without a letter was taken on C or D; these two
+differ only in how a second press inside the 200 ms lockout is counted, not in the timing of any
+task. A and B have no receive interrupt and ring: their loop-pass figures lack the receive handler
+(about 13 us per byte received during a pass), and the reply of `stats` lacks the `STAT rx` line
+(about 7 ms of transmission). The pass of the `stats` reply, 82.7 ms (A), is therefore expected
+near 90 ms on the final build (the command maximum of the same reply on build C was 86.9 ms). The
+captures of A are `stats`, `stow` and `stow-busy`; those of B are `load`, `sweep-ms` and
+`sweep-uart-poll`. A re-run of them on the final build is optional (baseline, section 2); until
+then the letters are the honest label.
+
 ## Summary
 
 | # | Limitation | Category | Affects | Worst measured | Hypothesis for LR4 (metric: baseline -> expected) |
 |---|---|---|---|---|---|
 | 1 | The event reaction waits for the longest blocking section | reaction time | E1 (FR-06) | S3: 18.5 ms against 10 ms, 10 of 27 SD-phase presses late | E1 max in S3: 18.5 ms -> at most 1 ms; idle 6.1 ms -> at most 1 ms |
 | 2 | Start jitter of the periodic task follows every other task's longest section | jitter | T2 (FR-02..04) | late max 5.9 / 10.5 / 21.0 ms (S1 / S2 / S3) against 25 ms | T2 late max in all scenarios: at most 2 ms; skipped runs in the `stats` window 1 -> 0 |
-| 3 | Console replies and long commands block the loop (polled TX) | long operations | T4 (FR-07), T2, E1 | reply of line 9 of a burst ends at 101.9 ms; `stats` pass 82.7 ms; `time` 342 ms | lines of a burst answered in time 8 -> about 10 (limited by the wire); T2 late during `stats` 55.3 ms -> at most 2 ms |
+| 3 | Console replies and long commands block the loop (polled TX) | long operations | T4 (FR-07), T2, E1 | reply of line 9 of a burst ends at 101.9 ms; `stats` pass 82.7 ms (A); `time` 342 ms | lines of a burst answered in time 8 -> about 10 (limited by the wire); T2 late during `stats` 55.3 ms -> at most 2 ms |
 | 4 | Input is lost when the loop is blocked longer than the 256-byte ring holds | overload | T4 (FR-07) | 53..657 of 1440 bytes lost in the flood; 224 of 486 during a `stats` reply | bytes lost: 0 in the flood windows, at most about 30 in the `stats` window |
 | 5 | Every datum shared with an interrupt needs hand-made protection | shared resources | E1, T4 | S2: 4 presses counted as 5 (fixed, commit 19b0119) | 0 anomalies in at least 100 presses; ISR-to-task latency measured |
 | 6 | A failing device blocks the loop and fails silently | failure handling | T5 (FR-05), all | card absent: 90 % of the log events dropped, loop blocked 4 ms once per second; stuck device: 0.1 s .. 4.9 s (computed) | card absent: T2 late max and E1 unaffected (at most 2 ms) |
-| 7 | Adding a task changes the timing of all existing tasks | modularity | all | E1 breaks at +6 ms per pass, T2 at +20 ms per pass | break points not reached up to +30 ms with the new work at the lowest priority |
+| 7 | Adding a task changes the timing of all existing tasks | modularity | all | E1 breaks at +6 ms per pass, T2 at +20 ms per pass (B) | break points not reached up to +30 ms with the new work at the lowest priority |
 | 8 | Flash is nearly full and one stack is sized by the deepest path of any task | memory | build | flash 96.77 % (1060 B free); stack worst case 1016 B of a 1024 B budget | kernel 5..10 KB must be found by trimming; RAM 31 % -> about 40..55 % (estimate) |
 
 The most serious one is limitation 1, see the end of the file.
@@ -33,8 +46,8 @@ passes. So for an event handled in `button_poll`:
     reaction(max)  =  B + H
 
 where B is the longest stretch in which the loop does not return to `button_poll`, and H is the
-handler time (0.10..0.12 ms: the EVENT pulse is 101.9 us wide in `stow-busy`, 102.2 and 119.0 us in
-`stow`; [analyzer-stow-busy.txt](metrics/analyzer-stow-busy.txt), [analyzer-stow.txt](metrics/analyzer-stow.txt)).
+handler time (0.10..0.12 ms: the EVENT pulse is 101.9 us wide in `stow-busy` (A), 102.2 and 119.0 us in
+`stow` (A); [analyzer-stow-busy.txt](metrics/analyzer-stow-busy.txt), [analyzer-stow.txt](metrics/analyzer-stow.txt)).
 The same B bounds how late T2 can start. B, taken from the measurements:
 
 | Source of B | Length | Where measured |
@@ -42,7 +55,7 @@ The same B bounds how late T2 can start. B, taken from the measurements:
 | idle pass (5 ms wait for a byte plus tick alignment) | 6.0 ms | [stats-s1-idle.txt](metrics/stats-s1-idle.txt), loop pass max 6007 us |
 | console command with its reply, typical | 11.8 ms (S2), 19.9 ms (S3) | [stats-s2-nominal.txt](metrics/stats-s2-nominal.txt), [stats-s3-worst.txt](metrics/stats-s3-worst.txt) |
 | `sd write` command (13.4 ms write, 3.6 ms reply, parsing) | about 21 ms | [stats-s3-worst.txt](metrics/stats-s3-worst.txt), table "press during an sd write" |
-| `stats` reply | 82.7 ms | [analyzer-stats.txt](metrics/analyzer-stats.txt), longer pass without a T2 run |
+| `stats` reply | 82.7 ms (A) | [analyzer-stats.txt](metrics/analyzer-stats.txt), longer pass without a T2 run |
 | `time` command (diagnostic, 40000 clock reads) | 342 ms | [stats-e1-idle.txt](metrics/stats-e1-idle.txt), window W2 |
 
 Check against the data: idle B = 6.0 ms gives 6.1 ms, measured max 6.113 ms (n = 40); S3 B = 21 ms
@@ -63,7 +76,7 @@ output changed within 30 ms.
 - The reaction depends on when the press came: a press `d` ms after the `sd write` line was sent
   waits for the rest of the command, about 21 ms minus `d` (3 ms: 18.0..18.5 ms; 11 ms: 10.0 ms;
   19 ms: 1.7 ms). After about 21 ms only the idle-pass phase is left (0.6..5.6 ms).
-- One press on the logic analyzer ([stow-busy.vcd](captures/lr3/stow-busy.vcd),
+- One press on the logic analyzer (build A, [stow-busy.vcd](captures/lr3/stow-busy.vcd),
   [analyzer-stow-busy.txt](metrics/analyzer-stow-busy.txt)): the edge came 712 us after the loop
   became busy, the busy stretch lasted 24.8 ms, the EVENT pulse started 18.93 ms after the edge, the
   firmware printed `lat_us=19020` (the analyzer is 11.0 us above the firmware), and the new servo
@@ -74,7 +87,7 @@ output changed within 30 ms.
   13.5 ms in 129 s). It did not in S2, by chance.
 - Idle floor: 40 presses in an idle system ([stats-e1-idle.txt](metrics/stats-e1-idle.txt)): min 0.34 ms,
   median 2.69 ms, p90 5.51 ms, max 6.11 ms, 40 of 40 accepted. This meets 10 ms by 3.9 ms.
-- Per-pass work that is added to every pass ([analyzer-sweep-ms.txt](metrics/analyzer-sweep-ms.txt)):
+- Per-pass work that is added to every pass (build B, [analyzer-sweep-ms.txt](metrics/analyzer-sweep-ms.txt)):
   firmware reaction 9.9 ms at +4 ms per pass (met), 11.5 ms at +6 ms (missed).
 
 **Cause in the architecture.** The ISR (`EXTI4_15_IRQHandler`) only counts the edge and stamps the
@@ -120,7 +133,7 @@ includes the longest of them. Stack overflow of the new task.
 
 **Hypothesis for LR4.** Same S3 scenario and the same 30 presses: E1 max from 18.5 ms to at most
 1 ms (handler 0.12 ms plus switch plus the longest masked section), and independent of `d`;
-idle max from 6.1 ms to at most 1 ms. The end-to-end pulse in `stow-busy` from 31.4 ms to at most
+idle max from 6.1 ms to at most 1 ms. The end-to-end pulse in `stow-busy` (A) from 31.4 ms to at most
 about 21 ms (reaction plus one 20 ms frame), which meets the 30 ms deadline.
 
 ### Limitation 2: Start jitter of the periodic task follows every other task's longest section
@@ -141,8 +154,8 @@ Source: [S1](metrics/stats-s1-idle.txt), [S2](metrics/stats-s2-nominal.txt),
 4 ms. A `stats` reply is longer than the period: in the flood run the window with a `stats` reply had
 T2 late max 55.3 ms and one skipped run ([analyzer-flood.txt](metrics/analyzer-flood.txt), window
 `stats-reply`). With per-pass work added, the first miss is at +20 ms per pass (+10 ms is the last good
-value; [analyzer-sweep-ms.txt](metrics/analyzer-sweep-ms.txt)).
-Two methods for the same metric ([analyzer-stats.txt](metrics/analyzer-stats.txt)): T2 start jitter
+value; build B, [analyzer-sweep-ms.txt](metrics/analyzer-sweep-ms.txt)).
+Two methods for the same metric (build A, [analyzer-stats.txt](metrics/analyzer-stats.txt)): T2 start jitter
 4007 us by the cycle counter and 4228 us on the analyzer (+221 us, about 74 ppm of clock difference
 between the firmware time base and the simulation; see "Not counted" below).
 
@@ -192,7 +205,8 @@ delayed by every reply.
   ([analyzer-burst.txt](metrics/analyzer-burst.txt), [burst.vcd](captures/lr3/burst.vcd)).
 - The wire byte takes 93.9 us instead of 86.7 us (about 8 % more): the simulated USART seems to start the
   next byte only after the data register is refilled (cause not confirmed).
-- `stats` blocks the loop for 82.7 ms in one pass ([analyzer-stats.txt](metrics/analyzer-stats.txt));
+- `stats` blocks the loop for 82.7 ms in one pass (build A, [analyzer-stats.txt](metrics/analyzer-stats.txt));
+  on the final build, with the `STAT rx` line, about 90 ms is expected;
   the flood run with a 12-line `stats` shows a period max of 87.8 ms and T2 late 55.3 ms.
 - `time` (a diagnostic command with 40000 clock reads) blocks the loop for 342 ms: 18 T2 periods
   skipped in a 1032 ms window, T2 late max 318 ms, CPU load 998 per mille
@@ -235,7 +249,7 @@ the 5 runs inside the burst). Window with a `stats` reply: T2 late 55.3 ms to at
 sending. A line with a lost byte is a damaged command; a lost line end merges two lines.
 
 **Evidence.**
-- Before the interrupt and ring ([analyzer-sweep-uart-poll.txt](metrics/analyzer-sweep-uart-poll.txt)):
+- Before the interrupt and ring (build B, [analyzer-sweep-uart-poll.txt](metrics/analyzer-sweep-uart-poll.txt)):
   the loop must take a byte every 86.7 us. The first loss came at +17 us of work per pass (P avg 69.6 us;
   the last good window had P avg 47.2 us), and 100 of 192 bytes were lost at +100 us. A fit of the
   ten windows puts the break point at about 54.6 us of work per pass (a model, not a measurement).
@@ -263,7 +277,7 @@ sending. A line with a lost byte is a damaged command; a lost line end merges tw
 
 **Cause in the architecture.** Reading the UART needs the loop to run. The ring turns the limit from
 "one pass" into "the longest blocking section", but it is still a limit: B above 22.2 ms at line
-rate loses bytes, and the longest sections (`stats` 82.7 ms, `time` 342 ms) are longer than that.
+rate loses bytes, and the longest sections (`stats` 82.7 ms (A), `time` 342 ms) are longer than that.
 
 **Workaround without an OS.** Bigger ring (RAM is free: each 256 B adds 22.2 ms); DMA in circular mode
 with an idle-line interrupt, which also removes the 143-cycle (11.9 us) interrupt per byte, 13.8 % of the
@@ -278,7 +292,7 @@ scheduling latency and not the longest blocking section.
 **What an OS would cost.** A queue call from the interrupt for every byte costs more than the bare
 ring (the current handler: 143 cycles); a stream buffer with one notification per line is cheaper.
 Bytes can still be lost if a higher-priority task keeps the processor. If the single console task
-also does the formatting, the 20..25 ms of formatting in `stats` (the 82.7 ms pass minus the transmit
+also does the formatting, the 20..25 ms of formatting in `stats` (the 82.7 ms pass (A) minus the transmit
 time of its 666 bytes, 62.5 ms at 93.9 us or 57.7 ms at 86.7 us) is as long as the ring.
 
 **Hypothesis for LR4.** Same flood scenario: bytes lost 0 in the six sweep windows (from 53..657) and the
@@ -402,7 +416,7 @@ problem). The computed stuck-card bounds cannot be checked in the simulator.
 
 **Evidence.** The `load <us>` command adds work to every pass, which is the worst case of a new task
 whose longest section is X. Seven values of X were run
-([analyzer-sweep-ms.txt](metrics/analyzer-sweep-ms.txt), [sweep-ms.vcd](captures/lr3/sweep-ms.vcd)):
+(build B, [analyzer-sweep-ms.txt](metrics/analyzer-sweep-ms.txt), [sweep-ms.vcd](captures/lr3/sweep-ms.vcd)):
 
 | X per pass | 1 ms | 2 ms | 4 ms | 6 ms | 10 ms | 20 ms | 30 ms |
 |---|---|---|---|---|---|---|---|
