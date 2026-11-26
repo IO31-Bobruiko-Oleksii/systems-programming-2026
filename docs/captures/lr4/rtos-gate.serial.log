@@ -1,0 +1,17 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0
+GATE up tick_hz=1000 core_hz=12000000 heap_free=2208
+GATE pass=1 blink_runs=3 gap_min_us=10000 gap_max_us=10000 evt_n=0 evt_max_us=0
+GATE pass=2 blink_runs=46 gap_min_us=9998 gap_max_us=10001 evt_n=0 evt_max_us=0
+GATE pass=3 blink_runs=90 gap_min_us=9998 gap_max_us=10003 evt_n=0 evt_max_us=0
+GATE pass=4 blink_runs=134 gap_min_us=9980 gap_max_us=10020 evt_n=5 evt_max_us=115
+GATE pass=5 blink_runs=178 gap_min_us=9998 gap_max_us=10002 evt_n=5 evt_max_us=115
+GATE pass=6 blink_runs=222 gap_min_us=9997 gap_max_us=10004 evt_n=5 evt_max_us=115
+GATE pass=7 blink_runs=266 gap_min_us=9998 gap_max_us=10003 evt_n=5 evt_max_us=115
+GATE pass=8 

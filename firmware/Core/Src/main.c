@@ -24,6 +24,9 @@
 #include "plat_uart.h"
 #include "plat_mem.h"
 #include "app.h"
+#ifdef USE_FREERTOS
+#include "rtos_app.h"
+#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -110,6 +113,9 @@ int main(void)
   app_init(&app);
   (void)app_selftest(&app);
   app_start(&app);
+  #ifdef USE_FREERTOS
+    rtos_start(&app);
+  #endif
   /* USER CODE END 2 */
 
   /* Infinite loop */

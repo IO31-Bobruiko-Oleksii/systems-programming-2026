@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: make check (dependency rule + unit tests with fakes)
         run: make check
       - name: make coverage (gcov, line coverage of devices and app, gate 90 %)
@@ -23,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: make build
         run: |
           set -o pipefail

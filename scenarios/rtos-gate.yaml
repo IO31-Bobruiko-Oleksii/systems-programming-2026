@@ -1,0 +1,15 @@
+name: 'rtos-gate: the kernel starts, a 10 ms task keeps its period while a 30 ms task spins, the button wakes a task from the interrupt'
+version: 1
+steps:
+  - wait-serial: 'GATE up tick_hz=1000'
+  - wait-serial: 'GATE pass=3 '
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - wait-serial: 'GATE pass=8 '

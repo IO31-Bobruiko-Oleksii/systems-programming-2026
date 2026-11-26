@@ -18,6 +18,12 @@ monitor:
 
 clean:
 	rm -rf firmware/build
+	
+.PHONY: build-rtos
+build-rtos: image
+	docker run --rm -v $(PWD):/workspace -w /workspace \
+		--user $$(id -u):$$(id -g) $(IMAGE) \
+		make -C firmware -f build_rtos.mk all BUILD_DIR=build/rtos
 
 .PHONY: test
 test:

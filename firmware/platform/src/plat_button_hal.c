@@ -9,6 +9,7 @@
 
 static volatile uint32_t edge_count;
 static volatile uint32_t edge_first;
+static void (*volatile notify)(void);
 
 plat_status_t plat_button_init(void)
 {
@@ -31,9 +32,19 @@ void EXTI4_15_IRQHandler(void)
         __HAL_GPIO_EXTI_CLEAR_FALLING_IT(BUTTON_PIN);
         if (edge_count == 0U) {
             edge_first = plat_time_cycles();
+            edge_count++;
+            if (notify != NULL) {
+                notify();
+            }
+        } else {
+            edge_count++;
         }
-        edge_count++;
     }
+}
+
+void plat_button_set_notify(void (*cb)(void))
+{
+    notify = cb;
 }
 
 uint32_t plat_button_take(uint32_t *first_edge_cycles)

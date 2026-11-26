@@ -22,6 +22,9 @@
 #include "stm32c0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#ifdef USE_FREERTOS
+#include "rtos_app.h"
+#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -93,6 +96,8 @@ void HardFault_Handler(void)
   }
 }
 
+#ifndef USE_FREERTOS
+
 /**
   * @brief This function handles System service call via SWI instruction.
   */
@@ -119,6 +124,8 @@ void PendSV_Handler(void)
   /* USER CODE END PendSV_IRQn 1 */
 }
 
+#endif /* USE_FREERTOS: the kernel port provides SVC_Handler and PendSV_Handler */
+
 /**
   * @brief This function handles System tick timer.
   */
@@ -128,6 +135,9 @@ void SysTick_Handler(void)
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
+  #ifdef USE_FREERTOS
+    rtos_systick();
+  #endif
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
