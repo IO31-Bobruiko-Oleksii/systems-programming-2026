@@ -1,0 +1,22 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+CMD load OK us=40 ms=300STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=6 min_us=630 avg_us=630 max_us=630
+STAT name=track n=6 min_us=905 avg_us=921 max_us=961
+STAT name=late n=6 min_us=81 avg_us=85 max_us=101
+STAT name=period n=6 min_us=31797 avg_us=46966 max_us=50020
+STAT name=cmd n=1 min_us=3623 avg_us=3623 max_us=3623
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=331 busy_ms=47 load_pm=142
+STAT count runs=7 missed=0 rx_bytes=0 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=0 errors=0 isr_n=0 isr_avg=0 isr_max=0
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+EVT load done us=40 ms=381
+CMD load OK us=40 active=0
