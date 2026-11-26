@@ -1,8 +1,8 @@
 #include <stdarg.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <string.h>
 #include "app.h"
+#include "fmt.h"
 #include "logger.h"
 #include "plat_adc.h"
 #include "plat_button.h"
@@ -27,7 +27,7 @@ static void say(const char *fmt, ...)
     int n;
 
     va_start(ap, fmt);
-    n = vsnprintf(buf, sizeof buf, fmt, ap);
+    n = fmt_vsnprintf(buf, sizeof buf, fmt, ap);
     va_end(ap);
     if (n > 0) {
         if ((size_t)n >= sizeof buf) {
