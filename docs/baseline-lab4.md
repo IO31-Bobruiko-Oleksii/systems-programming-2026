@@ -21,7 +21,7 @@ LR4 is a comparison, so everything except the firmware architecture stays as it 
 | host scripts and the way they read the logs | `tools/lr3_*.py`, `tools/lr3_*.sh` |
 | the console commands and the `STAT` / `EVT` / `CMD` line formats | section 7 |
 | the definition of every metric | section 7.3 |
-| the compiler flags (`-Og`, arm-none-eabi-gcc 10.3.1 in the `stm32-build` image) | `firmware/Makefile`, `docker/Dockerfile` |
+| the compiler flags (LR3: `-Og`; LR4 builds both columns at `-Os`, see the change log; arm-none-eabi-gcc 10.3.1 in the `stm32-build` image) | `firmware/Makefile`, `docker/Dockerfile` |
 | the simulated board, core clock 12 MHz, UART 115200 8N1 | `wokwi.toml`, `diagram.json` |
 
 What may change: the firmware (`firmware/`), the host-side additions that LR4 needs (new files
@@ -602,3 +602,5 @@ never inserted.
 | Date | Change |
 |---|---|
 | 2026-11-13 | first version of this file; `tools/lr3_startup.py`, `tools/lr3_regen.sh` and `docs/metrics/startup.txt` added with it |
+| 2026-11-26 | `tools/lr3_run.sh` and `tools/lr3_capture.sh` read two optional environment variables: `LR_ELF` (a firmware file for `wokwi-cli --elf`) and `LR_TAG` (outputs go to `docs/captures/lr4/<tag>/` and `docs/metrics/lr4/<tag>/` instead of `docs/captures/lr3/` and `docs/metrics/`). Without them nothing changes, so no LR3 result changes. LR3 and LR4 runs never share an output folder. Tags: `loop` (the LR3 firmware, commit 04eed11, rebuilt at `-Os`) and `rtos` (the FreeRTOS firmware) |
+| 2026-11-26 | The optimization level of LR4 is `-Os` for both columns (the FreeRTOS firmware does not fit in 32 KB at `-Og`), so the LR3 firmware is rebuilt from 04eed11 with `OPT = -Os` and re-measured the same day on the same stand; the LR3 numbers of sections 5 and 6 (built at `-Og`) are not compared with LR4 |
