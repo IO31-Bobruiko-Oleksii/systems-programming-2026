@@ -7,8 +7,16 @@ SELFTEST servo1 OK pulse_us=1500
 SELFTEST servo2 OK pulse_us=1500
 SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
 CMD stats-reset OK
-EVT stow t_us=6134962 lat_us=300
-EVT stow t_us=6436060 lat_us=298
-CMD evt OK notified=23 woken=22 pending=621 sem=1 state=1
-CMD evt OK notified=24 woken=22 pending=493 sem=1 state=1
-CMD button OK edges=64 accepted=2 ignored=62
+EVT stow t_us=6134979 lat_us=305
+EVT stow t_us=6435972 lat_us=344
+EVT stow t_us=6761008 lat_us=355
+EVT stow t_us=7087053 lat_us=324
+EVT stow t_us=7430090 lat_us=298
+EVT stow t_us=7704093 lat_us=336
+CMD evt OK notified=94 woken=94 pending=0 sem=0 state=2 sched=2 yw=94 rw=94 st2=2
+EVT stow t_us=8301861 lat_us=366
+EVT stow t_us=8638969 lat_us=317
+EVT stow t_us=8978934 lat_us=323
+EVT stow t_us=9310936 lat_us=347
+CMD evt OK notified=178 woken=178 pending=0 sem=0 state=2 sched=2 yw=178 rw=178 st2=2
+CMD button OK edges=878 accepted=10 ignored=868

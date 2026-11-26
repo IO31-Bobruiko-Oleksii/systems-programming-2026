@@ -6,5 +6,6 @@ SELFTEST sd OK type=V2HC sig=55AA
 SELFTEST servo1 OK pulse_us=1500
 SELFTEST servo2 OK pulse_us=1500
 SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
-EVT stow t_us=6070950 lat_us=337
-CMD sd-write OK block=16000 us=13447
+EVT stow t_us=6070941 lat_us=297
+CMD sd-write OK block=16000 us=13446
+CMD button OK edges=82 accepted=1 ignored=81

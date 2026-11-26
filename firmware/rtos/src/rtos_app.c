@@ -70,6 +70,7 @@ static uint32_t base_ticks;
 #ifdef RTOS_DIAG
 static volatile uint32_t evt_notified;
 static volatile uint32_t evt_woken;
+void rtos_diag_kernel(TaskHandle_t h, uint32_t *o);
 #endif
 
 #ifdef RTOS_BENCH
@@ -230,6 +231,9 @@ static void hook_log_drain(void)
     log_rec_t rec;
 
     while (xQueueReceive(log_q, &rec, 0U) == pdPASS) {
+        if (g_app->logger.count >= LOGGER_RECORDS_PER_BLOCK) {
+            app_service_log(g_app); /* RAM block full: write it before taking the next record */
+        }
         (void)logger_add(&g_app->logger, rec.t_ms, rec.raw, rec.az, rec.tilt, rec.flags);
     }
 }
@@ -390,12 +394,28 @@ static int hook_command(unsigned argc, char *argv[])
 #endif
 #ifdef RTOS_DIAG
     if (argc == 1U && strcmp(argv[0], "evt") == 0) {
+        uint32_t k[15];
         uint32_t first = 0U;
-        uint32_t pending = plat_button_take(&first);
+        unsigned s0 = (unsigned)eTaskGetState(tasks[0].handle);
+        uint32_t pending;
+        uint32_t w0;
 
+        rtos_diag_kernel(tasks[0].handle, k);
+        pending = plat_button_take(&first);
+        w0 = evt_woken;
         say("CMD evt OK notified=%lu woken=%lu pending=%lu sem=%u state=%u" EOL,
-            (unsigned long)evt_notified, (unsigned long)evt_woken, (unsigned long)pending,
-            (unsigned)uxSemaphoreGetCount(sem_event), (unsigned)eTaskGetState(tasks[0].handle));
+            (unsigned long)evt_notified, (unsigned long)w0, (unsigned long)pending,
+            (unsigned)uxSemaphoreGetCount(sem_event), s0);
+        if (s0 != 2U) {
+            char b[80];
+            unsigned i;
+            int n = 0;
+
+            for (i = 0U; i < 15U; i++) {
+                n += fmt_snprintf(b + n, sizeof b - (size_t)n, "%lu ", (unsigned long)k[i]);
+            }
+            say("KRN %s" EOL, b);
+        }
         return 1;
     }
 #endif

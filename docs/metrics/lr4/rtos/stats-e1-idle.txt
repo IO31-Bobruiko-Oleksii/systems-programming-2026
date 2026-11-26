@@ -1,26 +1,26 @@
-serial log docs/captures/lr4/rtos/e1-idle.serial.log: 2 statistics window(s), 4 EVT stow line(s), 0 FAIL line(s)
+serial log docs/captures/lr4/rtos/e1-idle.serial.log: 2 statistics window(s), 40 EVT stow line(s), 0 FAIL line(s)
 
 metric                             W1         W2   deadline  verdict
 window_ms                       12481       1090             
 T2 runs                           250         22             
 T2 skipped (missed)                 0          0          0  ok
-T2 start late, max us             103         81      25000  ok
-T2 start late, avg us              81         81             
+T2 start late, max us            2936         84      25000  ok
+T2 start late, avg us             116         84             
 T2 period, avg us               50000      50000             
-T2 period, max us               50022      50002             
-T1 sense, max us                  759        630       5000  ok
-T2 body (track), max us          1071        908             
+T2 period, max us               52852      50002             
+T1 sense, max us                 5194        630       5000  MISSED
+T2 body (track), max us          5447        908             
 loop pass, avg us                   -          -             
 loop pass, max us                   -          -             
 T4 commands, n                      2          4             
-T4 command, avg us               2191     270359             
-T4 command, max us               2531     359645     100000  MISSED
+T4 command, avg us               2188     270385             
+T4 command, max us               2531     359689     100000  MISSED
 T5 log block writes, n              0          0             
 T5 log block write, max us          -          -             
-E1 stow, n                          4          0             
-E1 stow, avg us                   338          -             
-E1 stow, max us                   374          -      10000  ok
-CPU load, per mille                28       1000             
+E1 stow, n                         40          0             
+E1 stow, avg us                   318          -             
+E1 stow, max us                   358          -      10000  ok
+CPU load, per mille                47       1000             
 rx bytes taken                     13         21             
 rx bytes dropped                    0          0          0  ok
 rx errors                           0          0          0  ok
@@ -32,11 +32,23 @@ W1: T2 runs 250, window_ms / 50 = 250
 W2: T2 runs 22, window_ms / 50 = 22
 
 E1 (stow) latency per window, from the EVT lines:
-  W1           n   4  min    319  avg    337  median    328  p90    374  p99    374  max    374 us  over 10 ms: 0
+  W1           n  40  min    269  avg    318  median    319  p90    343  p99    358  max    358 us  over 10 ms: 0
   W2           none
 
 E1 by kind of press (scenario scenarios/e1-idle.yaml):
-  the scenario has 40 presses, the log 4 EVT lines: phases not listed
+  idle         n  40  min    269  avg    318  median    319  p90    343  p99    358  max    358 us  over 10 ms: 0
 
-button: edges 388, accepted 4, ignored 384 (presses sent: 40)
+  press in an idle system: latency in bins of 1 ms
+     0.. 1 ms: 40 ########################################
+     1.. 2 ms:  0 
+     2.. 3 ms:  0 
+     3.. 4 ms:  0 
+     4.. 5 ms:  0 
+     5.. 6 ms:  0 
+     6.. 7 ms:  0 
+     7.. 8 ms:  0 
+     8.. 9 ms:  0 
+     9..10 ms:  0 
+
+button: edges 3669, accepted 40, ignored 3629 (presses sent: 40)
 time command: 3 reads, backsteps max 0, read_cycles 87..87
