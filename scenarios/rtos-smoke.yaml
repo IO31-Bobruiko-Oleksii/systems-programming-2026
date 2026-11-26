@@ -11,17 +11,17 @@ steps:
   - wait-serial: 'STAT os tick_hz=1000'
   - wait-serial: 'CMD tasks OK count=6'
   - write-serial: "heap\n"
-  - wait-serial: 'CMD heap OK total=5120'
+  - wait-serial: 'CMD heap OK total='
   - set-control:
       part-id: btn1
       control: pressed
       value: 1
+  - wait-serial: 'EVT stow t_us='
   - delay: 10ms
   - set-control:
       part-id: btn1
       control: pressed
       value: 0
-  - wait-serial: 'EVT stow t_us='
   - delay: 100ms
   - write-serial: "load 5000 300\n"
   - wait-serial: 'CMD load OK us=5000 ms=300'

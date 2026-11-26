@@ -10,7 +10,7 @@ extern void rtos_assert(unsigned line);
 #define RTOS_TICK_HZ     1000
 #endif
 #ifndef RTOS_HEAP_BYTES
-#define RTOS_HEAP_BYTES  5210
+#define RTOS_HEAP_BYTES  6144
 #endif
 
 #define configENABLE_MPU                        0

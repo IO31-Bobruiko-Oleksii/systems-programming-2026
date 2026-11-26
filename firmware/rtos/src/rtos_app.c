@@ -30,9 +30,9 @@ void xPortSysTickHandler(void);
 
 #define WORDS_EVENT        160U
 #define WORDS_TRACK        160U
-#define WORDS_CMD          224U
+#define WORDS_CMD          256U
 #define WORDS_LOGGER       128U
-#define WORDS_LOAD         64U
+#define WORDS_LOAD         192U
 
 typedef struct {
     uint32_t t_ms;
