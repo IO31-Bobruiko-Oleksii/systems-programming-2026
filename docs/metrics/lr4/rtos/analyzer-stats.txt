@@ -1,0 +1,32 @@
+capture docs/captures/lr4/rtos/stats.vcd: 3165.853 ms
+edges per channel: D0=126  D1=124  D2=0  D3=1  D4=6477  D5=314  D6=5  D7=504
+
+window 75.062 .. 3076.567 ms (3001.5 ms)
+
+LOOP PASS (D0: rising edge to rising edge = one pass; high width = work of one pass outside the UART wait)
+  pass period      n=60    min=   18999.9  avg=   49479.2  max=   50015.3 us
+  pass work P      no data   (passes without a T2 run and up to 300 us)
+  longer passes without a T2 run: 1 (commands, log flushes), 86087 .. 86087 us
+
+TASK T2 (D1)
+  start to start   n=59    min=   49976.3  avg=   49995.6  max=   50000.1 us
+  pulse width      n=60    min=     893.7  avg=     899.2  max=     920.4 us
+  start jitter (largest minus smallest offset from the ideal 50 ms grid): 261.2 us
+T1 SENSE (D7: from the start of the first to the end of the fourth conversion)
+  burst length     n=60    min=     610.3  avg=     610.4  max=     610.5 us   (conversions per run: [4])
+
+CPU TIME
+  T2 pulses add up to 53.95 ms = 18.0 permille of the window
+  loop-busy pin high  75.02 ms = 25.0 permille (all work outside the UART wait, the per-pass cost P included)
+
+COMPARISON with the firmware (STAT lines, cycle counter), all in us unless noted: min / avg / max
+  metric                     firmware (cycle counter)           logic analyzer                     difference
+  loop pass period           0.0 / 0.0 / 0.0                    18999.9 / 49479.2 / 50015.3        avg +49479.2, max +50015.3  the firmware counts passes with tracking on
+  T2 duration                900.0 / 905.0 / 940.0              893.7 / 899.2 / 920.4              avg -5.8, max -19.6  analyzer pulse starts after the time stamp
+  T2 start to start          49981.0 / 50132.0 / 57920.0        49976.3 / 49995.6 / 50000.1        avg -136.4, max -7919.9
+  T1 sense                   630.0 / 630.0 / 630.0              610.3 / 610.4 / 610.5              avg -19.6, max -19.6  analyzer: first start to last end only, firmware: whole call
+  passes counted             0                                  61                                 
+  T2 start jitter (us)       20.0                               261.2                              difference +241.2
+  T2 runs                    61                                 60                                 
+  busy time (ms)             104                                54.0 (T2 only)                     firmware busy = T2 + commands + log flushes
+  load (permille)            34                                 18.0 (T2 only)                     
