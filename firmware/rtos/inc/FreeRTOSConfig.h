@@ -12,6 +12,12 @@ extern void rtos_assert(unsigned line);
 #ifndef RTOS_HEAP_BYTES
 #define RTOS_HEAP_BYTES  6144
 #endif
+#ifndef RTOS_STACK_CHECK
+#define RTOS_STACK_CHECK 2
+#endif
+#ifndef RTOS_MALLOC_HOOK
+#define RTOS_MALLOC_HOOK 1
+#endif
 
 #define configENABLE_MPU                        0
 #define configENABLE_FPU                        0
@@ -44,8 +50,8 @@ extern void rtos_assert(unsigned line);
 
 #define configUSE_IDLE_HOOK                     0
 #define configUSE_TICK_HOOK                     0
-#define configUSE_MALLOC_FAILED_HOOK            1
-#define configCHECK_FOR_STACK_OVERFLOW          2
+#define configUSE_MALLOC_FAILED_HOOK            RTOS_MALLOC_HOOK
+#define configCHECK_FOR_STACK_OVERFLOW          RTOS_STACK_CHECK
 #define configUSE_TRACE_FACILITY                0
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
 #define configGENERATE_RUN_TIME_STATS           1

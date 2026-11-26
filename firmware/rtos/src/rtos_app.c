@@ -20,6 +20,7 @@ void xPortSysTickHandler(void);
 #define LOG_QUEUE_LEN      16U
 #define LOGGER_WAKE_MS     100U
 #define LOAD_PASS_MS       5U
+#define LOAD_PASS_TICKS    ((TickType_t)(((uint32_t)configTICK_RATE_HZ * LOAD_PASS_MS + 999U) / 1000U))
 #define RUNTIME_SHIFT      4U
 
 #define PRIO_EVENT         5U
@@ -32,7 +33,10 @@ void xPortSysTickHandler(void);
 #define WORDS_TRACK        160U
 #define WORDS_CMD          256U
 #define WORDS_LOGGER       128U
-#define WORDS_LOAD         192U
+#ifndef RTOS_WORDS_LOAD
+#define RTOS_WORDS_LOAD    192U
+#endif
+#define WORDS_LOAD         RTOS_WORDS_LOAD
 
 typedef struct {
     uint32_t t_ms;
@@ -384,8 +388,18 @@ static void cmd_ctx(void)
 
 #endif /* RTOS_BENCH */
 
+#if defined(RTOS_INV) || defined(RTOS_STARVE) || defined(RTOS_QFLOOD)
+#define RTOS_SCEN 1
+static int scen_command(unsigned argc, char *argv[]);
+#endif
+
 static int hook_command(unsigned argc, char *argv[])
 {
+#ifdef RTOS_SCEN
+    if (scen_command(argc, argv) != 0) {
+        return 1;
+    }
+#endif
 #ifdef RTOS_BENCH
     if (argc == 1U && strcmp(argv[0], "ctx") == 0) {
         cmd_ctx();
@@ -541,7 +555,7 @@ static void load_task(void *arg)
         (void)xSemaphoreTake(sem_load, portMAX_DELAY);
         while (app->load_active != 0U) {
             app_service_load(app);
-            vTaskDelay(pdMS_TO_TICKS(LOAD_PASS_MS));
+            vTaskDelay(LOAD_PASS_TICKS);
         }
     }
 }
@@ -559,6 +573,182 @@ static void add_task(TaskFunction_t fn, const char *name, uint16_t words, UBaseT
     tasks[task_count].prio = (uint8_t)prio;
     task_count++;
 }
+
+#ifdef RTOS_SCEN
+
+#if defined(RTOS_STARVE) || defined(RTOS_QFLOOD)
+static uint32_t scen_num(const char *s)
+{
+    uint32_t v = 0U;
+
+    while (*s >= '0' && *s <= '9') {
+        v = v * 10U + (uint32_t)(*s - '0');
+        s++;
+    }
+    return v;
+}
+#endif
+
+#ifdef RTOS_INV
+#define INV_LOW_US   20000U
+#define INV_MID_US   60000U
+#define INV_WORDS    64U
+#define CYC_PER_US   (configCPU_CLOCK_HZ / 1000000UL)
+
+static SemaphoreHandle_t inv_mtx;
+static SemaphoreHandle_t inv_bin;
+static SemaphoreHandle_t inv_go_low;
+static SemaphoreHandle_t inv_go_mid;
+static SemaphoreHandle_t inv_lk;
+
+static void burn(uint32_t us)
+{
+    const uint32_t need = us * CYC_PER_US;
+    uint32_t used = 0U;
+    uint32_t last = plat_time_cycles();
+
+    while (used < need) {
+        uint32_t now = plat_time_cycles();
+        uint32_t d = now - last;
+
+        last = now;
+        if (d < 2000U) {
+            used += d;
+        }
+    }
+}
+
+static void inv_low_task(void *arg)
+{
+    (void)arg;
+    for (;;) {
+        (void)xSemaphoreTake(inv_go_low, portMAX_DELAY);
+        (void)xSemaphoreTake(inv_lk, portMAX_DELAY);
+        (void)xSemaphoreGive(inv_go_mid);
+        burn(INV_LOW_US);
+        (void)xSemaphoreGive(inv_lk);
+    }
+}
+
+static void inv_mid_task(void *arg)
+{
+    (void)arg;
+    for (;;) {
+        (void)xSemaphoreTake(inv_go_mid, portMAX_DELAY);
+        burn(INV_MID_US);
+    }
+}
+
+static void cmd_inv(SemaphoreHandle_t lock)
+{
+    uint32_t t0;
+    uint32_t t1;
+
+    inv_lk = lock;
+    (void)xSemaphoreGive(inv_go_low);
+    vTaskDelay(1U);
+    t0 = plat_time_cycles();
+    (void)xSemaphoreTake(lock, portMAX_DELAY);
+    t1 = plat_time_cycles();
+    (void)xSemaphoreGive(lock);
+    say("CMD inv OK lock=%s wait_us=%lu" EOL, (lock == inv_bin) ? "binary" : "mutex",
+        (unsigned long)((t1 - t0) / CYC_PER_US));
+}
+#endif /* RTOS_INV */
+
+#ifdef RTOS_STARVE
+#define HOG_PRIO   5U
+#define HOG_WORDS  64U
+
+static SemaphoreHandle_t sem_hog;
+static volatile uint32_t hog_ms;
+
+static void hog_task(void *arg)
+{
+    (void)arg;
+    for (;;) {
+        uint32_t t0;
+        uint32_t span;
+
+        (void)xSemaphoreTake(sem_hog, portMAX_DELAY);
+        t0 = plat_time_cycles();
+        span = hog_ms * (plat_time_hz() / 1000U);
+        while (plat_time_cycles() - t0 < span) {
+        }
+    }
+}
+#endif /* RTOS_STARVE */
+
+#ifdef RTOS_QFLOOD
+static void cmd_qflood(uint32_t n, uint32_t wait_ms)
+{
+    log_rec_t rec;
+    uint32_t i;
+    uint32_t sent = 0U;
+    uint32_t t0 = plat_time_cycles();
+
+    memset(&rec, 0, sizeof rec);
+    for (i = 0U; i < n; i++) {
+        rec.t_ms = i;
+        if (xQueueSend(log_q, &rec, pdMS_TO_TICKS(wait_ms)) == pdPASS) {
+            sent++;
+        } else {
+            log_dropped++;
+        }
+    }
+    say("CMD qflood OK n=%lu sent=%lu lost=%lu wait_ms=%lu t_us=%lu" EOL, (unsigned long)n,
+        (unsigned long)sent, (unsigned long)(n - sent), (unsigned long)wait_ms,
+        (unsigned long)((plat_time_cycles() - t0) / (plat_time_hz() / 1000000U)));
+}
+#endif /* RTOS_QFLOOD */
+
+static int scen_command(unsigned argc, char *argv[])
+{
+#ifdef RTOS_INV
+    if (argc == 2U && strcmp(argv[0], "inv") == 0) {
+        cmd_inv((argv[1][0] == 's') ? inv_bin : inv_mtx);
+        return 1;
+    }
+#endif
+#ifdef RTOS_STARVE
+    if (argc == 2U && strcmp(argv[0], "starve") == 0) {
+        hog_ms = scen_num(argv[1]);
+        (void)xSemaphoreGive(sem_hog);
+        say("CMD starve OK ms=%lu" EOL, (unsigned long)hog_ms);
+        return 1;
+    }
+#endif
+#ifdef RTOS_QFLOOD
+    if (argc == 3U && strcmp(argv[0], "qflood") == 0) {
+        cmd_qflood(scen_num(argv[1]), scen_num(argv[2]));
+        return 1;
+    }
+#endif
+    (void)argc;
+    (void)argv;
+    return 0;
+}
+
+static void scen_init(app_t *app)
+{
+#ifdef RTOS_INV
+    inv_mtx = xSemaphoreCreateMutex();
+    inv_bin = xSemaphoreCreateBinary();
+    inv_go_low = xSemaphoreCreateBinary();
+    inv_go_mid = xSemaphoreCreateBinary();
+    configASSERT(inv_mtx != NULL && inv_bin != NULL && inv_go_low != NULL && inv_go_mid != NULL);
+    (void)xSemaphoreGive(inv_bin);
+    add_task(inv_low_task, "inv_low", INV_WORDS, 1U, app);
+    add_task(inv_mid_task, "inv_mid", INV_WORDS, 2U, app);
+#endif
+#ifdef RTOS_STARVE
+    sem_hog = xSemaphoreCreateBinary();
+    configASSERT(sem_hog != NULL);
+    add_task(hog_task, "hog", HOG_WORDS, HOG_PRIO, app);
+#endif
+    (void)app;
+}
+#endif /* RTOS_SCEN */
 
 void rtos_start(app_t *app)
 {
@@ -584,6 +774,9 @@ void rtos_start(app_t *app)
     add_task(cmd_task, "cmd", WORDS_CMD, PRIO_CMD, app);
     add_task(logger_task, "logger", WORDS_LOGGER, PRIO_LOGGER, app);
     add_task(load_task, "load", WORDS_LOAD, PRIO_LOAD, app);
+#ifdef RTOS_SCEN
+    scen_init(app);
+#endif
     tasks[task_count].handle = NULL;
     tasks[task_count].name = "IDLE";
     tasks[task_count].words = configMINIMAL_STACK_SIZE;
