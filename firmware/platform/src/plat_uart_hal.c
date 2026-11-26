@@ -31,6 +31,20 @@ plat_status_t plat_uart_write(const uint8_t *data, size_t len)
     }
 }
 
+void plat_uart_panic_write(const uint8_t *data, size_t len)
+{
+    size_t i;
+
+    for (i = 0U; i < len; i++) {
+        uint32_t spin = 100000U;
+
+        while (((huart2.Instance->ISR & USART_ISR_TXE_TXFNF) == 0U) && (spin != 0U)) {
+            spin--;
+        }
+        huart2.Instance->TDR = data[i];
+    }
+}
+
 void USART2_IRQHandler(void)
 {
     uint32_t start = SysTick->VAL;

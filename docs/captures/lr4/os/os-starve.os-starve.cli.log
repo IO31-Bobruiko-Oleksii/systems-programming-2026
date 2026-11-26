@@ -1,0 +1,75 @@
+Wokwi CLI v0.27.1 (ffde06bde1ae)
+Connected to Wokwi Simulation API 1.0.0-20261126-gccaad6a5
+Starting simulation...
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Expected text matched: "SELFTEST END total=5 passed=5 failed=0"
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 400ms
+RTOS up tick_hz=1000 core_hz=12000000 heap_free=1032 tasks=6
+CMD stats-reset OK
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Expected text matched: "CMD stats-reset OK"
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 1000ms
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=21 min_us=630 avg_us=630 max_us=631
+STAT name=track n=21 min_us=898 avg_us=905 max_us=908
+STAT name=late n=21 min_us=83 avg_us=84 max_us=84
+STAT name=period n=21 min_us=49999 avg_us=50000 max_us=50000
+STAT name=cmd n=1 min_us=2556 avg_us=2556 max_us=2556
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=1007 busy_ms=30 load_pm=30
+STAT count runs=22 missed=0 rx_bytes=6 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=6 errors=0 isr_n=6 isr_avg=252 isr_max=568
+STAT mem ram=12288 static=8952 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2880
+CMD stats OK
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Expected text matched: "CMD stats OK"
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 100ms
+CMD stats-reset OK
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Expected text matched: "CMD stats-reset OK"
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 100ms
+CMD starve OK ms=300
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Expected text matched: "CMD starve OK ms=300"
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 1000ms
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=23 min_us=630 avg_us=631 max_us=648
+STAT name=track n=24 min_us=894 avg_us=904 max_us=934
+STAT name=late n=24 min_us=84 avg_us=12021 max_us=286576
+STAT name=period n=24 min_us=13508 avg_us=60417 max_us=336493
+STAT name=cmd n=2 min_us=2553 avg_us=153195 max_us=303837
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=1417 busy_ms=342 load_pm=241
+STAT count runs=24 missed=5 rx_bytes=17 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=11 errors=0 isr_n=17 isr_avg=227 isr_max=568
+STAT mem ram=12288 static=8952 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2880
+CMD stats OK
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Expected text matched: "CMD stats OK"
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 200ms
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 200ms
+CMD resume OK
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 100ms
+EVT stow t_us=
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Expected text matched: "EVT stow t_us="
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 10ms
+3630217 lat_us=1004
+CMD starve OK ms=300
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Expected text matched: "CMD starve OK ms=300"
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 300ms
+STAT task name=event prio=5 run_us=5829 cpu_pm=2 stack=640 peak=428
+STAT task name=track prio=4 run_us=40993 cpu_pm=16 stack=640 peak=240
+STAT task name=cmd prio=3 run_us=96969 cpu_pm=38 stack=1024 peak=780
+STAT task name=logger prio=2 run_us=6328 cpu_pm=2 stack=512 peak=204
+STAT task name=load prio=1 run_us=0 cpu_pm=0 stack=768 peak=132
+STAT task name=hog prio=5 run_us=594512 cpu_pm=237 stack=256 peak=140
+STAT task name=IDLE prio=0 run_us=1756710 cpu_pm=702 stack=256 peak=84
+STAT os tick_hz=1000 ticks=2501 switches=142 log_dropped=0
+CMD tasks OK count=7
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Expected text matched: "CMD tasks OK count=7"
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] delay 5ms
+[os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window] Scenario completed successfully

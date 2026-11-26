@@ -1,0 +1,22 @@
+name: 'os-inv: priority inversion - the high task waits for a lock held by the low task while a medium task runs)'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 400ms
+  - write-serial: "inv m\n"
+  - wait-serial: 'CMD inv OK lock=mutex wait_us='
+  - delay: 300ms
+  - write-serial: "inv s\n"
+  - wait-serial: 'CMD inv OK lock=binary wait_us='
+  - delay: 300ms
+  - write-serial: "inv m\n"
+  - wait-serial: 'CMD inv OK lock=mutex wait_us='
+  - delay: 300ms
+  - write-serial: "inv s\n"
+  - wait-serial: 'CMD inv OK lock=binary wait_us='
+  - delay: 300ms
+  - write-serial: "tasks\n"
+  - wait-serial: 'CMD tasks OK count=8'
+  - write-serial: "heap\n"
+  - wait-serial: 'CMD heap OK total='
+  - delay: 5ms

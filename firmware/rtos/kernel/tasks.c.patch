@@ -1,0 +1,66 @@
+diff --git a/tasks.c b/tasks.c
+index fd3bc638d..b05dde531 100644
+--- a/tasks.c
++++ b/tasks.c
+@@ -177,7 +177,7 @@
+     #if ( configNUMBER_OF_CORES == 1 )
+         #define taskSELECT_HIGHEST_PRIORITY_TASK()                                       \
+     do {                                                                                 \
+-        UBaseType_t uxTopPriority = uxTopReadyPriority;                                  \
++        UBaseType_t uxTopPriority = ( UBaseType_t ) ( configMAX_PRIORITIES - 1U );       \
+                                                                                          \
+         /* Find the highest priority queue that contains ready tasks. */                 \
+         while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) != pdFALSE ) \
+@@ -8694,3 +8694,52 @@ void vTaskResetState( void )
+     #endif /* #if ( configGENERATE_RUN_TIME_STATS == 1 ) */
+ }
+ /*-----------------------------------------------------------*/
++
++#ifdef RTOS_DIAG
++/* diagnostic only: how the kernel sees task h (called from the cmd task) */
++void rtos_diag_kernel( TaskHandle_t h,
++                       uint32_t * o )
++{
++    TCB_t * t = ( TCB_t * ) h;
++    const List_t * c = listLIST_ITEM_CONTAINER( &( t->xStateListItem ) );
++    const List_t * e = listLIST_ITEM_CONTAINER( &( t->xEventListItem ) );
++    UBaseType_t i;
++    uint32_t where = 99U;
++
++    for( i = 0U; i < ( UBaseType_t ) configMAX_PRIORITIES; i++ )
++    {
++        if( c == &( pxReadyTasksLists[ i ] ) )
++        {
++            where = ( uint32_t ) i;
++        }
++
++        o[ 8U + i ] = ( uint32_t ) listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ i ] ) );
++    }
++
++    if( c == pxDelayedTaskList )
++    {
++        where = 20U;
++    }
++
++    if( c == pxOverflowDelayedTaskList )
++    {
++        where = 21U;
++    }
++
++    if( c == NULL )
++    {
++        where = 30U;
++    }
++
++    o[ 0 ] = where;
++    o[ 1 ] = ( e == NULL ) ? 0U : ( ( e == &xPendingReadyList ) ? 2U : 1U );
++    o[ 2 ] = ( uint32_t ) t->uxPriority;
++    o[ 3 ] = ( uint32_t ) t->uxBasePriority;
++    o[ 4 ] = ( uint32_t ) uxTopReadyPriority;
++    o[ 5 ] = ( uint32_t ) uxSchedulerSuspended;
++    o[ 6 ] = ( uint32_t ) xYieldPendings[ 0 ];
++    o[ 7 ] = ( uint32_t ) listCURRENT_LIST_LENGTH( &xPendingReadyList );
++    o[ 14 ] = ( pxCurrentTCB == t ) ? 1U : 0U;
++}
++#endif /* RTOS_DIAG */
++/*-----------------------------------------------------------*/

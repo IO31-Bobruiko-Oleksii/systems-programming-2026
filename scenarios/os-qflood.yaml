@@ -1,0 +1,24 @@
+name: 'os-qflood: 64 records into the 16-deep log queue, without waiting and with a 100 ms wait'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 400ms
+  - write-serial: "log on\n"
+  - wait-serial: 'CMD log OK on=1'
+  - delay: 300ms
+  - write-serial: "stats reset\n"
+  - wait-serial: 'CMD stats-reset OK'
+  - write-serial: "qflood 64 0\n"
+  - wait-serial: 'wait_ms=0 t_us='
+  - delay: 1500ms
+  - write-serial: "tasks\n"
+  - wait-serial: 'CMD tasks OK count=6'
+  - delay: 100ms
+  - write-serial: "stats reset\n"
+  - wait-serial: 'CMD stats-reset OK'
+  - write-serial: "qflood 64 100\n"
+  - wait-serial: 'wait_ms=100 t_us='
+  - delay: 1500ms
+  - write-serial: "tasks\n"
+  - wait-serial: 'CMD tasks OK count=6'
+  - delay: 5ms

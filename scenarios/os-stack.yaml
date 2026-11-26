@@ -1,0 +1,11 @@
+name: 'os-stack: the load task has 576 B of stack, the end-of-window print needs about 600 B'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 400ms
+  - write-serial: "load 40 300\n"
+  - delay: 1000ms
+  - write-serial: "tasks\n"
+  - delay: 600ms
+  - write-serial: "heap\n"
+  - delay: 300ms

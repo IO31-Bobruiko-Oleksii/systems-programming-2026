@@ -21,6 +21,15 @@ void xPortSysTickHandler(void);
 #define LOGGER_WAKE_MS     100U
 #define LOAD_PASS_MS       5U
 #define LOAD_PASS_TICKS    ((TickType_t)(((uint32_t)configTICK_RATE_HZ * LOAD_PASS_MS + 999U) / 1000U))
+
+#ifndef RTOS_EVENT_WATCHDOG_MS
+#define RTOS_EVENT_WATCHDOG_MS 8U
+#endif
+#if RTOS_EVENT_WATCHDOG_MS > 0U
+#define EVENT_WAIT_TICKS   ((TickType_t)(((uint32_t)configTICK_RATE_HZ * RTOS_EVENT_WATCHDOG_MS + 999U) / 1000U))
+#else
+#define EVENT_WAIT_TICKS   portMAX_DELAY
+#endif
 #define RUNTIME_SHIFT      4U
 
 #define PRIO_EVENT         5U
@@ -95,7 +104,7 @@ static void tick_reset(void)
 static void fatal_text(const char *text)
 {
     portDISABLE_INTERRUPTS();
-    (void)plat_uart_write((const uint8_t *)text, strlen(text));
+    plat_uart_panic_write((const uint8_t *)text, strlen(text));
     for (;;) {
     }
 }
@@ -107,7 +116,7 @@ void rtos_assert(unsigned line)
 
     portDISABLE_INTERRUPTS();
     if (n > 0) {
-        (void)plat_uart_write((const uint8_t *)buf, (size_t)n);
+        plat_uart_panic_write((const uint8_t *)buf, (size_t)n);
     }
     for (;;) {
     }
@@ -126,7 +135,7 @@ void vApplicationStackOverflowHook(TaskHandle_t task, char *name)
     (void)task;
     portDISABLE_INTERRUPTS();
     if (n > 0) {
-        (void)plat_uart_write((const uint8_t *)buf, (size_t)n);
+        plat_uart_panic_write((const uint8_t *)buf, (size_t)n);
     }
     for (;;) {
     }
@@ -474,7 +483,7 @@ static void event_task(void *arg)
     app_t *app = arg;
 
     for (;;) {
-        (void)xSemaphoreTake(sem_event, portMAX_DELAY);
+        (void)xSemaphoreTake(sem_event, EVENT_WAIT_TICKS);
 #ifdef RTOS_BENCH
         ctx_stamp = plat_time_cycles();
 #endif

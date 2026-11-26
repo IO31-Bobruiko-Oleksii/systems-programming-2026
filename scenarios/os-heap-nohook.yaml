@@ -1,0 +1,7 @@
+name: 'os-heap-nohook: the same 4000 B heap on the build without the malloc-failed hook, only the assert reports it'
+version: 1
+steps:
+  - wait-serial: 'FATAL assert line='
+  - delay: 300ms
+  - write-serial: "tasks\n"
+  - delay: 700ms

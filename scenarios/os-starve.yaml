@@ -1,0 +1,39 @@
+name: 'os-starve: a priority-5 task polls the clock for 300 ms, the lower tasks starve; the second run presses the button inside the window'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 400ms
+  - write-serial: "stats reset\n"
+  - wait-serial: 'CMD stats-reset OK'
+  - delay: 1000ms
+  - write-serial: "stats\n"
+  - wait-serial: 'CMD stats OK'
+  - delay: 100ms
+  - write-serial: "stats reset\n"
+  - wait-serial: 'CMD stats-reset OK'
+  - delay: 100ms
+  - write-serial: "starve 300\n"
+  - wait-serial: 'CMD starve OK ms=300'
+  - delay: 1000ms
+  - write-serial: "stats\n"
+  - wait-serial: 'CMD stats OK'
+  - delay: 200ms
+  - write-serial: "resume\n"
+  - delay: 200ms
+  - write-serial: "starve 300\n"
+  - delay: 100ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - wait-serial: 'EVT stow t_us='
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - wait-serial: 'CMD starve OK ms=300'
+  - delay: 300ms
+  - write-serial: "tasks\n"
+  - wait-serial: 'CMD tasks OK count=7'
+  - delay: 5ms

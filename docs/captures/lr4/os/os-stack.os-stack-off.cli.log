@@ -1,0 +1,41 @@
+Wokwi CLI v0.27.1 (ffde06bde1ae)
+Connected to Wokwi Simulation API 1.0.0-20261126-gccaad6a5
+Starting simulation...
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0
+[os-stack: the load task has 576 B of stack, the end-of-window print needs about 600 B] Expected text matched: "SELFTEST END total=5 passed=5 failed=0"
+[os-stack: the load task has 576 B of stack, the end-of-window print needs about 600 B] delay 400ms
+RTOS up tick_hz=1000 core_hz=12000000 heap_free=1624 tasks=5
+[os-stack: the load task has 576 B of stack, the end-of-window print needs about 600 B] delay 1000ms
+CMD load OK us=40 ms=300
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=7 min_us=630 avg_us=630 max_us=630
+STAT name=track n=7 min_us=899 avg_us=904 max_us=907
+STAT name=late n=7 min_us=77 avg_us=80 max_us=80
+STAT name=period n=7 min_us=6738 avg_us=43819 max_us=50000
+STAT name=cmd n=1 min_us=3599 avg_us=3599 max_us=3599
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=306 busy_ms=22 load_pm=73
+STAT count runs=8 missed=0 rx_bytes=0 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=0 errors=0 isr_n=0 isr_avg=0 isr_max=0
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+EVT load done us=40 ms=356
+[os-stack: the load task has 576 B of stack, the end-of-window print needs about 600 B] delay 600ms
+STAT task name=event prio=5 run_us=0 cpu_pm=0 stack=640 peak=132
+STAT task name=track prio=4 run_us=20761 cpu_pm=20 stack=640 peak=240
+STAT task name=cmd prio=3 run_us=4032 cpu_pm=4 stack=1024 peak=628
+STAT task name=logger prio=2 run_us=202115052 cpu_pm=202344 stack=512 peak=512
+STAT task name=oad prio=1 run_us=92161 cpu_pm=92 stack=576 peak=576
+STAT task name=IDLE prio=0 run_us=881706 cpu_pm=882 stack=256 peak=84
+STAT os tick_hz=1000 ticks=999 switches=163 log_dropped=0
+CMD tasks OK count=6
+[os-stack: the load task has 576 B of stack, the end-of-window print needs about 600 B] delay 300ms
+CMD heap OK total=6144 free=1296 used=4848
+[os-stack: the load task has 576 B of stack, the end-of-window print needs about 600 B] Scenario completed successfully

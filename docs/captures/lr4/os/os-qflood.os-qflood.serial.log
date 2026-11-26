@@ -1,0 +1,25 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+CMD log OK on=1CMD stats-reset OKCMD qflood OK n=64 sent=16 lost=48 wait_ms=0 t_us=2855
+STAT task name=event prio=5 run_us=0 cpu_pm=0 stack=640 peak=132
+STAT task name=track prio=4 run_us=34317 cpu_pm=22 stack=640 peak=256
+STAT task name=cmd prio=3 run_us=11481 cpu_pm=7 stack=1024 peak=640
+STAT task name=logger prio=2 run_us=54372 cpu_pm=35 stack=512 peak=408
+STAT task name=load prio=1 run_us=0 cpu_pm=0 stack=768 peak=132
+STAT task name=IDLE prio=0 run_us=1413017 cpu_pm=934 stack=256 peak=84
+STAT os tick_hz=1000 ticks=1513 switches=97 log_dropped=48
+CMD tasks OK count=6CMD stats-reset OKCMD qflood OK n=64 sent=64 lost=0 wait_ms=100 t_us=61843
+STAT task name=event prio=5 run_us=0 cpu_pm=0 stack=640 peak=132
+STAT task name=track prio=4 run_us=34136 cpu_pm=21 stack=640 peak=256
+STAT task name=cmd prio=3 run_us=19905 cpu_pm=12 stack=1024 peak=660
+STAT task name=logger prio=2 run_us=105150 cpu_pm=66 stack=512 peak=408
+STAT task name=load prio=1 run_us=0 cpu_pm=0 stack=768 peak=132
+STAT task name=IDLE prio=0 run_us=1413372 cpu_pm=899 stack=256 peak=84
+STAT os tick_hz=1000 ticks=1572 switches=192 log_dropped=1
+CMD tasks OK count=6

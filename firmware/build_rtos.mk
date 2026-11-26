@@ -1,6 +1,6 @@
 KERNEL := Middlewares/FreeRTOS-Kernel
 RTOS_APP_SOURCES := $(wildcard rtos/src/*.c)
-KERNEL_SOURCES := $(KERNEL)/tasks.c $(KERNEL)/queue.c $(KERNEL)/list.c \
+KERNEL_SOURCES := rtos/kernel/tasks_lr4.c $(KERNEL)/queue.c $(KERNEL)/list.c \
                   $(KERNEL)/portable/GCC/ARM_CM0/port.c $(KERNEL)/portable/GCC/ARM_CM0/portasm.c \
                   $(KERNEL)/portable/MemMang/heap_1.c
 

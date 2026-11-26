@@ -1,0 +1,49 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+CMD stats-reset OK
+EVT stow t_us=6134939 lat_us=323
+EVT stow t_us=6435991 lat_us=344
+EVT stow t_us=6761072 lat_us=295
+EVT stow t_us=7087018 lat_us=324
+EVT stow t_us=7430057 lat_us=322
+EVT stow t_us=7704088 lat_us=322
+EVT stow t_us=7993098 lat_us=348
+EVT stow t_us=8330171 lat_us=299
+CMD resume OK
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=249 min_us=630 avg_us=631 max_us=713
+STAT name=track n=249 min_us=877 avg_us=884 max_us=1010
+STAT name=late n=249 min_us=84 avg_us=84 max_us=92
+STAT name=period n=249 min_us=49992 avg_us=50000 max_us=50009
+STAT name=cmd n=2 min_us=1846 avg_us=2188 max_us=2531
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=8 min_us=295 avg_us=322 max_us=348
+STAT load window_ms=12481 busy_ms=379 load_pm=30
+STAT count runs=250 missed=0 rx_bytes=13 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=40 errors=0 isr_n=53 isr_avg=204 isr_max=551
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+CMD stats OK
+CMD stats-reset OK
+CMD time OK hz=12000000 read_cycles=87 backsteps=0
+CMD time OK hz=12000000 read_cycles=87 backsteps=0
+CMD time OK hz=12000000 read_cycles=87 backsteps=0
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=21 min_us=630 avg_us=630 max_us=630
+STAT name=track n=22 min_us=901 avg_us=906 max_us=908
+STAT name=late n=22 min_us=84 avg_us=84 max_us=84
+STAT name=period n=22 min_us=50000 avg_us=50000 max_us=50002
+STAT name=cmd n=4 min_us=2534 avg_us=270394 max_us=359685
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=1090 busy_ms=1090 load_pm=1000
+STAT count runs=22 missed=0 rx_bytes=21 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=28 errors=0 isr_n=0 isr_avg=0 isr_max=0
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+CMD stats OK
+CMD button OK edges=838 accepted=8 ignored=830
