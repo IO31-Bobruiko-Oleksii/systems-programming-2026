@@ -67,6 +67,11 @@ static uint32_t base_now;
 static uint32_t base_switches;
 static uint32_t base_ticks;
 
+#ifdef RTOS_DIAG
+static volatile uint32_t evt_notified;
+static volatile uint32_t evt_woken;
+#endif
+
 #ifdef RTOS_BENCH
 static volatile uint32_t tick_probe;
 static uint32_t tick_n;
@@ -383,6 +388,17 @@ static int hook_command(unsigned argc, char *argv[])
         return 1;
     }
 #endif
+#ifdef RTOS_DIAG
+    if (argc == 1U && strcmp(argv[0], "evt") == 0) {
+        uint32_t first = 0U;
+        uint32_t pending = plat_button_take(&first);
+
+        say("CMD evt OK notified=%lu woken=%lu pending=%lu sem=%u state=%u" EOL,
+            (unsigned long)evt_notified, (unsigned long)evt_woken, (unsigned long)pending,
+            (unsigned)uxSemaphoreGetCount(sem_event), (unsigned)eTaskGetState(tasks[0].handle));
+        return 1;
+    }
+#endif
     if (argc == 1U && strcmp(argv[0], "tasks") == 0) {
         cmd_tasks();
         return 1;
@@ -404,6 +420,9 @@ static void button_notify(void)
 {
     BaseType_t woken = pdFALSE;
 
+#ifdef RTOS_DIAG
+    evt_notified++;
+#endif
     (void)xSemaphoreGiveFromISR(sem_event, &woken);
     portYIELD_FROM_ISR(woken);
 }
@@ -424,6 +443,9 @@ static void event_task(void *arg)
         (void)xSemaphoreTake(sem_event, portMAX_DELAY);
 #ifdef RTOS_BENCH
         ctx_stamp = plat_time_cycles();
+#endif
+#ifdef RTOS_DIAG
+        evt_woken++;
 #endif
         app_service_button(app);
     }

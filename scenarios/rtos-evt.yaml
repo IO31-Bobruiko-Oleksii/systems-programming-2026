@@ -1,0 +1,118 @@
+name: 'rtos-evt: why e1-idle lost presses 5..40 on the RTOS build'
+version: 1
+steps:
+  - wait-serial: 'SELFTEST END total=5 passed=5 failed=0'
+  - delay: 6025ms
+  - write-serial: "stats reset\n"
+  - delay: 50ms
+  - delay: 16ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 291ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 315ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 316ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 333ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 264ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 200ms
+  - write-serial: "evt\n"
+  - wait-serial: 'CMD evt OK notified='
+  - delay: 100ms
+  - delay: 279ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 327ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 330ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 322ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 10ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 200ms
+  - write-serial: "evt\n"
+  - wait-serial: 'CMD evt OK notified='
+  - delay: 100ms
+  - write-serial: "button\n"
+  - wait-serial: 'CMD button OK edges='
+  - delay: 100ms

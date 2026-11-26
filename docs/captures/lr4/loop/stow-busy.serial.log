@@ -5,6 +5,6 @@ SELFTEST spi OK
 SELFTEST sd OK type=V2HC sig=55AA
 SELFTEST servo1 OK pulse_us=1500
 SELFTEST servo2 OK pulse_us=1500
-SELFTEST END total=5 passed=5 failed=0CMD sd-write OK block=16000 us=13283
-EVT stow t_us=6072871 lat_us=17931
-CMD button OK edges=28 accepted=1 ignored=27
+SELFTEST END total=5 passed=5 failed=0CMD sd-write OK block=16000 us=13480
+EVT stow t_us=6072777 lat_us=18268
+CMD button OK edges=119 accepted=1 ignored=118

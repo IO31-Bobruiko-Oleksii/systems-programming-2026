@@ -1,12 +1,12 @@
-capture docs/captures/lr4/loop/stow-busy.vcd: 6185.170 ms
-edges per channel: D0=2080  D1=244  D2=2  D3=57  D4=2281  D5=616  D6=7  D7=984
+capture docs/captures/lr4/loop/stow-busy.vcd: 6183.032 ms
+edges per channel: D0=2078  D1=244  D2=2  D3=239  D4=2289  D5=616  D6=7  D7=984
 
-button presses found: 1 (falling edges on PB5: 28), EVENT pulses (accepted presses): 1, EVT lines in the serial log: 1
+button presses found: 1 (falling edges on PB5: 119), EVENT pulses (accepted presses): 1, EVT lines in the serial log: 1
 
-press 1: first falling edge at 6074.620 ms, 28 falling edge(s) in the bounce, loop BUSY at the edge
-  the busy stretch that contained the edge: 6073.820 .. 6096.872 ms (23051.5 us), edge 800.2 us after its start
-  EVENT pulse: starts 17855.3 us after the edge, ends 17941.6 us after the edge (handler 86.2 us)
-  firmware EVT line: lat_us=17931 (cycle counter, from the interrupt time stamp to the end of the handler)
-  difference analyzer - firmware: +10.6 us (the analyzer starts at the pin edge, the firmware at the time stamp taken in the interrupt)
-  servo 1 pulse: 2000 us before, 1500 us after; the new pulse starts 31038.7 us and ends 32538.7 us after the edge (task deadline: 30000 us)
-  SD chip select was low around this press: 6074.928 .. 6088.109 ms
+press 1: first falling edge at 6074.526 ms, 119 falling edge(s) in the bounce, loop BUSY at the edge
+  the busy stretch that contained the edge: 6073.820 .. 6097.133 ms (23313.3 us), edge 705.9 us after its start
+  EVENT pulse: starts 18189.7 us after the edge, ends 18278.4 us after the edge (handler 88.8 us)
+  firmware EVT line: lat_us=18268 (cycle counter, from the interrupt time stamp to the end of the handler)
+  difference analyzer - firmware: +10.4 us (the analyzer starts at the pin edge, the firmware at the time stamp taken in the interrupt)
+  servo 1 pulse: 2000 us before, 1500 us after; the new pulse starts 31133.0 us and ends 32633.0 us after the edge (task deadline: 30000 us)
+  SD chip select was low around this press: 6074.981 .. 6088.356 ms
