@@ -29,17 +29,11 @@ plat_status_t plat_pwm_init(void)
     }
     __HAL_TIM_SET_PRESCALER(&htim3, prescaler - 1U);
     __HAL_TIM_SET_AUTORELOAD(&htim3, PLAT_PWM_PERIOD_US - 1U);
-    if (HAL_TIM_GenerateEvent(&htim3, TIM_EVENTSOURCE_UPDATE) != HAL_OK) {
-        return PLAT_ERR_BUS;
-    }
+    htim3.Instance->EGR = TIM_EGR_UG;
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0U);
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0U);
-    if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1) != HAL_OK) {
-        return PLAT_ERR_BUS;
-    }
-    if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2) != HAL_OK) {
-        return PLAT_ERR_BUS;
-    }
+    htim3.Instance->CCER |= TIM_CCER_CC1E | TIM_CCER_CC2E;
+    htim3.Instance->CR1 |= TIM_CR1_CEN;
     return PLAT_OK;
 }
 

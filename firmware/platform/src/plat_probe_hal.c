@@ -2,7 +2,7 @@
 #include "probe_pins.h"
 
 static const uint32_t pin_mask[PLAT_PROBE_COUNT] = {
-    PROBE_T2_PIN, PROBE_EVENT_PIN
+    PROBE_T2_PIN, PROBE_EVENT_PIN, PROBE_BUSY_PIN
 };
 
 void plat_probe_init(void)

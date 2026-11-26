@@ -10,7 +10,7 @@ extern void rtos_assert(unsigned line);
 #define RTOS_TICK_HZ     1000
 #endif
 #ifndef RTOS_HEAP_BYTES
-#define RTOS_HEAP_BYTES  4096
+#define RTOS_HEAP_BYTES  5210
 #endif
 
 #define configENABLE_MPU                        0
@@ -32,7 +32,7 @@ extern void rtos_assert(unsigned line);
 #define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             0
 #define configUSE_COUNTING_SEMAPHORES           0
-#define configUSE_TASK_NOTIFICATIONS            1
+#define configUSE_TASK_NOTIFICATIONS            0
 #define configTASK_NOTIFICATION_ARRAY_ENTRIES   1
 #define configQUEUE_REGISTRY_SIZE               0
 #define configUSE_TIMERS                        0
@@ -46,18 +46,20 @@ extern void rtos_assert(unsigned line);
 #define configUSE_TICK_HOOK                     0
 #define configUSE_MALLOC_FAILED_HOOK            1
 #define configCHECK_FOR_STACK_OVERFLOW          2
-#define configUSE_TRACE_FACILITY                1
+#define configUSE_TRACE_FACILITY                0
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
 #define configGENERATE_RUN_TIME_STATS           1
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() ((void)0)
-#define portGET_RUN_TIME_COUNTER_VALUE()        plat_time_cycles()
+#define portGET_RUN_TIME_COUNTER_VALUE()        (plat_time_cycles() >> 4)
 #define configASSERT(x)                         do { if (!(x)) { rtos_assert(__LINE__); } } while (0)
 
+void rtos_trace_switched_in(void);
+#define traceTASK_SWITCHED_IN()                 rtos_trace_switched_in()
 #define INCLUDE_vTaskDelay                      1
 #define INCLUDE_xTaskDelayUntil                 1
 #define INCLUDE_vTaskDelete                     0
-#define INCLUDE_vTaskSuspend                    1
-#define INCLUDE_uxTaskPriorityGet               1
+#define INCLUDE_vTaskSuspend                    0
+#define INCLUDE_uxTaskPriorityGet               0
 #define INCLUDE_uxTaskGetStackHighWaterMark     1
 #define INCLUDE_xTaskGetIdleTaskHandle          1
 #define INCLUDE_xTaskGetCurrentTaskHandle       1

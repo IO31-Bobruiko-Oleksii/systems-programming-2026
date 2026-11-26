@@ -4,6 +4,7 @@
 typedef enum {
     PLAT_PROBE_T2 = 0,
     PLAT_PROBE_EVENT,
+    PLAT_PROBE_BUSY,
     PLAT_PROBE_COUNT
 } plat_probe_t;
 

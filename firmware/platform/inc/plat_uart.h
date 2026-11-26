@@ -10,6 +10,8 @@ plat_status_t plat_uart_write(const uint8_t *data, size_t len);
 
 plat_status_t plat_uart_read_byte(uint8_t *byte, uint32_t timeout_ms);
 
+void plat_uart_set_rx_notify(void (*cb)(void));
+
 typedef struct {
     uint32_t dropped;
     uint32_t high;

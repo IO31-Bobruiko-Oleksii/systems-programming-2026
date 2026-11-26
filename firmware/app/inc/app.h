@@ -22,6 +22,24 @@
 #define APP_LOAD_MAX_MS      60000U
 
 typedef struct {
+    void     (*enter)(void);
+    void     (*leave)(void);
+    void     (*lock)(void);
+    void     (*unlock)(void);
+    void     (*sd_lock)(void);
+    void     (*sd_unlock)(void);
+    void     (*out_lock)(void);
+    void     (*out_unlock)(void);
+    int      (*log_put)(uint32_t t_ms, const uint16_t raw[LOGGER_SENSORS], uint8_t az,
+                        uint8_t tilt, uint8_t flags);
+    void     (*log_drain)(void);
+    void     (*load_start)(void);
+    void     (*stats_reset)(void);
+    uint64_t (*busy_cycles)(uint64_t window_cycles);
+    int      (*command)(unsigned argc, char *argv[]);
+} app_os_t;
+
+typedef struct {
     perf_stat_t sense;
     perf_stat_t track;
     perf_stat_t late;
@@ -73,6 +91,7 @@ typedef struct {
     plat_status_t pwm_init;
     plat_status_t button_init;
     plat_status_t rx_init;
+    app_os_t os;
 } app_t;
 
 void app_init(app_t *app);
@@ -84,5 +103,17 @@ int app_selftest(app_t *app);
 void app_poll(app_t *app);
 
 void app_execute(app_t *app, const char *line);
+
+int app_console_read(app_t *app, uint32_t timeout_ms);
+
+void app_run_command(app_t *app, const char *line, uint32_t t_ready);
+
+void app_service_button(app_t *app);
+
+uint32_t app_service_track(app_t *app, uint32_t now, uint32_t nominal);
+
+void app_service_log(app_t *app);
+
+void app_service_load(app_t *app);
 
 #endif /* APP_H */

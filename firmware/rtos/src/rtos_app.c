@@ -3,8 +3,10 @@
 #include <string.h>
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 #include "semphr.h"
 #include "fmt.h"
+#include "logger.h"
 #include "plat_button.h"
 #include "plat_probe.h"
 #include "plat_time.h"
@@ -13,23 +15,59 @@
 
 void xPortSysTickHandler(void);
 
-#define GATE_BLINK_MS      10U
-#define GATE_HOG_MS        30U
-#define GATE_REPORT_MS     400U
-#define GATE_BLINK_WORDS   96U
-#define GATE_EVENT_WORDS   96U
-#define GATE_HOG_WORDS     192U
+#define EOL                "\r\n"
+#define MAX_TASKS          8U
+#define LOG_QUEUE_LEN      16U
+#define LOGGER_WAKE_MS     100U
+#define LOAD_PASS_MS       5U
+#define RUNTIME_SHIFT      4U
 
-static TaskHandle_t h_event;
+#define PRIO_EVENT         5U
+#define PRIO_TRACK         4U
+#define PRIO_CMD           3U
+#define PRIO_LOGGER        2U
+#define PRIO_LOAD          1U
+
+#define WORDS_EVENT        160U
+#define WORDS_TRACK        160U
+#define WORDS_CMD          224U
+#define WORDS_LOGGER       128U
+#define WORDS_LOAD         64U
+
+typedef struct {
+    uint32_t t_ms;
+    uint16_t raw[LOGGER_SENSORS];
+    uint8_t  az;
+    uint8_t  tilt;
+    uint8_t  flags;
+} log_rec_t;
+
+typedef struct {
+    TaskHandle_t handle;
+    const char  *name;
+    uint16_t     words;
+    uint8_t      prio;
+} task_info_t;
+
+static app_t *g_app;
 static SemaphoreHandle_t uart_mutex;
+static SemaphoreHandle_t state_mutex;
+static SemaphoreHandle_t sd_mutex;
+static QueueHandle_t log_q;
+static task_info_t tasks[MAX_TASKS];
+static unsigned task_count;
+static SemaphoreHandle_t sem_event;
+static SemaphoreHandle_t sem_cmd;
+static SemaphoreHandle_t sem_load;
 
-static volatile uint32_t blink_runs;
-static volatile uint32_t blink_gap_min;
-static volatile uint32_t blink_gap_max;
-static volatile uint32_t evt_n;
-static volatile uint32_t evt_max;
+static volatile uint32_t switches;
+static volatile uint32_t log_dropped;
+static uint32_t base_run[MAX_TASKS];
+static uint32_t base_now;
+static uint32_t base_switches;
+static uint32_t base_ticks;
 
-static void fatal(const char *text)
+static void fatal_text(const char *text)
 {
     portDISABLE_INTERRUPTS();
     (void)plat_uart_write((const uint8_t *)text, strlen(text));
@@ -40,7 +78,7 @@ static void fatal(const char *text)
 void rtos_assert(unsigned line)
 {
     char buf[40];
-    int n = fmt_snprintf(buf, sizeof buf, "FATAL assert line=%u\r\n", line);
+    int n = fmt_snprintf(buf, sizeof buf, "FATAL assert line=%u" EOL, line);
 
     portDISABLE_INTERRUPTS();
     if (n > 0) {
@@ -52,18 +90,13 @@ void rtos_assert(unsigned line)
 
 void vApplicationMallocFailedHook(void)
 {
-    static const char msg[] = "FATAL malloc failed\r\n";
-
-    portDISABLE_INTERRUPTS();
-    (void)plat_uart_write((const uint8_t *)msg, sizeof msg - 1U);
-    for (;;) {
-    }
+    fatal_text("FATAL malloc failed" EOL);
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t task, char *name)
 {
     char buf[48];
-    int n = fmt_snprintf(buf, sizeof buf, "FATAL stack overflow in %s\r\n", name);
+    int n = fmt_snprintf(buf, sizeof buf, "FATAL stack overflow in %s" EOL, name);
 
     (void)task;
     portDISABLE_INTERRUPTS();
@@ -81,9 +114,124 @@ void rtos_systick(void)
     }
 }
 
+void rtos_trace_switched_in(void)
+{
+    switches++;
+    if (xTaskGetCurrentTaskHandle() == xTaskGetIdleTaskHandle()) {
+        plat_probe_clear(PLAT_PROBE_BUSY);
+    } else {
+        plat_probe_set(PLAT_PROBE_BUSY);
+    }
+}
+
+static void hook_enter(void)
+{
+    taskENTER_CRITICAL();
+}
+
+static void hook_leave(void)
+{
+    taskEXIT_CRITICAL();
+}
+
+static void hook_lock(void)
+{
+    (void)xSemaphoreTake(state_mutex, portMAX_DELAY);
+}
+
+static void hook_unlock(void)
+{
+    (void)xSemaphoreGive(state_mutex);
+}
+
+static void hook_sd_lock(void)
+{
+    (void)xSemaphoreTake(sd_mutex, portMAX_DELAY);
+}
+
+static void hook_sd_unlock(void)
+{
+    (void)xSemaphoreGive(sd_mutex);
+}
+
+static void hook_out_lock(void)
+{
+    (void)xSemaphoreTake(uart_mutex, portMAX_DELAY);
+}
+
+static void hook_out_unlock(void)
+{
+    (void)xSemaphoreGive(uart_mutex);
+}
+
+static int hook_log_put(uint32_t t_ms, const uint16_t raw[LOGGER_SENSORS], uint8_t az,
+                        uint8_t tilt, uint8_t flags)
+{
+    log_rec_t rec;
+    unsigned i;
+
+    rec.t_ms = t_ms;
+    for (i = 0U; i < LOGGER_SENSORS; i++) {
+        rec.raw[i] = raw[i];
+    }
+    rec.az = az;
+    rec.tilt = tilt;
+    rec.flags = flags;
+    if (xQueueSend(log_q, &rec, 0U) != pdPASS) {
+        log_dropped++;
+        return 0;
+    }
+    return 1;
+}
+
+static void hook_log_drain(void)
+{
+    log_rec_t rec;
+
+    while (xQueueReceive(log_q, &rec, 0U) == pdPASS) {
+        (void)logger_add(&g_app->logger, rec.t_ms, rec.raw, rec.az, rec.tilt, rec.flags);
+    }
+}
+
+static void hook_load_start(void)
+{
+    (void)xSemaphoreGive(sem_load);
+}
+
+static TaskHandle_t handle_of(unsigned i)
+{
+    return (i < task_count) ? tasks[i].handle : xTaskGetIdleTaskHandle();
+}
+
+static uint32_t runtime_now(void)
+{
+    return plat_time_cycles() >> RUNTIME_SHIFT;
+}
+
+static void hook_stats_reset(void)
+{
+    unsigned i;
+
+    for (i = 0U; i <= task_count; i++) {
+        base_run[i] = ulTaskGetRunTimeCounter(handle_of(i));
+    }
+    base_now = runtime_now();
+    base_switches = switches;
+    base_ticks = (uint32_t)xTaskGetTickCount();
+    log_dropped = 0U;
+}
+
+static uint64_t hook_busy_cycles(uint64_t window_cycles)
+{
+    uint64_t idle = (uint64_t)(ulTaskGetRunTimeCounter(handle_of(task_count)) -
+                               base_run[task_count]) << RUNTIME_SHIFT;
+
+    return (window_cycles > idle) ? (window_cycles - idle) : 0U;
+}
+
 static void say(const char *fmt, ...)
 {
-    char buf[120];
+    char buf[128];
     va_list ap;
     int n;
 
@@ -96,128 +244,215 @@ static void say(const char *fmt, ...)
     if (n >= (int)sizeof buf) {
         n = (int)sizeof buf - 1;
     }
-    if (xSemaphoreTake(uart_mutex, portMAX_DELAY) == pdTRUE) {
-        (void)plat_uart_write((const uint8_t *)buf, (size_t)n);
-        (void)xSemaphoreGive(uart_mutex);
-    }
+    hook_out_lock();
+    (void)plat_uart_write((const uint8_t *)buf, (size_t)n);
+    hook_out_unlock();
 }
+
+static void cmd_tasks(void)
+{
+    uint32_t window = runtime_now() - base_now;
+    uint32_t hz = plat_time_hz();
+    unsigned i;
+
+    for (i = 0U; i <= task_count; i++) {
+        uint32_t run = ulTaskGetRunTimeCounter(handle_of(i)) - base_run[i];
+        uint32_t stack = (uint32_t)tasks[i].words * 4U;
+        uint32_t peak = stack - (uint32_t)uxTaskGetStackHighWaterMark(handle_of(i)) * 4U;
+
+        say("STAT task name=%s prio=%u run_us=%lu cpu_pm=%lu stack=%lu peak=%lu" EOL,
+            tasks[i].name, (unsigned)tasks[i].prio,
+            (unsigned long)((run << RUNTIME_SHIFT) / (hz / 1000000U)),
+            (unsigned long)((window != 0U) ? (uint32_t)(((uint64_t)run * 1000U) / window) : 0U),
+            (unsigned long)stack, (unsigned long)peak);
+    }
+    say("STAT os tick_hz=%lu ticks=%lu switches=%lu log_dropped=%lu" EOL,
+        (unsigned long)configTICK_RATE_HZ,
+        (unsigned long)((uint32_t)xTaskGetTickCount() - base_ticks),
+        (unsigned long)(switches - base_switches), (unsigned long)log_dropped);
+    say("CMD tasks OK count=%u" EOL, task_count + 1U);
+}
+
+static void cmd_heap(void)
+{
+    size_t total = configTOTAL_HEAP_SIZE;
+    size_t free_now = xPortGetFreeHeapSize();
+
+    say("CMD heap OK total=%lu free=%lu used=%lu" EOL, (unsigned long)total,
+        (unsigned long)free_now, (unsigned long)(total - free_now));
+}
+
+static int hook_command(unsigned argc, char *argv[])
+{
+    if (argc == 1U && strcmp(argv[0], "tasks") == 0) {
+        cmd_tasks();
+        return 1;
+    }
+    if (argc == 1U && strcmp(argv[0], "heap") == 0) {
+        cmd_heap();
+        return 1;
+    }
+    return 0;
+}
+
+static const app_os_t os_hooks = {
+    hook_enter, hook_leave, hook_lock, hook_unlock, hook_sd_lock, hook_sd_unlock,
+    hook_out_lock, hook_out_unlock, hook_log_put, hook_log_drain, hook_load_start,
+    hook_stats_reset, hook_busy_cycles, hook_command
+};
 
 static void button_notify(void)
 {
     BaseType_t woken = pdFALSE;
 
-    vTaskNotifyGiveFromISR(h_event, &woken);
+    (void)xSemaphoreGiveFromISR(sem_event, &woken);
     portYIELD_FROM_ISR(woken);
 }
 
-static void gate_blink(void *arg)
+static void uart_notify(void)
 {
-    TickType_t last = xTaskGetTickCount();
-    uint32_t prev = 0U;
-    uint32_t level = 0U;
+    BaseType_t woken = pdFALSE;
 
-    (void)arg;
+    (void)xSemaphoreGiveFromISR(sem_cmd, &woken);
+    portYIELD_FROM_ISR(woken);
+}
+
+static void event_task(void *arg)
+{
+    app_t *app = arg;
+
+    for (;;) {
+        (void)xSemaphoreTake(sem_event, portMAX_DELAY);
+        app_service_button(app);
+    }
+}
+
+static void track_task(void *arg)
+{
+    app_t *app = arg;
+    const TickType_t period = pdMS_TO_TICKS(APP_TRACK_PERIOD_MS);
+    const uint32_t per_tick = plat_time_hz() / (uint32_t)configTICK_RATE_HZ;
+    TickType_t last = xTaskGetTickCount();
+    TickType_t base_tick = 0U;
+    uint32_t base = 0U;
+    int have_base = 0;
+
     for (;;) {
         uint32_t now;
+        uint32_t nominal;
+        uint32_t lost;
 
-        vTaskDelayUntil(&last, pdMS_TO_TICKS(GATE_BLINK_MS));
+        vTaskDelayUntil(&last, period);
         now = plat_time_cycles();
-        level ^= 1U;
-        if (level != 0U) {
-            plat_probe_set(PLAT_PROBE_T2);
-        } else {
-            plat_probe_clear(PLAT_PROBE_T2);
+        if (have_base == 0) {
+            base = now - (now % per_tick);
+            base_tick = last;
+            have_base = 1;
         }
-        if (blink_runs != 0U) {
-            uint32_t gap = now - prev;
-
-            if (gap < blink_gap_min) {
-                blink_gap_min = gap;
-            }
-            if (gap > blink_gap_max) {
-                blink_gap_max = gap;
-            }
-        }
-        prev = now;
-        blink_runs++;
+        nominal = base + (uint32_t)(last - base_tick) * per_tick;
+        lost = app_service_track(app, now, nominal);
+        last += (TickType_t)(lost * (uint32_t)period);
     }
 }
 
-static void gate_event(void *arg)
+static void cmd_task(void *arg)
 {
-    (void)arg;
-    for (;;) {
-        uint32_t first = 0U;
-        uint32_t cycles;
+    app_t *app = arg;
 
-        (void)ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        if (plat_button_take(&first) == 0U) {
-            continue;
+    for (;;) {
+        int r;
+
+        while ((r = app_console_read(app, 0U)) != 0) {
+            if (r == 1) {
+                app_run_command(app, app->line, plat_time_cycles());
+            }
         }
-        plat_probe_set(PLAT_PROBE_EVENT);
-        cycles = plat_time_cycles() - first;
-        plat_probe_clear(PLAT_PROBE_EVENT);
-        evt_n++;
-        if (cycles > evt_max) {
-            evt_max = cycles;
+        (void)xSemaphoreTake(sem_cmd, portMAX_DELAY);
+    }
+}
+
+static void logger_task(void *arg)
+{
+    app_t *app = arg;
+
+    for (;;) {
+        log_rec_t rec;
+        BaseType_t got = xQueueReceive(log_q, &rec, pdMS_TO_TICKS(LOGGER_WAKE_MS));
+
+        hook_sd_lock();
+        if (got == pdPASS) {
+            (void)logger_add(&app->logger, rec.t_ms, rec.raw, rec.az, rec.tilt, rec.flags);
+        }
+        hook_log_drain();
+        app_service_log(app);
+        hook_sd_unlock();
+    }
+}
+
+static void load_task(void *arg)
+{
+    app_t *app = arg;
+
+    for (;;) {
+        (void)xSemaphoreTake(sem_load, portMAX_DELAY);
+        while (app->load_active != 0U) {
+            app_service_load(app);
+            vTaskDelay(pdMS_TO_TICKS(LOAD_PASS_MS));
         }
     }
 }
 
-static void gate_hog(void *arg)
+static void add_task(TaskFunction_t fn, const char *name, uint16_t words, UBaseType_t prio,
+                     app_t *app)
 {
-    uint32_t pass = 0U;
-    uint32_t hz = plat_time_hz();
-    uint32_t spin = (hz / 1000U) * GATE_HOG_MS;
+    TaskHandle_t h = NULL;
+    BaseType_t ok = xTaskCreate(fn, name, words, app, prio, &h);
 
-    (void)arg;
-    for (;;) {
-        uint32_t t0 = plat_time_cycles();
-        uint32_t gmin;
-        uint32_t gmax;
-
-        while ((uint32_t)(plat_time_cycles() - t0) < spin) {
-        }
-        pass++;
-        taskENTER_CRITICAL();
-        gmin = blink_gap_min;
-        gmax = blink_gap_max;
-        blink_gap_min = UINT32_MAX;
-        blink_gap_max = 0U;
-        taskEXIT_CRITICAL();
-        say("GATE pass=%lu blink_runs=%lu gap_min_us=%lu gap_max_us=%lu evt_n=%lu evt_max_us=%lu"
-            "\r\n", (unsigned long)pass, (unsigned long)blink_runs,
-            (unsigned long)((gmin == UINT32_MAX) ? 0U : gmin / (hz / 1000000U)),
-            (unsigned long)(gmax / (hz / 1000000U)), (unsigned long)evt_n,
-            (unsigned long)(evt_max / (hz / 1000000U)));
-        vTaskDelay(pdMS_TO_TICKS(GATE_REPORT_MS));
-    }
+    configASSERT(ok == pdPASS);
+    tasks[task_count].handle = h;
+    tasks[task_count].name = name;
+    tasks[task_count].words = words;
+    tasks[task_count].prio = (uint8_t)prio;
+    task_count++;
 }
 
 void rtos_start(app_t *app)
 {
-    char buf[64];
-    BaseType_t ok;
+    char buf[80];
     int n;
 
-    (void)app;
     configASSERT(plat_time_hz() == configCPU_CLOCK_HZ);
-    blink_gap_min = UINT32_MAX;
+    g_app = app;
     uart_mutex = xSemaphoreCreateMutex();
-    configASSERT(uart_mutex != NULL);
-    ok = xTaskCreate(gate_event, "event", GATE_EVENT_WORDS, NULL, 3U, &h_event);
-    configASSERT(ok == pdPASS);
-    ok = xTaskCreate(gate_blink, "blink", GATE_BLINK_WORDS, NULL, 2U, NULL);
-    configASSERT(ok == pdPASS);
-    ok = xTaskCreate(gate_hog, "hog", GATE_HOG_WORDS, NULL, 1U, NULL);
-    configASSERT(ok == pdPASS);
+    state_mutex = xSemaphoreCreateMutex();
+    sd_mutex = xSemaphoreCreateMutex();
+    sem_event = xSemaphoreCreateBinary();
+    sem_cmd = xSemaphoreCreateBinary();
+    sem_load = xSemaphoreCreateBinary();
+    log_q = xQueueCreate(LOG_QUEUE_LEN, sizeof(log_rec_t));
+    configASSERT(uart_mutex != NULL && state_mutex != NULL && sd_mutex != NULL && log_q != NULL);
+    configASSERT(sem_event != NULL && sem_cmd != NULL && sem_load != NULL);
+
+    app->os = os_hooks;
+
+    add_task(event_task, "event", WORDS_EVENT, PRIO_EVENT, app);
+    add_task(track_task, "track", WORDS_TRACK, PRIO_TRACK, app);
+    add_task(cmd_task, "cmd", WORDS_CMD, PRIO_CMD, app);
+    add_task(logger_task, "logger", WORDS_LOGGER, PRIO_LOGGER, app);
+    add_task(load_task, "load", WORDS_LOAD, PRIO_LOAD, app);
+    tasks[task_count].handle = NULL;
+    tasks[task_count].name = "IDLE";
+    tasks[task_count].words = configMINIMAL_STACK_SIZE;
+    tasks[task_count].prio = 0U;
+
     plat_button_set_notify(button_notify);
-    n = fmt_snprintf(buf, sizeof buf, "GATE up tick_hz=%lu core_hz=%lu heap_free=%lu\r\n",
+    plat_uart_set_rx_notify(uart_notify);
+    n = fmt_snprintf(buf, sizeof buf, "RTOS up tick_hz=%lu core_hz=%lu heap_free=%lu tasks=%u" EOL,
                      (unsigned long)configTICK_RATE_HZ, (unsigned long)plat_time_hz(),
-                     (unsigned long)xPortGetFreeHeapSize());
+                     (unsigned long)xPortGetFreeHeapSize(), (unsigned)task_count);
     if (n > 0) {
         (void)plat_uart_write((const uint8_t *)buf, (size_t)n);
     }
     vTaskStartScheduler();
-    fatal("FATAL scheduler returned\r\n");
+    fatal_text("FATAL scheduler returned" EOL);
 }
