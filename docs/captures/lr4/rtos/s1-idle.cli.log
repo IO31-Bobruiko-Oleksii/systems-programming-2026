@@ -1,0 +1,57 @@
+   0.107 Wokwi CLI v0.27.1 (ffde06bde1ae)
+   2.080 Connected to Wokwi Simulation API 1.0.0-20261126-gccaad6a5
+   5.604 Starting simulation...
+   8.707 Heliostat boot OK
+   8.708 SELFTEST BEGIN version=1
+   8.710 SELFTEST adc OK raw=1025,2050,3074,4095
+   8.711 SELFTEST spi OK
+   8.799 SELFTEST sd OK type=V2HC sig=55AA
+   8.803 SELFTEST servo1 OK pulse_us=1500
+   8.806 SELFTEST servo2 OK pulse_us=1500
+   8.810 SELFTEST END total=5 passed=5 failed=0
+   8.819 [s1-idle: 250 s (LR3)] Expected text matched: "SELFTEST END total=5 passed=5 failed=0"
+   8.822 [s1-idle: 250 s (LR3)] delay 6025ms
+   9.605 RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+  17.362 CMD stats-reset OK
+  17.363 [s1-idle: 250 s (LR3)] Expected text matched: "CMD stats-reset OK"
+  17.364 [s1-idle: 250 s (LR3)] delay 10000ms
+  28.583 [s1-idle: 250 s (LR3)] delay 10000ms
+  39.793 [s1-idle: 250 s (LR3)] delay 10000ms
+  50.968 [s1-idle: 250 s (LR3)] delay 10000ms
+  62.210 [s1-idle: 250 s (LR3)] delay 10000ms
+  73.395 [s1-idle: 250 s (LR3)] delay 10000ms
+  84.598 [s1-idle: 250 s (LR3)] delay 10000ms
+  95.797 [s1-idle: 250 s (LR3)] delay 10000ms
+ 106.994 [s1-idle: 250 s (LR3)] delay 10000ms
+ 118.309 [s1-idle: 250 s (LR3)] delay 10000ms
+ 129.475 [s1-idle: 250 s (LR3)] delay 10000ms
+ 140.688 [s1-idle: 250 s (LR3)] delay 10000ms
+ 151.848 [s1-idle: 250 s (LR3)] delay 10000ms
+ 163.095 [s1-idle: 250 s (LR3)] delay 10000ms
+ 174.395 [s1-idle: 250 s (LR3)] delay 10000ms
+ 185.593 [s1-idle: 250 s (LR3)] delay 10000ms
+ 196.804 [s1-idle: 250 s (LR3)] delay 10000ms
+ 207.979 [s1-idle: 250 s (LR3)] delay 10000ms
+ 219.169 [s1-idle: 250 s (LR3)] delay 10000ms
+ 230.372 [s1-idle: 250 s (LR3)] delay 10000ms
+ 241.584 [s1-idle: 250 s (LR3)] delay 10000ms
+ 252.771 [s1-idle: 250 s (LR3)] delay 10000ms
+ 263.959 [s1-idle: 250 s (LR3)] delay 10000ms
+ 275.121 [s1-idle: 250 s (LR3)] delay 10000ms
+ 286.621 [s1-idle: 250 s (LR3)] delay 10000ms
+ 299.161 STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+ 299.162 STAT name=sense n=5000 min_us=630 avg_us=630 max_us=631
+ 299.164 STAT name=track n=5001 min_us=885 avg_us=890 max_us=891
+ 299.165 STAT name=late n=5001 min_us=80 avg_us=81 max_us=81
+ 299.228 STAT name=period n=5001 min_us=49998 avg_us=50000 max_us=50000
+ 299.230 STAT name=cmd n=1 min_us=2531 avg_us=2531 max_us=2531
+ 299.232 STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+ 299.233 STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+ 299.234 STAT load window_ms=250031 busy_ms=5908 load_pm=23
+ 299.236 STAT count runs=5001 missed=0 rx_bytes=6 rx_errors=0 passes=0
+ 299.293 STAT rx init=0 dropped=0 ring_max=6 errors=0 isr_n=6 isr_avg=252 isr_max=568
+ 299.295 STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+ 299.296 CMD stats OK
+ 299.297 [s1-idle: 250 s (LR3)] Expected text matched: "CMD stats OK"
+ 299.298 [s1-idle: 250 s (LR3)] delay 5ms
+ 299.966 [s1-idle: 250 s (LR3)] Scenario completed successfully

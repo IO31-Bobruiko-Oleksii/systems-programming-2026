@@ -72,6 +72,7 @@ static volatile uint32_t tick_probe;
 static uint32_t tick_n;
 static uint32_t tick_sum;
 static uint32_t tick_max;
+static volatile uint32_t ctx_stamp;
 
 static void tick_reset(void)
 {
@@ -330,9 +331,9 @@ static void cmd_heap(void)
 static void cmd_ctx(void)
 {
     uint32_t over = UINT32_MAX;
-    uint32_t sum = 0U;
-    uint32_t mn = UINT32_MAX;
-    uint32_t mx = 0U;
+    uint32_t rt_min = UINT32_MAX;
+    uint32_t one_min = UINT32_MAX;
+    uint32_t one_sum = 0U;
     unsigned i;
 
     for (i = 0U; i < 16U; i++) {
@@ -348,22 +349,24 @@ static void cmd_ctx(void)
     for (i = 0U; i < CTX_ROUNDS; i++) {
         uint32_t t0 = plat_time_cycles();
         uint32_t d;
+        uint32_t e;
 
         (void)xSemaphoreGive(sem_event);
         d = plat_time_cycles() - t0 - over;
-        sum += d;
-        if (d < mn) {
-            mn = d;
+        e = ctx_stamp - t0 - over;
+        one_sum += e;
+        if (e < one_min) {
+            one_min = e;
         }
-        if (d > mx) {
-            mx = d;
+        if (d < rt_min) {
+            rt_min = d;
         }
     }
     vTaskDelay(pdMS_TO_TICKS(200));
     tick_probe = 0U;
-    say("CMD ctx OK rounds=%u read_cyc=%lu min_cyc=%lu avg_cyc=%lu max_cyc=%lu" EOL, CTX_ROUNDS,
-        (unsigned long)over, (unsigned long)mn, (unsigned long)(sum / CTX_ROUNDS),
-        (unsigned long)mx);
+    say("CMD ctx OK rounds=%u read_cyc=%lu rt_min_cyc=%lu one_min_cyc=%lu one_avg_cyc=%lu" EOL,
+        CTX_ROUNDS, (unsigned long)over, (unsigned long)rt_min, (unsigned long)one_min,
+        (unsigned long)(one_sum / CTX_ROUNDS));
     if (tick_n != 0U) {
         say("STAT os tick_isr n=%lu avg_cyc=%lu max_cyc=%lu" EOL, (unsigned long)tick_n,
             (unsigned long)(tick_sum / tick_n - over), (unsigned long)(tick_max - over));
@@ -419,6 +422,9 @@ static void event_task(void *arg)
 
     for (;;) {
         (void)xSemaphoreTake(sem_event, portMAX_DELAY);
+#ifdef RTOS_BENCH
+        ctx_stamp = plat_time_cycles();
+#endif
         app_service_button(app);
     }
 }

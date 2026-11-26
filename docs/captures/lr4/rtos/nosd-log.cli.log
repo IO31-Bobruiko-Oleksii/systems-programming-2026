@@ -1,0 +1,58 @@
+   0.103 Wokwi CLI v0.27.1 (ffde06bde1ae)
+   1.145 Connected to Wokwi Simulation API 1.0.0-20261126-gccaad6a5
+   7.509 Starting simulation...
+  10.364 Heliostat boot OK
+  10.365 SELFTEST BEGIN version=1
+  10.368 SELFTEST adc OK raw=1025,2050,3074,4095
+  10.371 SELFTEST spi OK
+  10.373 SELFTEST sd FAIL step=init status=3
+  10.374 SELFTEST servo1 OK pulse_us=1500
+  10.376 SELFTEST servo2 OK pulse_us=1500
+  10.377 SELFTEST END total=5 passed=4 failed=1
+  10.378 [nosd-log: 18 s (LR3)] Expected text matched: "SELFTEST END total=5 passed=4 failed=1"
+  10.379 [nosd-log: 18 s (LR3)] delay 6025ms
+  11.093 RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+  20.855 [nosd-log: 18 s (LR3)] delay 100ms
+  21.530 CMD stow OK az=90 tilt=90
+  21.531 CMD resume OK
+  22.908 [nosd-log: 18 s (LR3)] delay 4000ms
+  23.591 CMD stats-reset OK
+  23.592 CMD log OK on=1
+  28.464 [nosd-log: 18 s (LR3)] delay 4000ms
+  33.980 [nosd-log: 18 s (LR3)] delay 4000ms
+  40.193 CMD log OK on=1 seq=16 stored=0 blocks=0 dropped=144 errors=12 flushes=0 flush_max_us=0
+  40.194 STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+  40.196 STAT name=sense n=240 min_us=630 avg_us=630 max_us=630
+  40.197 STAT name=track n=240 min_us=905 avg_us=970 max_us=1007
+  40.375 STAT name=late n=240 min_us=81 avg_us=81 max_us=81
+  40.377 STAT name=period n=241 min_us=50000 avg_us=50000 max_us=50000
+  40.378 STAT name=cmd n=3 min_us=2005 avg_us=4836 max_us=9871
+  40.380 STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+  40.381 STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+  40.456 STAT load window_ms=12031 busy_ms=393 load_pm=32
+  40.457 STAT count runs=241 missed=0 rx_bytes=17 rx_errors=0 passes=0
+  40.459 STAT rx init=0 dropped=0 ring_max=76 errors=0 isr_n=80 isr_avg=196 isr_max=543
+  40.460 STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+  40.461 CMD stats OK
+  40.488 CMD stats-reset OK
+  40.489 CMD sd-write FAIL step=init status=3
+  40.491 CMD sd-write FAIL step=init status=3
+  40.492 CMD sd-write FAIL step=init status=3
+  40.493 STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+  40.516 STAT name=sense n=0 min_us=0 avg_us=0 max_us=0
+  40.517 STAT name=track n=1 min_us=980 avg_us=980 max_us=980
+  40.518 STAT name=late n=1 min_us=78 avg_us=78 max_us=78
+  40.520 STAT name=period n=1 min_us=49998 avg_us=49998 max_us=49998
+  40.521 STAT name=cmd n=4 min_us=2543 avg_us=6481 max_us=7843
+  40.560 STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+  40.562 STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+  40.563 STAT load window_ms=34 busy_ms=34 load_pm=1000
+  40.565 STAT count runs=1 missed=0 rx_bytes=51 rx_errors=0 passes=0
+  40.575 STAT rx init=0 dropped=0 ring_max=58 errors=0 isr_n=0 isr_avg=0 isr_max=0
+  40.577 STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+  40.579 CMD stats OK
+  40.580 CMD button OK edges=
+  40.581 [nosd-log: 18 s (LR3)] Expected text matched: "CMD button OK edges="
+  40.584 [nosd-log: 18 s (LR3)] delay 5ms
+  41.237 0 accepted=0 ignored=0
+  41.239 [nosd-log: 18 s (LR3)] Scenario completed successfully
