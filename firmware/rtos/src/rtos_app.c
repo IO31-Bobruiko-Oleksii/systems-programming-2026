@@ -67,6 +67,20 @@ static uint32_t base_now;
 static uint32_t base_switches;
 static uint32_t base_ticks;
 
+#ifdef RTOS_BENCH
+static volatile uint32_t tick_probe;
+static uint32_t tick_n;
+static uint32_t tick_sum;
+static uint32_t tick_max;
+
+static void tick_reset(void)
+{
+    tick_n = 0U;
+    tick_sum = 0U;
+    tick_max = 0U;
+}
+#endif
+
 static void fatal_text(const char *text)
 {
     portDISABLE_INTERRUPTS();
@@ -109,9 +123,30 @@ void vApplicationStackOverflowHook(TaskHandle_t task, char *name)
 
 void rtos_systick(void)
 {
+#ifdef RTOS_BENCH
+    uint32_t t0;
+    uint32_t d;
+
+    if (xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED) {
+        return;
+    }
+    if (tick_probe == 0U) {
+        xPortSysTickHandler();
+        return;
+    }
+    t0 = plat_time_cycles();
+    xPortSysTickHandler();
+    d = plat_time_cycles() - t0;
+    tick_n++;
+    tick_sum += d;
+    if (d > tick_max) {
+        tick_max = d;
+    }
+#else
     if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
         xPortSysTickHandler();
     }
+#endif
 }
 
 void rtos_trace_switched_in(void)
@@ -219,6 +254,9 @@ static void hook_stats_reset(void)
     base_switches = switches;
     base_ticks = (uint32_t)xTaskGetTickCount();
     log_dropped = 0U;
+#ifdef RTOS_BENCH
+    tick_reset();
+#endif
 }
 
 static uint64_t hook_busy_cycles(uint64_t window_cycles)
@@ -252,24 +290,28 @@ static void say(const char *fmt, ...)
 static void cmd_tasks(void)
 {
     uint32_t window = runtime_now() - base_now;
+    uint32_t ticks = (uint32_t)xTaskGetTickCount() - base_ticks;
+    uint32_t sw = switches - base_switches;
     uint32_t hz = plat_time_hz();
+    uint32_t run[MAX_TASKS];
     unsigned i;
 
     for (i = 0U; i <= task_count; i++) {
-        uint32_t run = ulTaskGetRunTimeCounter(handle_of(i)) - base_run[i];
+        run[i] = ulTaskGetRunTimeCounter(handle_of(i)) - base_run[i];
+    }
+    for (i = 0U; i <= task_count; i++) {
         uint32_t stack = (uint32_t)tasks[i].words * 4U;
         uint32_t peak = stack - (uint32_t)uxTaskGetStackHighWaterMark(handle_of(i)) * 4U;
 
         say("STAT task name=%s prio=%u run_us=%lu cpu_pm=%lu stack=%lu peak=%lu" EOL,
             tasks[i].name, (unsigned)tasks[i].prio,
-            (unsigned long)((run << RUNTIME_SHIFT) / (hz / 1000000U)),
-            (unsigned long)((window != 0U) ? (uint32_t)(((uint64_t)run * 1000U) / window) : 0U),
+            (unsigned long)((run[i] << RUNTIME_SHIFT) / (hz / 1000000U)),
+            (unsigned long)((window != 0U) ? (uint32_t)(((uint64_t)run[i] * 1000U) / window) : 0U),
             (unsigned long)stack, (unsigned long)peak);
     }
     say("STAT os tick_hz=%lu ticks=%lu switches=%lu log_dropped=%lu" EOL,
-        (unsigned long)configTICK_RATE_HZ,
-        (unsigned long)((uint32_t)xTaskGetTickCount() - base_ticks),
-        (unsigned long)(switches - base_switches), (unsigned long)log_dropped);
+        (unsigned long)configTICK_RATE_HZ, (unsigned long)ticks, (unsigned long)sw,
+        (unsigned long)log_dropped);
     say("CMD tasks OK count=%u" EOL, task_count + 1U);
 }
 
@@ -282,8 +324,62 @@ static void cmd_heap(void)
         (unsigned long)free_now, (unsigned long)(total - free_now));
 }
 
+#ifdef RTOS_BENCH
+#define CTX_ROUNDS 200U
+
+static void cmd_ctx(void)
+{
+    uint32_t over = UINT32_MAX;
+    uint32_t sum = 0U;
+    uint32_t mn = UINT32_MAX;
+    uint32_t mx = 0U;
+    unsigned i;
+
+    for (i = 0U; i < 16U; i++) {
+        uint32_t a = plat_time_cycles();
+        uint32_t b = plat_time_cycles();
+
+        if (b - a < over) {
+            over = b - a;
+        }
+    }
+    tick_reset();
+    tick_probe = 1U;
+    for (i = 0U; i < CTX_ROUNDS; i++) {
+        uint32_t t0 = plat_time_cycles();
+        uint32_t d;
+
+        (void)xSemaphoreGive(sem_event);
+        d = plat_time_cycles() - t0 - over;
+        sum += d;
+        if (d < mn) {
+            mn = d;
+        }
+        if (d > mx) {
+            mx = d;
+        }
+    }
+    vTaskDelay(pdMS_TO_TICKS(200));
+    tick_probe = 0U;
+    say("CMD ctx OK rounds=%u read_cyc=%lu min_cyc=%lu avg_cyc=%lu max_cyc=%lu" EOL, CTX_ROUNDS,
+        (unsigned long)over, (unsigned long)mn, (unsigned long)(sum / CTX_ROUNDS),
+        (unsigned long)mx);
+    if (tick_n != 0U) {
+        say("STAT os tick_isr n=%lu avg_cyc=%lu max_cyc=%lu" EOL, (unsigned long)tick_n,
+            (unsigned long)(tick_sum / tick_n - over), (unsigned long)(tick_max - over));
+    }
+}
+
+#endif /* RTOS_BENCH */
+
 static int hook_command(unsigned argc, char *argv[])
 {
+#ifdef RTOS_BENCH
+    if (argc == 1U && strcmp(argv[0], "ctx") == 0) {
+        cmd_ctx();
+        return 1;
+    }
+#endif
     if (argc == 1U && strcmp(argv[0], "tasks") == 0) {
         cmd_tasks();
         return 1;
