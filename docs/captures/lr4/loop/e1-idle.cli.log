@@ -1,0 +1,173 @@
+   0.103 Wokwi CLI v0.27.1 (ffde06bde1ae)
+   1.364 Connected to Wokwi Simulation API 1.0.0-20261126-gccaad6a5
+   7.151 Starting simulation...
+   9.805 Heliostat boot OK
+   9.807 SELFTEST BEGIN version=1
+   9.809 SELFTEST adc OK raw=1025,2050,3074,4095
+   9.810 SELFTEST spi OK
+   9.896 SELFTEST sd OK type=V2HC sig=55AA
+   9.899 SELFTEST servo1 OK pulse_us=1500
+   9.900 SELFTEST servo2 OK pulse_us=1500
+   9.902 SELFTEST END total=5 passed=5 failed=0
+   9.903 [e1-idle: 18 s (LR3)] Expected text matched: "SELFTEST END total=5 passed=5 failed=0"
+   9.905 [e1-idle: 18 s (LR3)] delay 6025ms
+  17.734 [e1-idle: 18 s (LR3)] delay 50ms
+  18.413 CMD stats-reset OK
+  18.429 [e1-idle: 18 s (LR3)] delay 16ms
+  19.760 [e1-idle: 18 s (LR3)] delay 10ms
+  20.435 EVT stow t_us=6136783 lat_us=3325
+  21.095 [e1-idle: 18 s (LR3)] delay 291ms
+  22.694 [e1-idle: 18 s (LR3)] delay 10ms
+  23.360 EVT stow t_us=6437812 lat_us=355
+  24.020 [e1-idle: 18 s (LR3)] delay 315ms
+  25.651 [e1-idle: 18 s (LR3)] delay 10ms
+  26.319 EVT stow t_us=6762842 lat_us=3297
+  26.983 [e1-idle: 18 s (LR3)] delay 316ms
+  28.608 [e1-idle: 18 s (LR3)] delay 10ms
+  29.288 EVT stow t_us=7089057 lat_us=5079
+  29.955 [e1-idle: 18 s (LR3)] delay 333ms
+  31.594 [e1-idle: 18 s (LR3)] delay 10ms
+  32.260 EVT stow t_us=7431960 lat_us=3178
+  32.922 [e1-idle: 18 s (LR3)] delay 264ms
+  34.488 [e1-idle: 18 s (LR3)] delay 10ms
+  35.156 EVT stow t_us=7705923 lat_us=3213
+  35.814 [e1-idle: 18 s (LR3)] delay 279ms
+  37.402 [e1-idle: 18 s (LR3)] delay 10ms
+  38.068 EVT stow t_us=7994942 lat_us=221
+  38.728 [e1-idle: 18 s (LR3)] delay 327ms
+  40.361 [e1-idle: 18 s (LR3)] delay 10ms
+  41.028 EVT stow t_us=8331971 lat_us=4168
+  41.685 [e1-idle: 18 s (LR3)] delay 330ms
+  43.320 [e1-idle: 18 s (LR3)] delay 10ms
+  43.990 EVT stow t_us=8671975 lat_us=4160
+  44.649 [e1-idle: 18 s (LR3)] delay 322ms
+  46.284 [e1-idle: 18 s (LR3)] delay 10ms
+  46.960 EVT stow t_us=9004009 lat_us=157
+  47.619 [e1-idle: 18 s (LR3)] delay 304ms
+  49.235 [e1-idle: 18 s (LR3)] delay 10ms
+  49.901 EVT stow t_us=9318417 lat_us=1716
+  50.558 [e1-idle: 18 s (LR3)] delay 324ms
+  52.185 [e1-idle: 18 s (LR3)] delay 10ms
+  52.851 EVT stow t_us=9652059 lat_us=2104
+  53.508 [e1-idle: 18 s (LR3)] delay 321ms
+  55.145 [e1-idle: 18 s (LR3)] delay 10ms
+  55.810 EVT stow t_us=9983080 lat_us=5057
+  56.477 [e1-idle: 18 s (LR3)] delay 344ms
+  58.132 [e1-idle: 18 s (LR3)] delay 10ms
+  58.799 EVT stow t_us=10337144 lat_us=2993
+  59.457 [e1-idle: 18 s (LR3)] delay 349ms
+  61.113 [e1-idle: 18 s (LR3)] delay 10ms
+  61.782 EVT stow t_us=10696188 lat_us=1959
+  62.442 [e1-idle: 18 s (LR3)] delay 313ms
+  64.057 [e1-idle: 18 s (LR3)] delay 10ms
+  64.723 EVT stow t_us=11019193 lat_us=1968
+  65.384 [e1-idle: 18 s (LR3)] delay 347ms
+  67.124 [e1-idle: 18 s (LR3)] delay 10ms
+  67.793 EVT stow t_us=11376199 lat_us=2935
+  68.456 [e1-idle: 18 s (LR3)] delay 349ms
+  70.119 [e1-idle: 18 s (LR3)] delay 10ms
+  70.788 EVT stow t_us=11735259 lat_us=1892
+  71.445 [e1-idle: 18 s (LR3)] delay 326ms
+  73.089 [e1-idle: 18 s (LR3)] delay 10ms
+  74.415 EVT stow t_us=12071330 lat_us=580
+  74.417 [e1-idle: 18 s (LR3)] delay 307ms
+  75.096 7
+  76.036 [e1-idle: 18 s (LR3)] delay 10ms
+  76.702 EVT stow t_us=12388288 lat_us=4849
+  77.372 [e1-idle: 18 s (LR3)] delay 281ms
+  78.961 [e1-idle: 18 s (LR3)] delay 10ms
+  79.632 EVT stow t_us=12679323 lat_us=834
+  80.291 [e1-idle: 18 s (LR3)] delay 251ms
+  81.876 [e1-idle: 18 s (LR3)] delay 10ms
+  82.544 EVT stow t_us=12940415 lat_us=1735
+  83.221 [e1-idle: 18 s (LR3)] delay 329ms
+  84.896 [e1-idle: 18 s (LR3)] delay 10ms
+  85.570 EVT stow t_us=13279369 lat_us=3770
+  86.229 [e1-idle: 18 s (LR3)] delay 261ms
+  87.800 [e1-idle: 18 s (LR3)] delay 10ms
+  88.472 EVT stow t_us=13550400 lat_us=766
+  89.133 [e1-idle: 18 s (LR3)] delay 265ms
+  90.701 [e1-idle: 18 s (LR3)] delay 10ms
+  91.367 EVT stow t_us=13825454 lat_us=702
+  92.023 [e1-idle: 18 s (LR3)] delay 287ms
+  93.614 [e1-idle: 18 s (LR3)] delay 10ms
+  94.278 EVT stow t_us=14122462 lat_us=1697
+  94.936 [e1-idle: 18 s (LR3)] delay 263ms
+  96.512 [e1-idle: 18 s (LR3)] delay 10ms
+  97.180 EVT stow t_us=14395466 lat_us=2672
+  97.845 [e1-idle: 18 s (LR3)] delay 308ms
+  99.461 [e1-idle: 18 s (LR3)] delay 10ms
+ 100.130 EVT stow t_us=14713475 lat_us=1693
+ 100.880 [e1-idle: 18 s (LR3)] delay 252ms
+ 102.795 [e1-idle: 18 s (LR3)] delay 10ms
+ 103.585 EVT stow t_us=14975723 lat_us=1424
+ 104.248 [e1-idle: 18 s (LR3)] delay 338ms
+ 105.903 [e1-idle: 18 s (LR3)] delay 10ms
+ 106.570 EVT stow t_us=15323568 lat_us=5568
+ 107.226 [e1-idle: 18 s (LR3)] delay 313ms
+ 108.849 [e1-idle: 18 s (LR3)] delay 10ms
+ 109.513 EVT stow t_us=15646570 lat_us=4568
+ 110.185 [e1-idle: 18 s (LR3)] delay 337ms
+ 111.843 [e1-idle: 18 s (LR3)] delay 10ms
+ 112.523 EVT stow t_us=15993584 lat_us=4553
+ 113.180 [e1-idle: 18 s (LR3)] delay 291ms
+ 114.775 [e1-idle: 18 s (LR3)] delay 10ms
+ 115.441 EVT stow t_us=16294780 lat_us=2353
+ 116.101 [e1-idle: 18 s (LR3)] delay 277ms
+ 117.688 [e1-idle: 18 s (LR3)] delay 10ms
+ 118.354 EVT stow t_us=16581644 lat_us=2494
+ 119.011 [e1-idle: 18 s (LR3)] delay 301ms
+ 120.624 [e1-idle: 18 s (LR3)] delay 10ms
+ 121.290 EVT stow t_us=16892686 lat_us=1458
+ 121.956 [e1-idle: 18 s (LR3)] delay 283ms
+ 123.577 [e1-idle: 18 s (LR3)] delay 10ms
+ 124.242 EVT stow t_us=17185720 lat_us=1437
+ 124.900 [e1-idle: 18 s (LR3)] delay 295ms
+ 126.506 [e1-idle: 18 s (LR3)] delay 10ms
+ 127.178 EVT stow t_us=17490723 lat_us=434
+ 127.838 [e1-idle: 18 s (LR3)] delay 296ms
+ 129.437 [e1-idle: 18 s (LR3)] delay 10ms
+ 130.111 EVT stow t_us=17796770 lat_us=5369
+ 130.769 [e1-idle: 18 s (LR3)] delay 299ms
+ 132.379 [e1-idle: 18 s (LR3)] delay 10ms
+ 133.059 EVT stow t_us=18105763 lat_us=404
+ 133.716 [e1-idle: 18 s (LR3)] delay 346ms
+ 135.371 [e1-idle: 18 s (LR3)] delay 10ms
+ 136.036 EVT stow t_us=18461795 lat_us=2361
+ 136.702 [e1-idle: 18 s (LR3)] delay 50ms
+ 138.728 CMD resume OK
+ 138.729 STAT name=loop n=2058 min_us=36 avg_us=6051 max_us=10549
+ 138.731 STAT name=sense n=249 min_us=630 avg_us=630 max_us=661
+ 138.732 STAT name=track n=249 min_us=807 avg_us=813 max_us=851
+ 138.733 STAT name=late n=249 min_us=25 avg_us=3114 max_us=10099
+ 138.749 STAT name=period n=249 min_us=42515 avg_us=49988 max_us=58482
+ 138.750 STAT name=cmd n=2 min_us=1587 avg_us=1980 max_us=2373
+ 138.752 STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+ 138.758 STAT name=stow n=40 min_us=157 avg_us=2618 max_us=5807
+ 138.759 STAT load window_ms=12453 busy_ms=206 load_pm=16
+ 138.761 STAT count runs=249 missed=0 rx_bytes=13 rx_errors=0 passes=2058
+ 138.774 STAT rx init=0 dropped=0 ring_max=40 errors=0 isr_n=53 isr_avg=110 isr_max=115
+ 138.796 STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=1108 stack_res=1024 stack_free=8884
+ 138.797 CMD stats OK
+ 138.798 CMD stats-reset OK
+ 139.147 CMD time OK hz=12000000 read_cycles=88 backsteps=0
+ 139.512 CMD time OK hz=12000000 read_cycles=88 backsteps=0
+ 139.863 CMD time OK hz=12000000 read_cycles=88 backsteps=0
+ 139.876 STAT name=loop n=21 min_us=36 avg_us=48381 max_us=336734
+ 139.878 STAT name=sense n=3 min_us=630 avg_us=631 max_us=632
+ 139.894 STAT name=track n=3 min_us=846 avg_us=847 max_us=849
+ 139.895 STAT name=late n=3 min_us=289519 avg_us=301782 max_us=314045
+ 139.902 STAT name=period n=3 min_us=337737 avg_us=338668 max_us=340530
+ 139.914 STAT name=cmd n=4 min_us=2352 avg_us=253092 max_us=336679
+ 139.915 STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+ 139.925 STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+ 139.928 STAT load window_ms=1016 busy_ms=1014 load_pm=998
+ 139.935 STAT count runs=3 missed=17 rx_bytes=21 rx_errors=0 passes=21
+ 139.945 STAT rx init=0 dropped=0 ring_max=28 errors=0 isr_n=0 isr_avg=0 isr_max=0
+ 139.958 STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=1108 stack_res=1024 stack_free=8884
+ 139.961 CMD stats OK
+ 139.962 CMD button OK edges=
+ 139.964 [e1-idle: 18 s (LR3)] Expected text matched: "CMD button OK edges="
+ 139.965 [e1-idle: 18 s (LR3)] delay 5ms
+ 140.620 4137 accepted=40 ignored=4097
+ 140.622 [e1-idle: 18 s (LR3)] Scenario completed successfully

@@ -1,0 +1,57 @@
+   0.137 Wokwi CLI v0.27.1 (ffde06bde1ae)
+   2.284 Connected to Wokwi Simulation API 1.0.0-20261126-gccaad6a5
+   5.663 Starting simulation...
+   7.820 Heliostat boot OK
+   7.821 SELFTEST BEGIN version=1
+   7.824 SELFTEST adc OK raw=1025,2050,3074,4095
+   7.826 SELFTEST spi OK
+   7.827 SELFTEST sd FAIL step=init status=3
+   7.829 SELFTEST servo1 OK pulse_us=1500
+   7.830 SELFTEST servo2 OK pulse_us=1500
+   7.831 SELFTEST END total=5 passed=4 failed=1
+   7.833 [nosd-log: 18 s (LR3)] Expected text matched: "SELFTEST END total=5 passed=4 failed=1"
+   7.836 [nosd-log: 18 s (LR3)] delay 6025ms
+  18.184 [nosd-log: 18 s (LR3)] delay 100ms
+  18.863 CMD stow OK az=90 tilt=90
+  18.864 CMD resume OK
+  20.243 [nosd-log: 18 s (LR3)] delay 4000ms
+  20.928 CMD stats-reset OK
+  20.929 CMD log OK on=1
+  25.737 [nosd-log: 18 s (LR3)] delay 4000ms
+  31.314 [nosd-log: 18 s (LR3)] delay 4000ms
+  37.514 CMD log OK on=1 seq=16 stored=0 blocks=0 dropped=144 errors=12 flushes=0 flush_max_us=0
+  37.516 STAT name=loop n=2008 min_us=36 avg_us=5982 max_us=10291
+  37.517 STAT name=sense n=240 min_us=630 avg_us=630 max_us=630
+  37.519 STAT name=track n=240 min_us=834 avg_us=851 max_us=944
+  37.539 STAT name=late n=240 min_us=607 avg_us=2610 max_us=4613
+  37.541 STAT name=period n=240 min_us=45996 avg_us=49992 max_us=54006
+  37.544 STAT name=cmd n=3 min_us=1818 avg_us=4811 max_us=10187
+  37.548 STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+  37.562 STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+  37.564 STAT load window_ms=12011 busy_ms=258 load_pm=21
+  37.565 STAT count runs=240 missed=0 rx_bytes=17 rx_errors=0 passes=2008
+  37.602 STAT rx init=0 dropped=0 ring_max=76 errors=0 isr_n=82 isr_avg=109 isr_max=115
+  37.606 STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=1108 stack_res=1024 stack_free=8884
+  37.607 CMD stats OK
+  37.654 CMD stats-reset OK
+  37.656 CMD sd-write FAIL step=init status=3
+  37.657 CMD sd-write FAIL step=init status=3
+  37.658 CMD sd-write FAIL step=init status=3
+  37.659 STAT name=loop n=51 min_us=36 avg_us=549 max_us=7675
+  37.660 STAT name=sense n=1 min_us=632 avg_us=632 max_us=632
+  37.661 STAT name=track n=1 min_us=852 avg_us=852 max_us=852
+  37.663 STAT name=late n=1 min_us=416 avg_us=416 max_us=416
+  37.669 STAT name=period n=1 min_us=20079 avg_us=20079 max_us=20079
+  37.671 STAT name=cmd n=4 min_us=2359 avg_us=6303 max_us=7620
+  37.674 STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+  37.705 STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+  37.707 STAT load window_ms=28 busy_ms=26 load_pm=930
+  37.708 STAT count runs=1 missed=0 rx_bytes=51 rx_errors=0 passes=51
+  37.722 STAT rx init=0 dropped=0 ring_max=58 errors=0 isr_n=0 isr_avg=0 isr_max=0
+  37.724 STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=1108 stack_res=1024 stack_free=8884
+  37.725 CMD stats OK
+  37.726 CMD button OK edges=
+  37.729 [nosd-log: 18 s (LR3)] Expected text matched: "CMD button OK edges="
+  37.730 [nosd-log: 18 s (LR3)] delay 5ms
+  38.386 0 accepted=0 ignored=0
+  38.391 [nosd-log: 18 s (LR3)] Scenario completed successfully

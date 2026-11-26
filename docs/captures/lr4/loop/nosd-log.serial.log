@@ -1,0 +1,43 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd FAIL step=init status=3
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=4 failed=1CMD stow OK az=90 tilt=90
+CMD resume OK
+CMD stats-reset OK
+CMD log OK on=1
+CMD log OK on=1 seq=16 stored=0 blocks=0 dropped=144 errors=12 flushes=0 flush_max_us=0
+STAT name=loop n=2008 min_us=36 avg_us=5982 max_us=10291
+STAT name=sense n=240 min_us=630 avg_us=630 max_us=630
+STAT name=track n=240 min_us=834 avg_us=851 max_us=944
+STAT name=late n=240 min_us=607 avg_us=2610 max_us=4613
+STAT name=period n=240 min_us=45996 avg_us=49992 max_us=54006
+STAT name=cmd n=3 min_us=1818 avg_us=4811 max_us=10187
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=12011 busy_ms=258 load_pm=21
+STAT count runs=240 missed=0 rx_bytes=17 rx_errors=0 passes=2008
+STAT rx init=0 dropped=0 ring_max=76 errors=0 isr_n=82 isr_avg=109 isr_max=115
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=1108 stack_res=1024 stack_free=8884
+CMD stats OK
+CMD stats-reset OK
+CMD sd-write FAIL step=init status=3
+CMD sd-write FAIL step=init status=3
+CMD sd-write FAIL step=init status=3
+STAT name=loop n=51 min_us=36 avg_us=549 max_us=7675
+STAT name=sense n=1 min_us=632 avg_us=632 max_us=632
+STAT name=track n=1 min_us=852 avg_us=852 max_us=852
+STAT name=late n=1 min_us=416 avg_us=416 max_us=416
+STAT name=period n=1 min_us=20079 avg_us=20079 max_us=20079
+STAT name=cmd n=4 min_us=2359 avg_us=6303 max_us=7620
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=28 busy_ms=26 load_pm=930
+STAT count runs=1 missed=0 rx_bytes=51 rx_errors=0 passes=51
+STAT rx init=0 dropped=0 ring_max=58 errors=0 isr_n=0 isr_avg=0 isr_max=0
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=1108 stack_res=1024 stack_free=8884
+CMD stats OK
+CMD button OK edges=0 accepted=0 ignored=0
