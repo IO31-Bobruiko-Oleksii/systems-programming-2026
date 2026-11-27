@@ -50,18 +50,19 @@ correct because it is built from the SysTick reload value.
 
 | Task | Prio | Wakes on | Requirement (tasks.md) | Stack allocated | Static bound* | Peak measured |
 |---|---|---|---|---|---|---|
-| `event` | 5 | semaphore given by the EXTI handler; also every 8 ms (watchdog, section 8) | E1: edge to servo update <= 10 ms | 640 B | 528 B | 428 B |
-| `track` | 4 | `vTaskDelayUntil`, 50 ms | T1 <= 5 ms, T2 start late <= 25 ms, T3 park, produces T5 records | 640 B | 576 B | 256 B |
-| `cmd` | 3 | semaphore given by the USART2 receive handler | T4: reply <= 100 ms, no byte lost | 1024 B | 808 B | 780 B |
-| `logger` | 2 | queue `log_q`, 100 ms time-out | T5: block written <= 10 s after the first record | 512 B | 488 B | 400 B |
-| `load` | 1 | semaphore given by the `load` command; 5 ms pass | measurement tool: stands for "new work of the lowest priority" | 768 B | 632 B | 604 B |
+| `event` | 5 | semaphore given by the EXTI handler; also every 8 ms (watchdog, section 8) | E1: edge to servo update <= 10 ms | 640 B | 512 B | 428 B |
+| `track` | 4 | `vTaskDelayUntil`, 50 ms | T1 <= 5 ms, T2 start late <= 25 ms, T3 park, produces T5 records | 640 B | 560 B | 256 B |
+| `cmd` | 3 | semaphore given by the USART2 receive handler | T4: reply <= 100 ms, no byte lost | 1024 B | 800 B | 780 B |
+| `logger` | 2 | queue `log_q`, 100 ms time-out | T5: block written <= 10 s after the first record | 512 B | 432 B | 400 B |
+| `load` | 1 | semaphore given by the `load` command; 5 ms pass | measurement tool: stands for "new work of the lowest priority" | 768 B | 624 B | 604 B |
 | idle | 0 | kernel | - | 256 B | - | 84 B |
 
-\* static worst call chain from the machine code (frames; `tools/lr4_taskstack.py`, gcc 13.2.1, the
-final source) plus 72 B for the exception frame and the PendSV register save. Calls through a
+\* static worst call chain from the machine code (frames; `tools/lr4_taskstack.py`, gcc 10.3.1 of the project's
+Docker image, the final ELF; output in `docs/metrics/lr4/rtos-final/taskstack.txt`) plus 72 B for the exception frame and the PendSV register save. Calls through a
 function pointer (`blx`) are given the edges of the hook table by hand; the log-drain fix made the
-SD write chain reachable from `event`, `track` and `logger`, which raised their bounds (528, 576, 488 B)
-and left a margin of 112, 64 and 24 B to the allocation. Measured peaks come from `uxTaskGetStackHighWaterMark`
+SD write chain reachable from `event`, `track` and `logger`, which raised their bounds (512, 560, 432 B)
+and left a margin of 128, 80 and 80 B to the allocation. The sandbox compiler (gcc 13.2.1) gave 8 to 56 B more
+(528, 576, 808, 488, 632 B); no bound is below a measured peak. Measured peaks come from `uxTaskGetStackHighWaterMark`
 after the heaviest paths (`selftest`, `sd`, `log`, `stats`, the 300 ms starvation window of
 scenario 7.2.3, where `cmd` reached 780 B). Allocated stacks total 3840 B, the sum of the peaks is
 2552 B (66 %). T6 (the self-test) runs in `main()` before the scheduler starts. T1 is a part of
@@ -74,7 +75,7 @@ lowest.
 
 * **`event` (5).** E1 is the only requirement that arrives at an unpredictable moment and the only
   one that the loop failed in a normal situation (18.5 ms against 10 ms during an SD write). Its
-  handler is short (0.17 ms), so it can sit above the periodic task without hurting it.
+  handler is short (0.15 to 0.18 ms), so it can sit above the periodic task without hurting it.
 * **`track` (4).** A strictly periodic job. Its deadline (start no later than 25 ms after the
   nominal release) is the next shortest; its CPU time is about 1 ms every 50 ms.
 * **`cmd` (3).** A person is waiting, but the limit is 100 ms. It also drains the receive ring, so
@@ -87,7 +88,7 @@ lowest.
 **Known weakness of this assignment.** Deadline-monotonic ordering would place T1 (5 ms) above E1
 (10 ms), but T1 is a part of the `track` job and the job as a whole has a 25 ms deadline. In the
 current code `event` also prints the `EVT stow` line itself: with the polled UART at 86.7 us per
-byte that print takes about 3.2 ms at priority 5, during which `track` cannot run (analyzer record,
+byte that print takes about 3.3 ms at priority 5, during which `track` cannot run (analyzer record,
 [comparison.md](comparison.md) section 4). The cost shows as T1 up to 3.1 ms in S3 and, in
 three other runs (e1-idle on ELF 76905721e8a1, two S3 runs at 100 Hz), 5.2, 5.3 and 5.5 ms against
 the 5 ms deadline. The fix is to hand the print to `cmd` or
@@ -137,7 +138,7 @@ uses a time-out (section 8).
   so a kernel critical section blocks **every** interrupt, including the button handler at priority
   0, and there is no `configMAX_SYSCALL_INTERRUPT_PRIORITY`: `FromISR` functions may be called at any
   level. The longest kernel critical section was not measured; the measured edge-to-task start is
-  0.135 to 0.148 ms.
+  0.144 to 0.175 ms.
 * Priorities: EXTI4_15 0, USART2 1 (unchanged from LR3), SysTick and PendSV 3 (lowest, set by the
   port). The handlers of LR3 keep their code; only the notification callbacks were added
   (`plat_button_set_notify`, `plat_uart_set_rx_notify`), so the `platform` layer does not include

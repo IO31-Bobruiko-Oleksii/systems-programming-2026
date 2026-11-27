@@ -8,10 +8,10 @@ scripts and the same Wokwi stand on 2026-11-26. The design of the RTOS firmware 
 [limitations.md](limitations.md). Times are microseconds (us) unless a unit is written; "pm" is per
 mille of CPU time.
 
-The RTOS column of S2, S3 and the `stats` capture is the **final ELF** `ee5ac2e18182` (directory
-`rtos-final`). Values marked **†** were measured on the earlier ELF `76905721e8a1`, which has no
+The RTOS column of S2, S3, `stow`, `stow-busy` and the `stats` capture is the **final ELF**
+`ee5ac2e18182` (directory `rtos-final`). Values marked **†** were measured on the earlier ELF `76905721e8a1`, which has no
 event-task watchdog (rtos-design.md, section 8); they are kept where there is no final-ELF run
-(`stow`, `stow-busy`, the 100 Hz run) or as the "without watchdog" figure next to the final one.
+(the 100 Hz run) or as the "without watchdog" figure next to the final one.
 The watchdog costs about +29 pm of CPU (S2 44 -> 73, S3 72 -> 102) and adds up to 0.25 ms to the
 start of the periodic task (S2 late max 92 -> 336 us); the other latency rows move by noise.
 
@@ -25,10 +25,10 @@ start of the periodic task (S2 late max 92 -> 336 us); the other latency rows mo
 | Result directory (`docs/metrics/lr4/…`) | ELF | What it holds |
 |---|---|---|
 | `loop` | `lr3-ref` | every loop number |
-| `rtos` | `76905721e8a1` (†) | `stow`, `stow-busy`; `e1-idle`, `s2-nominal`, `s3-worst` (superseded by the final ELF, kept as the "without watchdog" figures) |
+| `rtos` | `76905721e8a1` (†) | `stow`, `stow-busy`, `e1-idle`, `s2-nominal`, `s3-worst` (all superseded by the final ELF, kept as the "without watchdog" figures) |
 | `rtos` | `3abf0e9bd068` (earlier build: no kernel fix F1, a log-drain bug, no watchdog) | `s1-idle`, `load`, `flood`, `burst`, `sweep-ms`, `sweep-uart`, `nosd-log`, `park`. The changed code is the task selection and the log drain, which these scenarios hardly touch; the three presses of each `sweep-ms` window were all accepted. Not re-run on the final ELF: the watchdog adds up to 0.25 ms to T2 start and about 29 pm of CPU there (see section 9) |
 | `rtos-wd` | `ee5ac2e18182` (final) | `e1-idle` |
-| `rtos-final` | `ee5ac2e18182` (final) | `s2-nominal`, `s3-worst`, `stats`; the functional scenarios are in `captures/lr4/os/*.rtos.*` |
+| `rtos-final` | `ee5ac2e18182` (final) | `s2-nominal`, `s3-worst`, `stats`, `stow`, `stow-busy`, `taskstack.txt`; the functional scenarios are in `captures/lr4/os/*.rtos.*` |
 | `rtos-t100`, `rtos-t100-unpatched`, `rtos-nowd-failed` | variants | 7.2.6, and the two runs that exposed the kernel defects |
 | `captures/lr4/os/` | one ELF per scenario | the six scenarios of section 7.2 |
 
@@ -53,8 +53,8 @@ with nothing to choose.
 | E1 stow, avg | S3 | 7,217 | 321 | -6,896 | - | RTOS |
 | E1 stow, max | S2 (4 presses) | 3,757 | 481 | -3,276 | 10,000 | RTOS |
 | E1 stow, max | e1-idle (40 presses) | 5,807 | 358 † / 1,348 (final ELF) | -5,449 / -4,459 | 10,000 | RTOS |
-| E1 stow, edge to the first instruction of the task | stow | not measurable (the handler runs in the main loop) | 135..148 | - | - | RTOS |
-| Edge to the new servo pulse | stow-busy (press during an SD write) | 31,133 | 12,278 † | -18,855 | 30,000 | RTOS |
+| E1 stow, edge to the first instruction of the task | stow | not measurable (the handler runs in the main loop) | 144..175 | - | - | RTOS |
+| Edge to the new servo pulse | stow-busy (press during an SD write) | 31,133 | 12,250 | -18,883 | 30,000 | RTOS |
 | T2 start late, max | S1 | 4,618 | 81 | -4,537 (x0.02) | 25,000 | RTOS |
 | T2 start late, max | S2 | 11,077 | 336 (92 †) | -10,741 (x0.03) | 25,000 | RTOS |
 | T2 start late, max | S3 | 20,363 | 2,421 (2,237 †) | -17,942 (x0.12) | 25,000 | RTOS |
@@ -243,29 +243,29 @@ start. Limit T6: 1 s, met by both.
 
 ## 5. Chronology of one press (preemption)
 
-![Chronology](img/timeline-stow-busy.png)
+![Chronology](lab_4/img/timeline-stow-busy.png)
 
 Scenario `stow-busy`: a command that writes an SD block is running when the button is pressed
 (analyzer: D3 button, D2 `EVENT` pulse of the stow handler, D0 busy pin PB6, D6 SD chip select,
 D4 UART TX, D5 servo 1 PWM; `tools/lr4_timeline.py` draws the figure from `stow-busy.vcd`).
 
-| Moment (after the first falling edge) | Loop | FreeRTOS † (no watchdog) |
+| Moment (after the first falling edge) | Loop | FreeRTOS (final ELF) |
 |---|---|---|
-| Handler (`EVENT`) starts | 18,190 us | **135 us** |
-| Handler ends | 18,278 us | 309 us |
-| New servo pulse starts | 31,133 us | 12,278 us |
+| Handler (`EVENT`) starts | 18,190 us | **144 us** |
+| Handler ends | 18,278 us | 322 us |
+| New servo pulse starts | 31,133 us | 12,250 us |
 | The command that was running | ends first, then the press is served | preempted, resumes after the press |
-| Busy stretch that contained the edge | 23,313 us | 23,815 us |
+| Busy stretch that contained the edge | 23,313 us | 24,492 us |
 
 On the loop the press is noticed only when the pass that holds the SD write and its reply ends
 (reaction = rest of the pass; the edge fell 706 us into a 23 ms busy stretch). On the RTOS the
-button interrupt makes the `event` task (priority 5) ready, it runs 135 us after the edge and
-preempts `cmd`; the chip select of the command's SD write goes low at 5.3 ms after the edge
+button interrupt makes the `event` task (priority 5) ready, it runs 144 us after the edge and
+preempts `cmd`; the chip select of the command's SD write goes low at 5.4 ms after the edge
 instead of 0.5 ms in the loop, because the event task and its print run first. The sum of the
-work is the same (the busy stretch is 23.3 and 23.8 ms), the order differs.
+work is about the same (the busy stretch is 23.3 and 24.5 ms; the 1.2 ms difference is context switches, the print and the watchdog wake-ups, not separated), the order differs.
 
-The figure also shows what the RTOS costs. Right after the 0.17 ms handler the `event` task
-prints `EVT stow ...` with the polled UART: **UART TX from 1.0 to 4.2 ms**, 3.2 ms at priority 5.
+The figure also shows what the RTOS costs. Right after the 0.18 ms handler the `event` task
+prints `EVT stow ...` with the polled UART: **UART TX from 1.1 to 4.4 ms**, 3.3 ms at priority 5.
 For that time no lower task runs: `track` (T1, T2) and `cmd` are held. This is the probable
 cause (it is read from this record; no run was done with the print moved) of T1 up to 3.07 ms in
 S3 (3.07 ms on the final ELF) and of T1 5.19 ms (e1-idle †), 5.34 and 5.45 ms (two S3 runs at 100 Hz), which are above the
@@ -300,7 +300,7 @@ Verdicts: **confirmed**, **partly**, **not confirmed**. "Baseline" is the loop r
 |---|---|---|---|---|---|
 | H1a | S3, E1 max over 30 presses | 17,851 us (LR3: 18,511) | at most 1 ms | 370 us (30 of 30 presses; min 270, median 317); 363 us on the ELF without watchdog (29 of 30) | **confirmed** |
 | H1b | e1-idle, E1 max | 5,807 us (LR3: 6,113) | at most 1 ms | 358 us † (40 of 40, no watchdog); 1,348 us on the final ELF (39 of 40 below 0.35 ms) | **partly**: confirmed without the watchdog, one press of 40 at 1.35 ms with it (S3 and S2 on the final ELF: max 370 and 481 us) |
-| H1c | stow-busy, edge to the new servo pulse | 31,133 us (LR3: 31,370) | at most about 21 ms | 12,278 us † | **confirmed** |
+| H1c | stow-busy, edge to the new servo pulse | 31,133 us (LR3: 31,370) | at most about 21 ms | 12,250 us | **confirmed** |
 | H2a | S1, S2, S3, T2 start late max | 4,618 / 11,077 / 20,363 us | at most 2 ms in all three | 81 ‡ / 336 / 2,421 us (final ELF, S1 without watchdog; 92 / 2,237 without it in S2 / S3) | **partly**: S1 and S2 yes; S3 2.42 ms, above 2 ms by 0.42 ms (cause: section 5, probable) |
 | H2b | window with a `stats` reply: skipped T2 runs, late max | 1 run, 54,989 us | 0 runs, at most 2 ms | 0 runs, 97 us (flood run, no watchdog); the `stats` capture on the final ELF: 0 runs, late max 336 us | **confirmed** |
 | H3a | burst of 20 `track` lines: replies within 100 ms | 8 | about 10, the limit of the wire | 9 (one reply per 11.07 ms, which is the wire time plus the gap) | **confirmed** (the limit of the wire is 9) |
@@ -356,9 +356,9 @@ and no kernel to debug.
   `uxTopReadyPriority` and the lost wake-up may be artefacts of the simulator (on a real core PendSV
   runs with interrupts masked). Both were handled in the firmware because the results could not
   be taken without it; neither is proven to occur on hardware.
-* The RTOS rows of S2, S3, `e1-idle` and the `stats` capture are from the final ELF
-  `ee5ac2e18182`. `stow` and `stow-busy` (section 5) come from `76905721e8a1`, the other scenarios
-  (S1, `park`, `nosd-log`, `burst`, `flood`, `sweep-*`, `load`) from `3abf0e9bd068`; neither has the
+* The RTOS rows of S2, S3, `e1-idle`, `stow`, `stow-busy` and the `stats` capture are from the final ELF
+  `ee5ac2e18182`; the other scenarios
+  (S1, `park`, `nosd-log`, `burst`, `flood`, `sweep-*`, `load`) from `3abf0e9bd068`, which has no
   watchdog, so their T2 start is up to 0.25 ms better and their CPU about 29 pm lower than on the
   final firmware. No verdict depends on that margin (H2b: 97 us against a 2 ms limit).
 * The wall-clock "execution time" rows (T1, T2 body, T4, T5) contain preemption (LR4.pdf,
