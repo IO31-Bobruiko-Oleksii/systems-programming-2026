@@ -1,4 +1,4 @@
-# RTOS design (LR4)
+# RTOS design
 
 The FreeRTOS firmware implements the same product as the LR3 super loop: same functional
 requirements (FR-01 to FR-08), same command interface, same `STAT`/`EVT`/`CMD` line formats, same
@@ -206,7 +206,9 @@ after the take in `event`) 1,041 cycles = 86.8 us minimum, 90 us average; the ti
    edge counter notifies only on 0 -> 1, so one lost notification silences every later press. Handling:
    the event task waits at most `RTOS_EVENT_WATCHDOG_MS` = 8 ms, then reads the edge counter anyway. A
    lost wake-up costs at most 8 ms (E1 deadline 10 ms) and no press is lost. Cost: 125 wake-ups per
-   second, about +28 per mille of CPU load (e1-idle 47 -> 75). `RTOS_EVENT_WATCHDOG_MS=0` builds the
+   second, about +28..30 per mille of CPU load (e1-idle 47 -> 75, S2 44 -> 73, S3 72 -> 102) and up to
+   0.25 ms more start jitter of the periodic task (S2 late max 92 -> 336 us). On the final ELF the
+   presses of S2, S3 and e1-idle were all accepted (4 + 30 + 40). `RTOS_EVENT_WATCHDOG_MS=0` builds the
    version that waits forever, used to reproduce the defect.
 
 ## 9. Layering
