@@ -1,0 +1,38 @@
+capture docs/captures/lr4/loop/sweep-ms.vcd: 9388.516 ms, load windows on D4: 7, in the serial log: 7
+bytes sent per window: counted by the receive interrupt (isr_n); bytes lost: counted by the ring (dropped); byte time 86.7 us
+
+UART AND LOAD (P = work of one loop pass outside the UART wait, pin PB6; margin = byte time - largest P)
+    X us   P avg   P max  margin  fw pm  pin pm    rx  lost  err  ok  bad  T2 in burst
+    1000  1040.9  1094.6 -1007.9    161   177.6     -     -    -   -    -            -
+    2000  2042.2  2077.6 -1990.9    267   283.4     -     -    -   -    -            -
+    4000  4045.7  4080.4 -3993.8    416   431.4     -     -    -   -    -            -
+    6000  6041.3  6077.8 -5991.1    515   529.1     -     -    -   -    -            -
+   10000 10041.9 10081.2 -9994.5    638   651.6     -     -    -   -    -            -
+   20000 20043.7 20079.3 -19992.7    780   792.8     -     -    -   -    -            -
+   30000 30039.6 30044.2 -29957.6    843   855.4     -     -    -   -    -            -
+
+RECEIVE BUFFER (STAT rx; arrived = bytes the interrupt took, read = bytes the console took from the ring,
+left = still in the ring at the end of the window; isr times in CPU cycles of the 12 MHz clock)
+    X us  arrived   read  dropped  left  ring max  errors  isr avg  isr max
+    1000        0      0        0     0         0       0        0        0
+    2000        0      0        0     0         0       0        0        0
+    4000        0      0        0     0         0       0        0        0
+    6000        0      0        0     0         0       0        0        0
+   10000        0      0        0     0         0       0        0        0
+   20000        0      0        0     0         0       0        0        0
+   30000        0      0        0     0         0       0        0        0
+
+DEADLINES (T2: late + duration within 25 ms; E1: firmware reaction within 10 ms)
+    X us  period avg  period max  T2 runs  late max  missed      T2  presses  lat fw max  lat pin max      E1
+    1000        7076       11995       24     11001       0      ok        3        5552         5564      ok
+    2000        8095       12999       24     12157       0      ok        3        5565         5577      ok
+    4000       10109       14997       24     10964       0      ok        3        9406         9417      ok
+    6000       12132       16999       24     11775       0      ok        3       12059        12071  MISSED
+   10000       16190       20997       24     15285       0      ok        3       12897        12908  MISSED
+   20000       26339       30999       23     27794       0  MISSED        3       19894        19905  MISSED
+   30000       36481       40998       23     33991       0  MISSED        3       23570        23580  MISSED
+
+BREAKING POINTS (control and named windows left out, rows in order of growing X)
+  console bytes lost: no console traffic in this sweep
+  E1 reaction above 10 ms: first at X = 6000 us (period max 16999 us), last good X = 4000 us (period max 14997 us)
+  T2 deadline missed: first at X = 20000 us (period max 30999 us), last good X = 10000 us (period max 20997 us)

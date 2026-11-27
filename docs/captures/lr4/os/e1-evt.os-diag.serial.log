@@ -1,0 +1,23 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+CMD stats-reset OK
+EVT stow t_us=6134954 lat_us=285
+EVT stow t_us=6436211 lat_us=268
+EVT stow t_us=6761013 lat_us=313
+EVT stow t_us=7087033 lat_us=348
+EVT stow t_us=7430069 lat_us=321
+EVT stow t_us=7704083 lat_us=321
+EVT stow t_us=7993108 lat_us=333
+EVT stow t_us=8330145 lat_us=339
+EVT stow t_us=8670164 lat_us=306
+EVT stow t_us=9002184 lat_us=317
+EVT stow t_us=9316254 lat_us=313
+EVT stow t_us=9650278 lat_us=295
+CMD evt OK notified=252 woken=251 pending=2697 sem=1 state=2
+CMD button OK edges=1186 accepted=12 ignored=1174

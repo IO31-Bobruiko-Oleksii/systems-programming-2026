@@ -1,0 +1,7 @@
+name: 'os-heap-hook: a 4000 B kernel heap is too small for the tasks; the build with the malloc-failed hook must name the cause'
+version: 1
+steps:
+  - wait-serial: 'FATAL malloc failed'
+  - delay: 300ms
+  - write-serial: "tasks\n"
+  - delay: 700ms

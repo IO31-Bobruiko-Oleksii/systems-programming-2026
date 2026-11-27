@@ -1,0 +1,42 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+CMD log OK on=1CMD sd-write OK block=16000 us=13479
+CMD sd-read OK block=16000 sig=7E7F first16=808182838485868788898A8B8C8D8E8F
+CMD log-flush OK stored=31 blocks=1 us=14670
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0CMD selftest OK failed=0
+CMD stats-reset OKCMD load OK us=5000 ms=1000STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=20 min_us=630 avg_us=630 max_us=630
+STAT name=track n=20 min_us=998 avg_us=1003 max_us=1018
+STAT name=late n=20 min_us=82 avg_us=83 max_us=98
+STAT name=period n=20 min_us=37790 avg_us=49389 max_us=50016
+STAT name=cmd n=1 min_us=4120 avg_us=4120 max_us=4120
+STAT name=logflush n=2 min_us=13538 avg_us=15944 max_us=18350
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=1037 busy_ms=566 load_pm=546
+STAT count runs=21 missed=0 rx_bytes=0 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=0 errors=0 isr_n=0 isr_avg=0 isr_max=0
+STAT mem ram=12288 static=8968 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2864
+EVT load done us=5000 ms=1087
+EVT stow t_us=2857289 lat_us=293
+STAT task name=event prio=5 run_us=7330 cpu_pm=6 stack=640 peak=416
+STAT task name=track prio=4 run_us=26357 cpu_pm=21 stack=640 peak=256
+STAT task name=cmd prio=3 run_us=4550 cpu_pm=3 stack=1024 peak=640
+STAT task name=logger prio=2 run_us=35652 cpu_pm=29 stack=512 peak=400
+STAT task name=load prio=1 run_us=560640 cpu_pm=464 stack=768 peak=604
+STAT task name=IDLE prio=0 run_us=573624 cpu_pm=475 stack=256 peak=84
+STAT os tick_hz=1000 ticks=1207 switches=277 log_dropped=0
+CMD tasks OK count=6CMD heap OK total=6144 free=1104 used=5040
+CMD ctx OK rounds=200 read_cyc=90 rt_min_cyc=3127 one_min_cyc=1041 one_avg_cyc=1081
+STAT os tick_isr n=259 avg_cyc=140 max_cyc=429

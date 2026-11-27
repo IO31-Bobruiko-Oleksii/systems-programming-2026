@@ -1,0 +1,81 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+CMD stats-reset OK
+EVT stow t_us=6134937 lat_us=319
+EVT stow t_us=6435986 lat_us=351
+EVT stow t_us=6760000 lat_us=1348
+EVT stow t_us=7087016 lat_us=344
+EVT stow t_us=7430075 lat_us=298
+EVT stow t_us=7704076 lat_us=322
+EVT stow t_us=7993119 lat_us=299
+EVT stow t_us=8330137 lat_us=299
+EVT stow t_us=8670925 lat_us=287
+EVT stow t_us=9002199 lat_us=302
+EVT stow t_us=9316202 lat_us=337
+EVT stow t_us=9650245 lat_us=314
+EVT stow t_us=9981273 lat_us=326
+EVT stow t_us=10335287 lat_us=325
+EVT stow t_us=10694348 lat_us=321
+EVT stow t_us=11017352 lat_us=343
+EVT stow t_us=11374378 lat_us=332
+EVT stow t_us=11733404 lat_us=317
+EVT stow t_us=12069593 lat_us=269
+EVT stow t_us=12386839 lat_us=287
+EVT stow t_us=12677494 lat_us=314
+EVT stow t_us=12938523 lat_us=344
+EVT stow t_us=13277532 lat_us=303
+EVT stow t_us=13548566 lat_us=325
+EVT stow t_us=13823699 lat_us=269
+EVT stow t_us=14120686 lat_us=299
+EVT stow t_us=14393637 lat_us=303
+EVT stow t_us=14711693 lat_us=339
+EVT stow t_us=14973769 lat_us=321
+EVT stow t_us=15321853 lat_us=287
+EVT stow t_us=15644748 lat_us=370
+EVT stow t_us=15991955 lat_us=290
+EVT stow t_us=16292808 lat_us=350
+EVT stow t_us=16579824 lat_us=357
+EVT stow t_us=16890976 lat_us=292
+EVT stow t_us=17183874 lat_us=339
+EVT stow t_us=17489222 lat_us=270
+EVT stow t_us=17794909 lat_us=358
+EVT stow t_us=18103991 lat_us=328
+EVT stow t_us=18461148 lat_us=273
+CMD resume OK
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=249 min_us=630 avg_us=633 max_us=671
+STAT name=track n=249 min_us=877 avg_us=895 max_us=3396
+STAT name=late n=249 min_us=84 avg_us=162 max_us=4752
+STAT name=period n=249 min_us=45332 avg_us=49999 max_us=54668
+STAT name=cmd n=2 min_us=1846 avg_us=2188 max_us=2530
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=40 min_us=269 avg_us=342 max_us=1348
+STAT load window_ms=12482 busy_ms=941 load_pm=75
+STAT count runs=250 missed=0 rx_bytes=13 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=40 errors=0 isr_n=53 isr_avg=204 isr_max=551
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+CMD stats OK
+CMD stats-reset OK
+CMD time OK hz=12000000 read_cycles=87 backsteps=0
+CMD time OK hz=12000000 read_cycles=87 backsteps=0
+CMD time OK hz=12000000 read_cycles=87 backsteps=0
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=22 min_us=630 avg_us=635 max_us=648
+STAT name=track n=23 min_us=903 avg_us=910 max_us=926
+STAT name=late n=23 min_us=84 avg_us=149 max_us=335
+STAT name=period n=23 min_us=49749 avg_us=50011 max_us=50251
+STAT name=cmd n=4 min_us=2805 avg_us=281408 max_us=375098
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=1138 busy_ms=1138 load_pm=1000
+STAT count runs=23 missed=0 rx_bytes=21 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=28 errors=0 isr_n=0 isr_avg=0 isr_max=0
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+CMD stats OK
+CMD button OK edges=3866 accepted=40 ignored=3826

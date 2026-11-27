@@ -1,0 +1,44 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd FAIL step=init status=3
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=4 failed=1RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+CMD stow OK az=90 tilt=90
+CMD resume OK
+CMD stats-reset OK
+CMD log OK on=1
+CMD log OK on=1 seq=16 stored=0 blocks=0 dropped=144 errors=12 flushes=0 flush_max_us=0
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=240 min_us=630 avg_us=630 max_us=630
+STAT name=track n=240 min_us=905 avg_us=970 max_us=1007
+STAT name=late n=240 min_us=81 avg_us=81 max_us=81
+STAT name=period n=241 min_us=50000 avg_us=50000 max_us=50000
+STAT name=cmd n=3 min_us=2005 avg_us=4836 max_us=9871
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=12031 busy_ms=393 load_pm=32
+STAT count runs=241 missed=0 rx_bytes=17 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=76 errors=0 isr_n=80 isr_avg=196 isr_max=543
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+CMD stats OK
+CMD stats-reset OK
+CMD sd-write FAIL step=init status=3
+CMD sd-write FAIL step=init status=3
+CMD sd-write FAIL step=init status=3
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=0 min_us=0 avg_us=0 max_us=0
+STAT name=track n=1 min_us=980 avg_us=980 max_us=980
+STAT name=late n=1 min_us=78 avg_us=78 max_us=78
+STAT name=period n=1 min_us=49998 avg_us=49998 max_us=49998
+STAT name=cmd n=4 min_us=2543 avg_us=6481 max_us=7843
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=34 busy_ms=34 load_pm=1000
+STAT count runs=1 missed=0 rx_bytes=51 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=58 errors=0 isr_n=0 isr_avg=0 isr_max=0
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+CMD stats OK
+CMD button OK edges=0 accepted=0 ignored=0

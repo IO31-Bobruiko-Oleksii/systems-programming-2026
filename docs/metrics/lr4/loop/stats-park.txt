@@ -1,0 +1,31 @@
+park probes: 48 in the scenario, 48 `CMD track OK` lines in the log
+
+cycle  before(920 ms)         after(1030 ms)             cloud
+       dark parked az/tilt   dark parked az/tilt   dark parked az/tilt   runs b->a
+    0    19      0  81/99  ok     20      1  90/90  ok      0      0  85/95  ok   2
+    1    18      0  82/98  ok     20      1  90/90  ok      0      0  84/96  ok   2
+    2    18      0  81/99  ok     20      1  90/90  ok      0      0  84/96  ok   2
+    3    18      0  82/98  ok     20      1  90/90  ok      0      0  85/95  ok   3
+    4    18      0  82/98  ok     20      1  90/90  ok      0      0  84/96  ok   2
+    5    18      0  81/99  ok     20      1  90/90  ok      0      0  84/96  ok   2
+    6    18      0  81/99  ok     20      1  90/90  ok      0      0  84/96  ok   2
+    7    18      0  81/99  ok     20      1  90/90  ok      0      0  84/96  ok   2
+    8    19      0  81/99  ok     20      1  90/90  ok      0      0  84/96  ok   2
+    9    18      0  81/99  ok     20      1  90/90  ok      0      0  84/96  ok   2
+   10    18      0  81/99  ok     20      1  90/90  ok      0      0  84/96  ok   3
+   11    19      0  82/98  ok     20      1  90/90  ok      0      0  85/95  ok   2
+   12    18      0  82/98  ok     20      1  90/90  ok      0      0  85/95  ok   2
+   13    18      0  82/98  ok     20      1  90/90  ok      0      0  84/96  ok   2
+   14    18      0  82/98  ok     20      1  90/90  ok      0      0  84/96  ok   2
+   15    18      0  82/98  ok     20      1  90/90  ok      0      0  84/96  ok   2
+
+before 16 of 16: parked=0 and fewer than 20 dark samples
+after  16 of 16: parked=1, 20 dark samples, panel at the safe position
+cloud  16 of 16: parked=0 and dark count 0
+dark count seen at the `before` probe: 18 x 13, 19 x 3
+T2 runs between the two probes (110 ms apart): 2 x 14, 3 x 2
+T2 missed at the end: 0, track errors 0
+
+the 20th dark sample is taken 950..1000 ms after the light goes out (theory: 19 periods of 50 ms plus 0..50 ms of phase)
+measured: the panel was not parked 920 ms after the light went out and was parked at 1030 ms
+deadline 1100 ms: met, margin at least 70 ms

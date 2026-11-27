@@ -1,0 +1,41 @@
+serial log docs/captures/lr4/loop/s2-nominal.serial.log: 1 statistics window(s), 4 EVT stow line(s), 0 FAIL line(s)
+
+metric                             W1   deadline  verdict
+window_ms                      129100             
+T2 runs                          2582             
+T2 skipped (missed)                 0          0  ok
+T2 start late, max us           11077      25000  ok
+T2 start late, avg us            3219             
+T2 period, avg us               50000             
+T2 period, max us               60455             
+T1 sense, max us                  726       5000  ok
+T2 body (track), max us          1084             
+loop pass, avg us                5917             
+loop pass, max us               20006             
+T4 commands, n                    133             
+T4 command, avg us               8476             
+T4 command, max us              12052     100000  ok
+T5 log block writes, n             80             
+T5 log block write, max us      13324             
+E1 stow, n                          4             
+E1 stow, avg us                  1101             
+E1 stow, max us                  3757      10000  ok
+CPU load, per mille                34             
+rx bytes taken                    699             
+rx bytes dropped                    0          0  ok
+rx errors                           0          0  ok
+rx ring max (of 256)               55             
+rx interrupt avg, cycles          107             
+stack used, bytes                1152             
+heap used, bytes                    0             
+W1: T2 runs 2582, window_ms / 50 = 2582
+
+E1 (stow) latency per window, from the EVT lines:
+  W1           n   4  min    175  avg   1100  median    235  p90   3757  p99   3757  max   3757 us  over 10 ms: 0
+
+E1 by kind of press (scenario scenarios/s2-nominal.yaml):
+  nominal      n   4  min    175  avg   1100  median    235  p90   3757  p99   3757  max   3757 us  over 10 ms: 0
+
+button: edges 391, accepted 4, ignored 387 (presses sent: 4)
+log: on 1, seq 1284, stored 1284, blocks 80, dropped 0, errors 0, flushes 81, flush_max_us 13324
+log records read back with `log get`: 3, checksum ok: 3

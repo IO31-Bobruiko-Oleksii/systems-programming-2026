@@ -1,0 +1,28 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0CMD track OK az=100 tilt=80 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=10 missed=0 errors=0
+CMD track OK az=106 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=16 missed=0 errors=0
+CMD track OK az=106 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=16 missed=0 errors=0
+CMD track OK az=106 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=16 missed=0 errors=0
+CMD track OK az=106 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=16 missed=0 errors=0
+CMD track OK az=106 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=16 missed=0 errors=0
+CMD track OK az=107 tilt=73 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=17 missed=0 errors=0
+CMD track OK az=107 tilt=73 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=17 missed=0 errors=0
+CMD track OK az=107 tilt=73 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=17 missed=0 errors=0
+CMD track OK az=107 tilt=73 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=17 missed=0 errors=0
+CMD track OK az=108 tilt=72 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=18 missed=0 errors=0
+CMD track OK az=108 tilt=72 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=18 missed=0 errors=0
+CMD track OK az=108 tilt=72 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=18 missed=0 errors=0
+CMD track OK az=108 tilt=72 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=18 missed=0 errors=0
+CMD track OK az=109 tilt=71 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=19 missed=0 errors=0
+CMD track OK az=109 tilt=71 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=19 missed=0 errors=0
+CMD track OK az=109 tilt=71 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=19 missed=0 errors=0
+CMD track OK az=109 tilt=71 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=19 missed=0 errors=0
+CMD track OK az=110 tilt=70 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=20 missed=0 errors=0
+CMD track OK az=110 tilt=70 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=20 missed=0 errors=0
+CMD track OK az=110 tilt=70 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=20 missed=0 errors=0

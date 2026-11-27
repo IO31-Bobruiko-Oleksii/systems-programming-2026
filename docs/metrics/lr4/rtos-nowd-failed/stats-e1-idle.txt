@@ -1,0 +1,42 @@
+serial log docs/captures/lr4/rtos-final/e1-idle.serial.log: 2 statistics window(s), 8 EVT stow line(s), 0 FAIL line(s)
+
+metric                             W1         W2   deadline  verdict
+window_ms                       12481       1090             
+T2 runs                           250         22             
+T2 skipped (missed)                 0          0          0  ok
+T2 start late, max us              92         84      25000  ok
+T2 start late, avg us              84         84             
+T2 period, avg us               50000      50000             
+T2 period, max us               50009      50002             
+T1 sense, max us                  713        630       5000  ok
+T2 body (track), max us          1010        908             
+loop pass, avg us                   -          -             
+loop pass, max us                   -          -             
+T4 commands, n                      2          4             
+T4 command, avg us               2188     270394             
+T4 command, max us               2531     359685     100000  MISSED
+T5 log block writes, n              0          0             
+T5 log block write, max us          -          -             
+E1 stow, n                          8          0             
+E1 stow, avg us                   322          -             
+E1 stow, max us                   348          -      10000  ok
+CPU load, per mille                30       1000             
+rx bytes taken                     13         21             
+rx bytes dropped                    0          0          0  ok
+rx errors                           0          0          0  ok
+rx ring max (of 256)               40         28             
+rx interrupt avg, cycles          204          0             
+stack used, bytes                 456        456             
+heap used, bytes                    0          0             
+W1: T2 runs 250, window_ms / 50 = 250
+W2: T2 runs 22, window_ms / 50 = 22
+
+E1 (stow) latency per window, from the EVT lines:
+  W1           n   8  min    295  avg    322  median    322  p90    344  p99    348  max    348 us  over 10 ms: 0
+  W2           none
+
+E1 by kind of press (scenario scenarios/e1-idle.yaml):
+  the scenario has 40 presses, the log 8 EVT lines: phases not listed
+
+button: edges 838, accepted 8, ignored 830 (presses sent: 40)
+time command: 3 reads, backsteps max 0, read_cycles 87..87

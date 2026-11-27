@@ -1,0 +1,17 @@
+capture docs/captures/lr4/rtos-final/stow.vcd: 6536.371 ms
+edges per channel: D0=1822  D1=258  D2=4  D3=613  D4=3495  D5=652  D6=5  D7=1040
+
+button presses found: 3 (falling edges on PB5: 306), EVENT pulses (accepted presses): 2, EVT lines in the serial log: 2
+
+press 1: first falling edge at 6073.064 ms, 103 falling edge(s) in the bounce, loop waiting for a byte at the edge
+  EVENT pulse: starts 161.7 us after the edge, ends 309.9 us after the edge (handler 148.2 us)
+  firmware EVT line: lat_us=298 (cycle counter, from the interrupt time stamp to the end of the handler)
+  difference analyzer - firmware: +11.9 us (the analyzer starts at the pin edge, the firmware at the time stamp taken in the interrupt)
+  servo 1 pulse: 2000 us before, 1500 us after; the new pulse starts 14256.1 us and ends 15756.1 us after the edge (task deadline: 30000 us)
+press 2: first falling edge at 6169.671 ms, 76 falling edge(s) in the bounce, loop waiting for a byte at the edge
+  no EVENT pulse: the press was ignored by the 200 ms lockout (or is still pending)
+press 3: first falling edge at 6475.541 ms, 127 falling edge(s) in the bounce, loop waiting for a byte at the edge
+  EVENT pulse: starts 174.8 us after the edge, ends 326.7 us after the edge (handler 151.9 us)
+  firmware EVT line: lat_us=310 (cycle counter, from the interrupt time stamp to the end of the handler)
+  difference analyzer - firmware: +16.7 us (the analyzer starts at the pin edge, the firmware at the time stamp taken in the interrupt)
+  servo 1: no pulse with a different width after the press (width before 1500 us)

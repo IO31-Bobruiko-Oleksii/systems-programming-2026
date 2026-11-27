@@ -1,0 +1,41 @@
+serial log docs/captures/lr4/rtos-t100/s3-worst.serial.log: 1 statistics window(s), 14 EVT stow line(s), 0 FAIL line(s)
+
+metric                             W1   deadline  verdict
+window_ms                       47357             
+T2 runs                           948             
+T2 skipped (missed)                 0          0  ok
+T2 start late, max us            1906      25000  ok
+T2 start late, avg us              85             
+T2 period, avg us               50000             
+T2 period, max us               51825             
+T1 sense, max us                 5338       5000  MISSED
+T2 body (track), max us          5591             
+loop pass, avg us                   -             
+loop pass, max us                   -             
+T4 commands, n                    136             
+T4 command, avg us              11962             
+T4 command, max us              26630     100000  ok
+T5 log block writes, n             29             
+T5 log block write, max us      13309             
+E1 stow, n                         14             
+E1 stow, avg us                   311             
+E1 stow, max us                   339      10000  ok
+CPU load, per mille                70             
+rx bytes taken                   1067             
+rx bytes dropped                    0          0  ok
+rx errors                           0          0  ok
+rx ring max (of 256)              114             
+rx interrupt avg, cycles          207             
+stack used, bytes                 464             
+heap used, bytes                    0             
+W1: T2 runs 948, window_ms / 50 = 947
+
+E1 (stow) latency per window, from the EVT lines:
+  W1           n  14  min    295  avg    311  median    304  p90    332  p99    339  max    339 us  over 10 ms: 0
+
+E1 by kind of press (scenario scenarios/s3-worst.yaml):
+  the scenario has 30 presses, the log 14 EVT lines: phases not listed
+
+button: edges 1313, accepted 14, ignored 1299 (presses sent: 30)
+log: on 1, seq 481, stored 480, blocks 30, dropped 0, errors 0, flushes 30, flush_max_us 14462
+log records read back with `log get`: 3, checksum ok: 3

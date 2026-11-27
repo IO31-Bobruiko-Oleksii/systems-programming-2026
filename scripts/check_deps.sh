@@ -46,9 +46,10 @@ check() {
 }
 
 check platform-inc "platform/inc" allow "platform/inc"
-check platform-src "platform/src" deny  "devices/inc app/inc"
+check platform-src "platform/src" deny  "devices/inc app/inc rtos/inc Middlewares/FreeRTOS-Kernel/include"
 check devices      "devices/inc devices/src" allow "devices/inc platform/inc"
 check app          "app/inc app/src"         allow "app/inc devices/inc platform/inc"
+check rtos         "rtos/inc rtos/src"       allow "rtos/inc app/inc devices/inc platform/inc Middlewares/FreeRTOS-Kernel/include"
 
 if [ "$violations" -ne 0 ]; then
   echo "check-deps FAILED: $violations violation(s) in $files file(s)"

@@ -1,0 +1,115 @@
+Wokwi CLI v0.27.1 (ffde06bde1ae)
+Connected to Wokwi Simulation API 1.0.0-20261126-gccaad6a5
+Starting simulation...
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0
+[e1-idle: 18 s (LR3)] Expected text matched: "SELFTEST END total=5 passed=5 failed=0"
+[e1-idle: 18 s (LR3)] delay 6025ms
+RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+[e1-idle: 18 s (LR3)] delay 50ms
+CMD stats-reset OK
+[e1-idle: 18 s (LR3)] delay 16ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=6134954 lat_us=285
+[e1-idle: 18 s (LR3)] delay 291ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=6436211 lat_us=268
+[e1-idle: 18 s (LR3)] delay 315ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=6761013 lat_us=313
+[e1-idle: 18 s (LR3)] delay 316ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=7087033 lat_us=348
+[e1-idle: 18 s (LR3)] delay 333ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=7430069 lat_us=321
+[e1-idle: 18 s (LR3)] delay 264ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=7704083 lat_us=321
+[e1-idle: 18 s (LR3)] delay 279ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=7993108 lat_us=333
+[e1-idle: 18 s (LR3)] delay 327ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=8330145 lat_us=339
+[e1-idle: 18 s (LR3)] delay 330ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=8670164 lat_us=306
+[e1-idle: 18 s (LR3)] delay 322ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=9002184 lat_us=317
+[e1-idle: 18 s (LR3)] delay 304ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=9316254 lat_us=313
+[e1-idle: 18 s (LR3)] delay 324ms
+[e1-idle: 18 s (LR3)] delay 10ms
+EVT stow t_us=9650278 lat_us=295
+[e1-idle: 18 s (LR3)] delay 321ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 344ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 349ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 313ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 347ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 349ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 326ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 307ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 281ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 251ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 329ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 261ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 265ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 287ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 263ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 308ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 252ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 338ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 313ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 337ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 291ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 277ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 301ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 283ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 295ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 296ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 299ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 346ms
+[e1-idle: 18 s (LR3)] delay 10ms
+[e1-idle: 18 s (LR3)] delay 50ms
+CMD evt OK notified=252 woken=251 pending=2697 sem=1 state=2
+CMD button OK edges=
+[e1-idle: 18 s (LR3)] Expected text matched: "CMD button OK edges="
+[e1-idle: 18 s (LR3)] delay 5ms
+1186 accepted=12 ignored=1174
+[e1-idle: 18 s (LR3)] Scenario completed successfully

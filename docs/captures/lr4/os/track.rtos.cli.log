@@ -1,0 +1,29 @@
+Wokwi CLI v0.27.1 (ffde06bde1ae)
+Connected to Wokwi Simulation API 1.0.0-20261126-gb061761c
+Starting simulation...
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0
+[track: follows the light to the end stops, stow and resume, night park (LR3)] Expected text matched: "SELFTEST END total=5 passed=5 failed=0"
+[track: follows the light to the end stops, stow and resume, night park (LR3)] delay 6025ms
+RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+CMD track OK az=180 tilt=0 band=100 zero=90,90 parked=0 stowed=0
+[track: follows the light to the end stops, stow and resume, night park (LR3)] Expected text matched: "CMD track OK az=180 tilt=0 band=100 zero=90,90 parked=0 stowed=0"
+[track: follows the light to the end stops, stow and resume, night park (LR3)] delay 5ms
+ dark=0 runs=120 missed=0 errors=0
+CMD stow OK az=90 tilt=90
+[track: follows the light to the end stops, stow and resume, night park (LR3)] Expected text matched: "CMD stow OK az=90 tilt=90"
+[track: follows the light to the end stops, stow and resume, night park (LR3)] delay 5ms
+CMD resume OK
+[track: follows the light to the end stops, stow and resume, night park (LR3)] Expected text matched: "CMD resume OK"
+[track: follows the light to the end stops, stow and resume, night park (LR3)] delay 1480ms
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20
+[track: follows the light to the end stops, stow and resume, night park (LR3)] Expected text matched: "CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=1 stowed=0 dark=20"
+[track: follows the light to the end stops, stow and resume, night park (LR3)] delay 5ms
+ runs=150 missed=0 errors=0
+[track: follows the light to the end stops, stow and resume, night park (LR3)] Scenario completed successfully

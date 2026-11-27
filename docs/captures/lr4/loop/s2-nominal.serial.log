@@ -1,0 +1,165 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0CMD stow OK az=90 tilt=90
+CMD resume OK
+CMD log OK on=1
+CMD stats-reset OK
+CMD track OK az=91 tilt=91 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=3 missed=0 errors=0
+CMD adc OK raw=2048,3686,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=0 accepted=0 ignored=0
+CMD log OK on=1 seq=80 stored=80 blocks=5 dropped=0 errors=0 flushes=5 flush_max_us=13324
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=83 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=0 accepted=0 ignored=0
+CMD log OK on=1 seq=81 stored=80 blocks=5 dropped=0 errors=0 flushes=5 flush_max_us=13324
+CMD track OK az=169 tilt=169 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=163 missed=0 errors=0
+CMD adc OK raw=2048,410,2048,2048
+EVT stow t_us=12196278 lat_us=198
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=78 accepted=1 ignored=77
+CMD log OK on=1 seq=161 stored=160 blocks=10 dropped=0 errors=0 flushes=10 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=1 dark=0 runs=243 missed=0 errors=0
+CMD resume OK
+CMD adc OK raw=2048,3686,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=78 accepted=1 ignored=77
+CMD log OK on=1 seq=161 stored=160 blocks=10 dropped=0 errors=0 flushes=10 flush_max_us=13324
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=408 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=78 accepted=1 ignored=77
+CMD log OK on=1 seq=241 stored=240 blocks=15 dropped=0 errors=0 flushes=15 flush_max_us=13324
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=488 missed=0 errors=0
+CMD adc OK raw=2048,410,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=78 accepted=1 ignored=77
+CMD log OK on=1 seq=321 stored=320 blocks=20 dropped=0 errors=0 flushes=20 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=568 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=78 accepted=1 ignored=77
+CMD log OK on=1 seq=321 stored=320 blocks=20 dropped=0 errors=0 flushes=20 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=648 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=78 accepted=1 ignored=77
+CMD log OK on=1 seq=401 stored=400 blocks=25 dropped=0 errors=0 flushes=25 flush_max_us=13324
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=808 missed=0 errors=0
+CMD adc OK raw=2048,410,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=78 accepted=1 ignored=77
+EVT stow t_us=44458977 lat_us=273
+CMD log OK on=1 seq=482 stored=480 blocks=30 dropped=0 errors=0 flushes=30 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=1 dark=0 runs=888 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD resume OK
+CMD button OK edges=237 accepted=2 ignored=235
+CMD log OK on=1 seq=482 stored=480 blocks=30 dropped=0 errors=0 flushes=30 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=973 missed=0 errors=0
+CMD adc OK raw=2048,3686,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=237 accepted=2 ignored=235
+CMD log OK on=1 seq=562 stored=560 blocks=35 dropped=0 errors=0 flushes=35 flush_max_us=13324
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=1054 missed=0 errors=0
+CMD adc OK raw=2048,410,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=237 accepted=2 ignored=235
+CMD log OK on=1 seq=562 stored=560 blocks=35 dropped=0 errors=0 flushes=35 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=1213 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=237 accepted=2 ignored=235
+CMD log OK on=1 seq=642 stored=640 blocks=40 dropped=0 errors=0 flushes=40 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=1293 missed=0 errors=0
+CMD adc OK raw=2048,3686,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=237 accepted=2 ignored=235
+CMD log OK on=1 seq=722 stored=720 blocks=45 dropped=0 errors=0 flushes=45 flush_max_us=13324
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=1373 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=237 accepted=2 ignored=235
+CMD log OK on=1 seq=722 stored=720 blocks=45 dropped=0 errors=0 flushes=45 flush_max_us=13324
+CMD track OK az=169 tilt=169 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=1454 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+EVT stow t_us=76723517 lat_us=3757CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=285 accepted=3 ignored=282
+CMD log OK on=1 seq=803 stored=800 blocks=50 dropped=0 errors=0 flushes=50 flush_max_us=13324
+CMD resume OK
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=1618 missed=0 errors=0
+CMD adc OK raw=2048,3686,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=285 accepted=3 ignored=282
+CMD log OK on=1 seq=883 stored=880 blocks=55 dropped=0 errors=0 flushes=55 flush_max_us=13324
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=1698 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=285 accepted=3 ignored=282
+CMD log OK on=1 seq=883 stored=880 blocks=55 dropped=0 errors=0 flushes=55 flush_max_us=13324
+CMD track OK az=169 tilt=169 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=1779 missed=0 errors=0
+CMD adc OK raw=2048,410,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=285 accepted=3 ignored=282
+CMD log OK on=1 seq=963 stored=960 blocks=60 dropped=0 errors=0 flushes=60 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=1859 missed=0 errors=0
+CMD adc OK raw=2048,3686,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=285 accepted=3 ignored=282
+CMD log OK on=1 seq=964 stored=960 blocks=60 dropped=0 errors=0 flushes=60 flush_max_us=13324
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=2018 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=285 accepted=3 ignored=282
+CMD log OK on=1 seq=1043 stored=1040 blocks=65 dropped=0 errors=0 flushes=65 flush_max_us=13324
+CMD track OK az=169 tilt=169 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=2099 missed=0 errors=0
+CMD adc OK raw=2048,410,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+EVT stow t_us=108984437 lat_us=175
+CMD button OK edges=303 accepted=4 ignored=299
+CMD log OK on=1 seq=1124 stored=1120 blocks=70 dropped=0 errors=0 flushes=70 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=1 dark=0 runs=2179 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD resume OK
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=391 accepted=4 ignored=387
+CMD log OK on=1 seq=1125 stored=1120 blocks=70 dropped=0 errors=0 flushes=70 flush_max_us=13324
+CMD track OK az=91 tilt=91 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=2264 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=391 accepted=4 ignored=387
+CMD log OK on=1 seq=1204 stored=1200 blocks=75 dropped=0 errors=0 flushes=75 flush_max_us=13324
+CMD track OK az=169 tilt=169 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=2424 missed=0 errors=0
+CMD adc OK raw=2048,410,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=391 accepted=4 ignored=387
+CMD log OK on=1 seq=1284 stored=1280 blocks=80 dropped=0 errors=0 flushes=80 flush_max_us=13324
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=2504 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+STAT name=loop n=21817 min_us=36 avg_us=5917 max_us=20006
+STAT name=sense n=2582 min_us=629 avg_us=630 max_us=726
+STAT name=track n=2582 min_us=810 avg_us=888 max_us=1084
+STAT name=late n=2582 min_us=66 avg_us=3219 max_us=11077
+STAT name=period n=2582 min_us=40159 avg_us=50000 max_us=60455
+STAT name=cmd n=133 min_us=1599 avg_us=8476 max_us=12052
+STAT name=logflush n=80 min_us=13308 avg_us=13320 max_us=13324
+STAT name=stow n=4 min_us=175 avg_us=1101 max_us=3757
+STAT load window_ms=129100 busy_ms=4488 load_pm=34
+STAT count runs=2582 missed=0 rx_bytes=699 rx_errors=0 passes=21817
+STAT rx init=0 dropped=0 ring_max=55 errors=0 isr_n=754 isr_avg=107 isr_max=235
+STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=1152 stack_res=1024 stack_free=8840
+CMD stats OK
+CMD log-flush OK stored=1284 blocks=80 us=13292
+CMD log OK on=1 seq=1284 stored=1284 blocks=80 dropped=0 errors=0 flushes=81 flush_max_us=13324
+CMD log-get OK n=0 t_ms=150 raw=2048,3686,2048,2048 az=91 tilt=91 flags=3 ok=1
+CMD log-get OK n=320 t_ms=28403 raw=2048,410,2048,2048 az=90 tilt=90 flags=3 ok=1
+CMD log-get OK n=640 t_ms=60605 raw=2048,410,2048,2048 az=91 tilt=91 flags=3 ok=1
+CMD button OK edges=391 accepted=4 ignored=387

@@ -1,8 +1,8 @@
 #include <stdarg.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <string.h>
 #include "app.h"
+#include "fmt.h"
 #include "logger.h"
 #include "plat_adc.h"
 #include "plat_button.h"
@@ -20,6 +20,8 @@
 #define SELFTEST_VERSION   1U
 #define TIME_PROBE_PAIRS   20000U
 
+static const app_os_t *s_os;
+
 static void say(const char *fmt, ...)
 {
     char buf[160];
@@ -27,14 +29,55 @@ static void say(const char *fmt, ...)
     int n;
 
     va_start(ap, fmt);
-    n = vsnprintf(buf, sizeof buf, fmt, ap);
+    n = fmt_vsnprintf(buf, sizeof buf, fmt, ap);
     va_end(ap);
     if (n > 0) {
         if ((size_t)n >= sizeof buf) {
             n = (int)sizeof buf - 1;
         }
+        if (s_os != NULL && s_os->out_lock != NULL) {
+            s_os->out_lock();
+        }
         (void)plat_uart_write((const uint8_t *)buf, (size_t)n);
+        if (s_os != NULL && s_os->out_unlock != NULL) {
+            s_os->out_unlock();
+        }
     }
+}
+
+static void os_enter(const app_t *app)
+{
+    if (app->os.enter != NULL) {
+        app->os.enter();
+    }
+}
+
+static void os_leave(const app_t *app)
+{
+    if (app->os.leave != NULL) {
+        app->os.leave();
+    }
+}
+
+static void os_lock(const app_t *app)
+{
+    if (app->os.lock != NULL) {
+        app->os.lock();
+    }
+}
+
+static void os_unlock(const app_t *app)
+{
+    if (app->os.unlock != NULL) {
+        app->os.unlock();
+    }
+}
+
+static void clock_sync(app_t *app, uint32_t now, uint32_t hz)
+{
+    os_enter(app);
+    (void)perf_clock_advance(&app->clock, now, hz);
+    os_leave(app);
 }
 
 static const char *sd_type_name(sd_type_t t)
@@ -67,6 +110,9 @@ static void meter_reset(app_t *app)
     app->rx_bytes = 0U;
     m->rx_errors = 0U;
     plat_uart_rx_reset_stats();
+    if (app->os.stats_reset != NULL) {
+        app->os.stats_reset();
+    }
 }
 
 
@@ -76,6 +122,7 @@ void app_init(app_t *app)
         return;
     }
     memset(app, 0, sizeof *app);
+    s_os = &app->os;
     plat_probe_init();
     app->rx_init = plat_uart_rx_start();
     app->adc_init = plat_adc_init();
@@ -461,6 +508,11 @@ static void log_note(app_t *app, uint8_t flags)
     if (app->log_on == 0U || flags == 0U) {
         return;
     }
+    if (app->os.log_put != NULL) {
+        (void)app->os.log_put(app->clock.ms, app->pots.raw, app->tracker.az, app->tracker.tilt,
+                              flags);
+        return;
+    }
     (void)logger_add(&app->logger, app->clock.ms, app->pots.raw, app->tracker.az,
                      app->tracker.tilt, flags);
 }
@@ -481,7 +533,11 @@ static plat_status_t log_flush_now(app_t *app)
     t0 = plat_time_cycles();
     st = logger_flush(&app->logger, &app->sd, app->clock.ms);
     if (st == PLAT_OK) {
-        perf_stat_add(&app->log_flush, plat_time_cycles() - t0);
+        uint32_t spent = plat_time_cycles() - t0;
+
+        os_enter(app);
+        perf_stat_add(&app->log_flush, spent);
+        os_leave(app);
     }
     return st;
 }
@@ -511,8 +567,13 @@ static void track_task(app_t *app)
         }
     }
     if (st == PLAT_OK) {
-        log_note(app, result_flags(tracker_update(&app->tracker, app->pots.raw)));
+        tracker_result_t moved;
+
+        os_lock(app);
+        moved = tracker_update(&app->tracker, app->pots.raw);
         st = apply_servos(app);
+        os_unlock(app);
+        log_note(app, result_flags(moved));
     }
     app->track_runs++;
     if (st != PLAT_OK) {
@@ -528,7 +589,7 @@ static void track_due(app_t *app, uint32_t now)
     uint32_t cycles;
 
     plat_probe_set(PLAT_PROBE_T2);
-    (void)perf_clock_advance(&app->clock, now, plat_time_hz());
+    (void)clock_sync(app, now, plat_time_hz());
     late = now - app->track_next;
     perf_stat_add(&m->late, late);
     perf_stat_add(&m->period, now - m->track_last);
@@ -541,7 +602,6 @@ static void track_due(app_t *app, uint32_t now)
     plat_probe_clear(PLAT_PROBE_T2);
     perf_stat_add(&m->track, cycles);
     m->busy += cycles;
-    log_poll(app);
 }
 
 static void track_poll(app_t *app)
@@ -564,6 +624,7 @@ static void track_poll(app_t *app)
     }
     if ((int32_t)(now - app->track_next) >= 0) {
         track_due(app, now);
+        log_poll(app);
     }
 }
 
@@ -582,12 +643,16 @@ static void cmd_track(const app_t *app)
 static void cmd_deadband(app_t *app, unsigned argc, char *argv[])
 {
     uint32_t value;
+    plat_status_t st;
 
     if (argc != 2U || parse_uint(argv[1], UINT32_MAX, &value) != 0) {
         say("CMD deadband FAIL reason=usage" EOL);
         return;
     }
-    if (tracker_set_deadband(&app->tracker, value) != PLAT_OK) {
+    os_lock(app);
+    st = tracker_set_deadband(&app->tracker, value);
+    os_unlock(app);
+    if (st != PLAT_OK) {
         say("CMD deadband FAIL reason=range" EOL);
         return;
     }
@@ -605,11 +670,15 @@ static void cmd_zero(app_t *app, unsigned argc, char *argv[])
         say("CMD zero FAIL reason=usage" EOL);
         return;
     }
-    if (tracker_set_zero(&app->tracker, az, tilt) != PLAT_OK) {
+    os_lock(app);
+    st = tracker_set_zero(&app->tracker, az, tilt);
+    if (st != PLAT_OK) {
+        os_unlock(app);
         say("CMD zero FAIL reason=range" EOL);
         return;
     }
     st = apply_servos(app);
+    os_unlock(app);
     if (st != PLAT_OK) {
         say("CMD zero FAIL status=%d" EOL, (int)st);
         return;
@@ -622,8 +691,10 @@ static void cmd_stow(app_t *app)
 {
     plat_status_t st;
 
+    os_lock(app);
     (void)tracker_stow(&app->tracker);
     st = apply_servos(app);
+    os_unlock(app);
     if (st != PLAT_OK) {
         say("CMD stow FAIL status=%d" EOL, (int)st);
         return;
@@ -633,7 +704,9 @@ static void cmd_stow(app_t *app)
 
 static void cmd_resume(app_t *app)
 {
+    os_lock(app);
     tracker_resume(&app->tracker);
+    os_unlock(app);
     say("CMD resume OK" EOL);
 }
 
@@ -666,8 +739,10 @@ static void button_poll(app_t *app)
     app->button_ignored += count - 1U;
     app->button_last = first;
     plat_probe_set(PLAT_PROBE_EVENT);
+    os_lock(app);
     moved = tracker_stow(&app->tracker);
     st = apply_servos(app);
+    os_unlock(app);
     now = plat_time_cycles();
     plat_probe_clear(PLAT_PROBE_EVENT);
     cycles = now - first;
@@ -678,7 +753,7 @@ static void button_poll(app_t *app)
     perf_stat_add(&app->stow_latency, cycles);
     say("EVT stow t_us=%lu lat_us=%lu" EOL, (unsigned long)perf_cycles_to_us(first, hz),
         (unsigned long)perf_cycles_to_us(cycles, hz));
-    (void)perf_clock_advance(&app->clock, now, hz);
+    (void)clock_sync(app, now, hz);
     log_note(app, (uint8_t)(result_flags(moved) | LOGGER_F_STOW));
 }
 
@@ -800,15 +875,17 @@ static void print_loop(const app_t *app)
 static void print_load(const app_t *app)
 {
     uint64_t window = window_cycles(app);
+    uint64_t busy = (app->os.busy_cycles != NULL) ? app->os.busy_cycles(window)
+                                                  : app->meter.busy;
     uint32_t per_ms = plat_time_hz() / 1000U;
     uint32_t busy_ms = 0U;
     uint32_t load_pm = 0U;
 
     if (per_ms != 0U) {
-        busy_ms = (uint32_t)(app->meter.busy / per_ms);
+        busy_ms = (uint32_t)(busy / per_ms);
     }
     if (window != 0U) {
-        load_pm = (uint32_t)((app->meter.busy * 1000U) / window);
+        load_pm = (uint32_t)((busy * 1000U) / window);
         if (load_pm > 1000U) {
             load_pm = 1000U;
         }
@@ -883,7 +960,7 @@ static void cmd_stats(app_t *app, unsigned argc, char *argv[])
         say("CMD stats FAIL reason=usage" EOL);
         return;
     }
-    (void)perf_clock_advance(&app->clock, plat_time_cycles(), plat_time_hz());
+    (void)clock_sync(app, plat_time_cycles(), plat_time_hz());
     if (argc == 2U) {
         meter_reset(app);
         say("CMD stats-reset OK" EOL);
@@ -895,7 +972,7 @@ static void cmd_stats(app_t *app, unsigned argc, char *argv[])
 
 static void load_finish(app_t *app)
 {
-    (void)perf_clock_advance(&app->clock, plat_time_cycles(), plat_time_hz());
+    (void)clock_sync(app, plat_time_cycles(), plat_time_hz());
     app->load_active = 0U;
     app->load_cycles = 0U;
     print_stats(app);
@@ -924,7 +1001,7 @@ static void cmd_load(app_t *app, unsigned argc, char *argv[])
         return;
     }
     now = plat_time_cycles();
-    (void)perf_clock_advance(&app->clock, now, plat_time_hz());
+    (void)clock_sync(app, now, plat_time_hz());
     meter_reset(app);
     app->track_next = now + app->track_period;
     app->meter.track_last = now;
@@ -932,6 +1009,9 @@ static void cmd_load(app_t *app, unsigned argc, char *argv[])
     app->load_cycles = us * (plat_time_hz() / 1000000U);
     app->load_end = now + ms * (plat_time_hz() / 1000U);
     app->load_active = 1U;
+    if (app->os.load_start != NULL) {
+        app->os.load_start();
+    }
     say("CMD load OK us=%lu ms=%lu" EOL, (unsigned long)us, (unsigned long)ms);
 }
 
@@ -954,6 +1034,7 @@ void app_execute(app_t *app, const char *line)
     char work[APP_LINE_MAX + 1U];
     char *argv[MAX_ARGS];
     unsigned argc;
+    int uses_sd;
 
     if (app == NULL || line == NULL || strlen(line) > APP_LINE_MAX) {
         return;
@@ -962,6 +1043,14 @@ void app_execute(app_t *app, const char *line)
     argc = tokenize(work, argv, MAX_ARGS);
     if (argc == 0U) {
         return;
+    }
+    uses_sd = (strcmp(argv[0], "sd") == 0 || strcmp(argv[0], "log") == 0 ||
+               strcmp(argv[0], "selftest") == 0);
+    if (uses_sd && app->os.sd_lock != NULL) {
+        app->os.sd_lock();
+        if (app->os.log_drain != NULL) {
+            app->os.log_drain();
+        }
     }
     if (strcmp(argv[0], "help") == 0) {
         cmd_help();
@@ -993,36 +1082,47 @@ void app_execute(app_t *app, const char *line)
         cmd_stats(app, argc, argv);
     } else if (strcmp(argv[0], "load") == 0) {
         cmd_load(app, argc, argv);
-    } else {
+    } else if (app->os.command == NULL || app->os.command(argc, argv) == 0) {
         say("CMD %s FAIL reason=unknown" EOL, argv[0]);
     }
+    if (uses_sd && app->os.sd_unlock != NULL) {
+        app->os.sd_unlock();
+    }
+}
+
+void app_run_command(app_t *app, const char *line, uint32_t t_ready)
+{
+    uint32_t cycles;
+
+    app_execute(app, line);
+    cycles = plat_time_cycles() - t_ready;
+    os_enter(app);
+    perf_stat_add(&app->meter.cmd, cycles);
+    app->meter.busy += cycles;
+    os_leave(app);
 }
 
 static void run_line(app_t *app)
 {
-    uint32_t t0 = plat_time_cycles();
-    uint32_t cycles;
-
-    app_execute(app, app->line);
-    cycles = plat_time_cycles() - t0;
-    perf_stat_add(&app->meter.cmd, cycles);
-    app->meter.busy += cycles;
+    app_run_command(app, app->line, plat_time_cycles());
 }
 
-static void console_poll(app_t *app)
+int app_console_read(app_t *app, uint32_t timeout_ms)
 {
     uint8_t b;
     plat_status_t st;
+    int ready = 0;
 
     if (app == NULL) {
-        return;
+        return 0;
     }
-    st = plat_uart_read_byte(&b, POLL_TIMEOUT_MS);
+    st = plat_uart_read_byte(&b, timeout_ms);
     if (st != PLAT_OK) {
         if (st == PLAT_ERR_BUS) {
             app->meter.rx_errors++;
+            return 2;
         }
-        return;
+        return 0;
     }
     app->rx_bytes++;
     if (b == '\r' || b == '\n') {
@@ -1030,16 +1130,24 @@ static void console_poll(app_t *app)
             say("CMD ? FAIL reason=too-long" EOL);
         } else if (app->line_len > 0U) {
             app->line[app->line_len] = '\0';
-            run_line(app);
+            ready = 1;
         }
         app->line_len = 0U;
         app->line_overflow = 0U;
-        return;
+        return (ready != 0) ? 1 : 2;
     }
     if (app->line_len < APP_LINE_MAX) {
         app->line[app->line_len++] = (char)b;
     } else {
         app->line_overflow = 1U;
+    }
+    return 2;
+}
+
+static void console_poll(app_t *app)
+{
+    if (app_console_read(app, POLL_TIMEOUT_MS) == 1) {
+        run_line(app);
     }
 }
 
@@ -1054,4 +1162,38 @@ void app_poll(app_t *app)
         load_poll(app);
     }
     console_poll(app);
+}
+
+void app_service_button(app_t *app)
+{
+    if (app != NULL) {
+        button_poll(app);
+    }
+}
+
+uint32_t app_service_track(app_t *app, uint32_t now, uint32_t nominal)
+{
+    uint32_t before;
+
+    if (app == NULL) {
+        return 0U;
+    }
+    before = app->track_missed;
+    app->track_next = nominal;
+    track_due(app, now);
+    return app->track_missed - before;
+}
+
+void app_service_log(app_t *app)
+{
+    if (app != NULL) {
+        log_poll(app);
+    }
+}
+
+void app_service_load(app_t *app)
+{
+    if (app != NULL && app->load_active != 0U) {
+        load_poll(app);
+    }
 }

@@ -1968,9 +1968,269 @@ static void test_null_and_oversized_arguments_are_harmless(void)
     CHECK_STR(fake_uart_output(), "");
 }
 
+static struct {
+    unsigned enter, leave, lock, unlock, sd_lock, sd_unlock, out_lock, out_unlock;
+    unsigned put, drain, load_start, reset, busy, command;
+    uint32_t put_t_ms;
+    unsigned put_flags;
+} hk;
+
+static void h_enter(void)      { hk.enter++; }
+static void h_leave(void)      { hk.leave++; }
+static void h_lock(void)       { hk.lock++; }
+static void h_unlock(void)     { hk.unlock++; }
+static void h_sd_lock(void)    { hk.sd_lock++; }
+static void h_sd_unlock(void)  { hk.sd_unlock++; }
+static void h_out_lock(void)   { hk.out_lock++; }
+static void h_out_unlock(void) { hk.out_unlock++; }
+static void h_drain(void)      { hk.drain++; }
+static void h_load_start(void) { hk.load_start++; }
+static void h_reset(void)      { hk.reset++; }
+
+static int h_put(uint32_t t_ms, const uint16_t raw[LOGGER_SENSORS], uint8_t az, uint8_t tilt,
+                 uint8_t flags)
+{
+    (void)raw;
+    (void)az;
+    (void)tilt;
+    hk.put++;
+    hk.put_t_ms = t_ms;
+    hk.put_flags = flags;
+    return 1;
+}
+
+static uint64_t h_busy(uint64_t window)
+{
+    hk.busy++;
+    return window / 4U;
+}
+
+static int h_command(unsigned argc, char *argv[])
+{
+    (void)argc;
+    hk.command++;
+    return (strcmp(argv[0], "tasks") == 0) ? 1 : 0;
+}
+
+static void hooks_on(void)
+{
+    memset(&hk, 0, sizeof hk);
+    app.os.enter = h_enter;
+    app.os.leave = h_leave;
+    app.os.lock = h_lock;
+    app.os.unlock = h_unlock;
+    app.os.sd_lock = h_sd_lock;
+    app.os.sd_unlock = h_sd_unlock;
+    app.os.out_lock = h_out_lock;
+    app.os.out_unlock = h_out_unlock;
+    app.os.log_put = h_put;
+    app.os.log_drain = h_drain;
+    app.os.load_start = h_load_start;
+    app.os.stats_reset = h_reset;
+    app.os.busy_cycles = h_busy;
+    app.os.command = h_command;
+}
+
+static void test_hooks_are_off_in_a_loop_build(void)
+{
+    start();
+    CHECK(app.os.enter == NULL);
+    CHECK(app.os.lock == NULL);
+    CHECK(app.os.sd_lock == NULL);
+    CHECK(app.os.out_lock == NULL);
+    CHECK(app.os.log_put == NULL);
+    CHECK(app.os.command == NULL);
+}
+
+static void test_every_printed_line_is_taken_under_the_output_lock(void)
+{
+    start();
+    hooks_on();
+    run("help\n");
+    CHECK_EQ(hk.out_lock, 1);
+    CHECK_EQ(hk.out_unlock, 1);
+    run("adc\n");
+    CHECK_EQ(hk.out_lock, 2);
+    CHECK_EQ(hk.out_unlock, 2);
+}
+
+static void test_the_tracker_and_servo_update_is_taken_under_the_state_lock(void)
+{
+    start_tracking();
+    hooks_on();
+    tick(PERIOD);
+    CHECK_EQ(app.track_runs, 1);
+    CHECK_EQ(hk.lock, 1);
+    CHECK_EQ(hk.unlock, 1);
+    run("stow\n");
+    CHECK_EQ(hk.lock, 2);
+    CHECK_EQ(hk.unlock, 2);
+    run("resume\n");
+    run("deadband 5\n");
+    run("zero 10 20\n");
+    CHECK_EQ(hk.lock, 5);
+    CHECK_EQ(hk.unlock, 5);
+    run("zero 999 999\n");
+    CHECK_EQ(hk.lock, hk.unlock);
+    CHECK_EQ(hk.lock, 6);
+    run("deadband 99999\n");
+    CHECK_EQ(hk.lock, hk.unlock);
+}
+
+static void test_the_short_counter_updates_are_taken_in_a_critical_section(void)
+{
+    start_tracking();
+    hooks_on();
+    tick(PERIOD);
+    CHECK(hk.enter > 0U);
+    CHECK_EQ(hk.enter, hk.leave);
+}
+
+static void test_the_sd_commands_hold_the_sd_lock_and_drain_the_log_queue(void)
+{
+    start();
+    hooks_on();
+    run("help\n");
+    CHECK_EQ(hk.sd_lock, 0);
+    run("sd read 0\n");
+    CHECK_EQ(hk.sd_lock, 1);
+    CHECK_EQ(hk.sd_unlock, 1);
+    CHECK_EQ(hk.drain, 1);
+    run("log\n");
+    run("selftest\n");
+    CHECK_EQ(hk.sd_lock, 3);
+    CHECK_EQ(hk.sd_unlock, 3);
+    CHECK_EQ(hk.drain, 3);
+}
+
+static void test_the_log_hook_takes_the_records_in_place_of_the_logger(void)
+{
+    start_tracking();
+    log_on();
+    hooks_on();
+    run_n(1U, 3U);
+    CHECK(hk.put > 0U);
+    CHECK((hk.put_flags & LOGGER_F_AZ) != 0U);
+    CHECK_EQ(logger_total(&app.logger), 0);
+}
+
+static void test_load_and_stats_reset_call_their_hooks(void)
+{
+    start_tracking();
+    hooks_on();
+    run("load 40 500\n");
+    fake_time_set_step(100U);
+    CHECK_EQ(hk.load_start, 1);
+    CHECK_EQ(hk.reset, 1);
+    run("stats reset\n");
+    CHECK_EQ(hk.reset, 2);
+    run("load\n");
+    CHECK_EQ(hk.load_start, 1);
+}
+
+static void test_the_os_busy_time_replaces_the_sum_of_the_loop_in_the_load_line(void)
+{
+    start_tracking();
+    tick(PERIOD);
+    hooks_on();
+    CHECK(strstr(run("stats\n"), "STAT load window_ms=50 busy_ms=12 load_pm=250") != NULL);
+    CHECK_EQ(hk.busy, 1);
+}
+
+static void test_an_unknown_command_is_offered_to_the_os_hook_first(void)
+{
+    start();
+    hooks_on();
+    CHECK_STR(run("tasks\n"), "");
+    CHECK_EQ(hk.command, 1);
+    CHECK_STR(run("bogus\n"), "CMD bogus FAIL reason=unknown" EOL);
+    CHECK_EQ(hk.command, 2);
+}
+
+static void test_a_task_reads_the_console_byte_by_byte_and_runs_the_line(void)
+{
+    int r;
+
+    start();
+    fake_uart_clear_output();
+    fake_uart_feed("help\n");
+    r = app_console_read(&app, 0U);
+    CHECK_EQ(r, 2);
+    CHECK_EQ(app_console_read(&app, 0U), 2);
+    CHECK_EQ(app_console_read(&app, 0U), 2);
+    CHECK_EQ(app_console_read(&app, 0U), 2);
+    CHECK_EQ(app_console_read(&app, 0U), 1);
+    CHECK_STR(app.line, "help");
+    CHECK_EQ(app_console_read(&app, 0U), 0);
+    app_run_command(&app, app.line, 0U);
+    CHECK(strstr(fake_uart_output(), "CMD help OK") != NULL);
+    CHECK(app.meter.cmd.count == 1U);
+}
+
+static void test_a_receive_error_in_a_task_is_counted_and_asks_for_another_read(void)
+{
+    start();
+    fake_uart_feed_error();
+    CHECK_EQ(app_console_read(&app, 0U), 2);
+    CHECK_EQ(app.meter.rx_errors, 1);
+    CHECK_EQ(app.rx_bytes, 0);
+}
+
+static void test_the_track_service_runs_at_the_given_release_and_reports_the_lost_periods(void)
+{
+    uint32_t lost;
+
+    start_tracking();
+    fake_time_set(PERIOD + 5U);
+    lost = app_service_track(&app, PERIOD + 5U, PERIOD);
+    CHECK_EQ(lost, 0);
+    CHECK_EQ(app.track_runs, 1);
+    CHECK_EQ(app.meter.late.max, 5);
+    fake_time_set(4U * PERIOD + 7U);
+    lost = app_service_track(&app, 4U * PERIOD + 7U, 2U * PERIOD);
+    CHECK_EQ(lost, 2);
+    CHECK_EQ(app.track_missed, 2);
+}
+
+static void test_the_service_entries_do_the_same_as_the_loop_steps(void)
+{
+    start_tracking();
+    fake_button_press(1000U);
+    fake_time_set(2000U);
+    app_service_button(&app);
+    CHECK_EQ(app.button_accepted, 1);
+    run("load 10 100\n");
+    fake_time_set_step(10U);
+    app_service_load(&app);
+    CHECK_EQ(app.load_active, 1);
+    fake_time_set(7000000U);
+    app_service_load(&app);
+    CHECK_EQ(app.load_active, 0);
+    fake_time_set_step(0U);
+    app_service_log(&app);
+    app_service_track(NULL, 0U, 0U);
+    app_service_button(NULL);
+    app_service_log(NULL);
+    app_service_load(NULL);
+    CHECK_EQ(app_console_read(NULL, 0U), 0);
+}
+
 int main(void)
 {
     RUN(test_init_starts_platform_and_centres_servos_silently);
+    RUN(test_hooks_are_off_in_a_loop_build);
+    RUN(test_every_printed_line_is_taken_under_the_output_lock);
+    RUN(test_the_tracker_and_servo_update_is_taken_under_the_state_lock);
+    RUN(test_the_short_counter_updates_are_taken_in_a_critical_section);
+    RUN(test_the_sd_commands_hold_the_sd_lock_and_drain_the_log_queue);
+    RUN(test_the_log_hook_takes_the_records_in_place_of_the_logger);
+    RUN(test_load_and_stats_reset_call_their_hooks);
+    RUN(test_the_os_busy_time_replaces_the_sum_of_the_loop_in_the_load_line);
+    RUN(test_an_unknown_command_is_offered_to_the_os_hook_first);
+    RUN(test_a_task_reads_the_console_byte_by_byte_and_runs_the_line);
+    RUN(test_a_receive_error_in_a_task_is_counted_and_asks_for_another_read);
+    RUN(test_the_track_service_runs_at_the_given_release_and_reports_the_lost_periods);
+    RUN(test_the_service_entries_do_the_same_as_the_loop_steps);
     RUN(test_init_remembers_platform_failures);
     RUN(test_selftest_all_pass_golden_output);
     RUN(test_selftest_adc_channel_failure_does_not_stop_the_others);

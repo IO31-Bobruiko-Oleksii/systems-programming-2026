@@ -1,0 +1,25 @@
+hook_enter            8 B cyc=False
+hook_leave           16 B cyc=False
+hook_lock           108 B cyc=False
+hook_unlock         108 B cyc=False
+hook_sd_lock        108 B cyc=False
+hook_sd_unlock      108 B cyc=False
+hook_log_put        132 B cyc=False
+hook_log_drain      360 B cyc=True
+hook_load_start     108 B cyc=False
+hook_stats_reset     40 B cyc=False
+hook_busy_cycles     32 B cyc=False
+hook_out_lock       108 B cyc=False
+hook_out_unlock     108 B cyc=False
+hook_command        384 B cyc=False
+
+event_task    440 B  cyc=True
+   event_task(8) > app_service_button(8) > button_poll(40) > log_note(24) > hook_log_drain(40) > app_service_log(8) > log_poll(16) > log_flush_now(32) > logger_flush(32) > sdcard_write_block(32) > command(40) > plat_spi_transfer(72) > HAL_SPI_TransmitReceive(32) > SPI_EndRxTxTransaction(16) > SPI_WaitFlagStateUntilTimeout.constprop.0(40)
+track_task    488 B  cyc=True
+   track_task(48) > app_service_track(16) > track_due(40) > log_note(24) > hook_log_drain(40) > app_service_log(8) > log_poll(16) > log_flush_now(32) > logger_flush(32) > sdcard_write_block(32) > command(40) > plat_spi_transfer(72) > HAL_SPI_TransmitReceive(32) > SPI_EndRxTxTransaction(16) > SPI_WaitFlagStateUntilTimeout.constprop.0(40)
+cmd_task      728 B  cyc=True
+   cmd_task(16) > app_run_command(16) > app_execute(192) > print_stats(88) > print_stat(104) > say(200) > fmt_vsnprintf(56) > put_number(48) > put(8)
+logger_task   360 B  cyc=True
+   logger_task(40) > app_service_log(8) > log_poll(16) > log_flush_now(32) > logger_flush(32) > sdcard_write_block(32) > command(40) > plat_spi_transfer(72) > HAL_SPI_TransmitReceive(32) > SPI_EndRxTxTransaction(16) > SPI_WaitFlagStateUntilTimeout.constprop.0(40)
+load_task     552 B  cyc=True
+   load_task(16) > app_service_load(8) > load_poll(24) > print_stats(88) > print_stat(104) > say(200) > fmt_vsnprintf(56) > put_number(48) > put(8)

@@ -1,0 +1,57 @@
+serial log docs/captures/lr4/rtos-final/s3-worst.serial.log: 1 statistics window(s), 30 EVT stow line(s), 0 FAIL line(s)
+
+metric                             W1   deadline  verdict
+window_ms                       47357             
+T2 runs                           948             
+T2 skipped (missed)                 0          0  ok
+T2 start late, max us            2421      25000  ok
+T2 start late, avg us             126             
+T2 period, avg us               50000             
+T2 period, max us               52337             
+T1 sense, max us                 3073       5000  ok
+T2 body (track), max us          3320             
+loop pass, avg us                   -             
+loop pass, max us                   -             
+T4 commands, n                    136             
+T4 command, avg us              12893             
+T4 command, max us              27560     100000  ok
+T5 log block writes, n             28             
+T5 log block write, max us      14766             
+E1 stow, n                         30             
+E1 stow, avg us                   321             
+E1 stow, max us                   370      10000  ok
+CPU load, per mille               102             
+rx bytes taken                   1067             
+rx bytes dropped                    0          0  ok
+rx errors                           0          0  ok
+rx ring max (of 256)              114             
+rx interrupt avg, cycles          207             
+stack used, bytes                 464             
+heap used, bytes                    0             
+W1: T2 runs 948, window_ms / 50 = 947
+
+E1 (stow) latency per window, from the EVT lines:
+  W1           n  30  min    270  avg    321  median    317  p90    358  p99    370  max    370 us  over 10 ms: 0
+
+E1 by kind of press (scenario scenarios/s3-worst.yaml):
+  random       n   3  min    270  avg    324  median    332  p90    370  p99    370  max    370 us  over 10 ms: 0
+  sd           n  27  min    270  avg    320  median    317  p90    358  p99    367  max    367 us  over 10 ms: 0
+
+  press during an sd write: ms after the line was sent -> latency us
+     3 ms:    270     358     313
+     5 ms:    299     287
+     7 ms:    299     318
+     9 ms:    312     310
+    11 ms:    348     325
+    13 ms:    302     317
+    15 ms:    315     367
+    17 ms:    333     320
+    19 ms:    335     345
+    21 ms:    326     310
+    23 ms:    310     325
+    25 ms:    310     358
+    27 ms:    362     287
+
+button: edges 2776, accepted 30, ignored 2746 (presses sent: 30)
+log: on 1, seq 464, stored 463, blocks 28, dropped 0, errors 0, flushes 29, flush_max_us 14909
+log records read back with `log get`: 3, checksum ok: 3

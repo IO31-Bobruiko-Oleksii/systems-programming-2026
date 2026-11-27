@@ -1,0 +1,180 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=100 core_hz=12000000 heap_free=1432 tasks=5
+CMD stow OK az=90 tilt=90
+CMD resume OK
+CMD log OK on=1
+CMD stats-reset OK
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=2 missed=0 errors=0
+CMD adc OK raw=2048,3686,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=0 accepted=0 ignored=0
+CMD sd-write OK block=16000 us=14377
+EVT stow t_us=864224 lat_us=301
+CMD sd-write OK block=16000 us=20019
+EVT stow t_us=1129231 lat_us=332
+CMD sd-write OK block=16000 us=20522
+EVT stow t_us=1396287 lat_us=295
+CMD sd-write OK block=16000 us=20304
+CMD resume OK
+CMD log OK on=1 seq=87 stored=80 blocks=5 dropped=0 errors=0 flushes=5 flush_max_us=13309
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=102 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+EVT stow t_us=5877284 lat_us=322
+EVT stow t_us=6146266 lat_us=332
+CMD sd-write OK block=16000 us=20291
+EVT stow t_us=6417291 lat_us=295
+CMD sd-write OK block=16000 us=21314
+EVT stow t_us=6690306 lat_us=325
+CMD sd-write OK block=16000 us=17895
+CMD resume OK
+CMD button OK edges=754 accepted=7 ignored=747
+CMD log OK on=1 seq=91 stored=80 blocks=5 dropped=0 errors=0 flushes=5 flush_max_us=13309
+CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=208 missed=0 errors=0
+CMD adc OK raw=2048,410,2048,2048
+CMD track OK az=88 tilt=88 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=210 missed=0 errors=0
+CMD track OK az=88 tilt=88 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=210 missed=0 errors=0
+CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+CMD track OK az=86 tilt=86 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=212 missed=0 errors=0
+CMD track OK az=86 tilt=86 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=212 missed=0 errors=0
+CMD track OK az=86 tilt=86 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=212 missed=0 errors=0
+CMD track OK az=86 tilt=86 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=212 missed=0 errors=0
+CMD track OK az=85 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=213 missed=0 errors=0
+CMD track OK az=85 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=213 missed=0 errors=0
+CMD track OK az=85 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=213 missed=0 errors=0
+CMD track OK az=85 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=213 missed=0 errors=0
+CMD track OK az=85 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=213 missed=0 errors=0
+CMD track OK az=84 tilt=84 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=214 missed=0 errors=0
+CMD track OK az=84 tilt=84 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=214 missed=0 errors=0
+CMD track OK az=84 tilt=84 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=214 missed=0 errors=0
+CMD track OK az=84 tilt=84 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=214 missed=0 errors=0
+EVT stow t_us=11365343 lat_us=303
+CMD sd-write OK block=16000 us=19031
+CMD sd-write OK block=16000 us=13249
+EVT stow t_us=11642343 lat_us=317
+CMD sd-write OK block=16000 us=13231
+EVT stow t_us=11921319 lat_us=339
+CMD resume OK
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=1046 accepted=10 ignored=1036
+CMD log OK on=1 seq=182 stored=176 blocks=11 dropped=0 errors=0 flushes=11 flush_max_us=13309
+CMD track OK az=10 tilt=10 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=313 missed=0 errors=0
+CMD sd-write OK block=16000 us=13231
+CMD sd-write OK block=16000 us=13231
+EVT stow t_us=16402418 lat_us=295
+CMD sd-write OK block=16000 us=14281
+EVT stow t_us=16685390 lat_us=299
+CMD sd-write OK block=16000 us=13249
+EVT stow t_us=16970551 lat_us=299
+CMD resume OK
+CMD adc OK raw=2048,3686,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=1279 accepted=13 ignored=1266
+CMD log OK on=1 seq=185 stored=176 blocks=11 dropped=0 errors=0 flushes=11 flush_max_us=13309
+EVT stow t_us=21657459 lat_us=306
+CMD sd-write OK block=16000 us=13231
+CMD sd-write OK block=16000 us=14779
+CMD sd-write OK block=16000 us=13710
+CMD resume OK
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=524 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=1313 accepted=14 ignored=1299
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=526 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=526 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=526 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=526 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=527 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=527 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=527 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=527 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=528 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=528 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=528 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=528 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=528 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=529 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=529 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=529 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=529 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=530 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=530 missed=0 errors=0
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=530 missed=0 errors=0
+CMD sd-write OK block=16000 us=13478
+CMD sd-write OK block=16000 us=13524
+CMD sd-write OK block=16000 us=13317
+CMD resume OK
+CMD log OK on=1 seq=274 stored=272 blocks=17 dropped=0 errors=0 flushes=17 flush_max_us=13309
+CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=628 missed=0 errors=0
+CMD adc OK raw=2048,410,2048,2048
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD sd-write OK block=16000 us=13231
+CMD sd-write OK block=16000 us=13332
+CMD sd-write OK block=16000 us=14606
+CMD sd-write OK block=16000 us=13231
+CMD resume OK
+CMD button OK edges=1313 accepted=14 ignored=1299
+CMD log OK on=1 seq=374 stored=368 blocks=23 dropped=0 errors=0 flushes=23 flush_max_us=13309
+CMD track OK az=70 tilt=70 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=729 missed=0 errors=0
+CMD adc OK raw=2048,2048,2048,2048
+CMD sd-write OK block=16000 us=13231
+CMD sd-write OK block=16000 us=13231
+CMD sd-write OK block=16000 us=13231
+CMD resume OK
+CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+CMD button OK edges=1313 accepted=14 ignored=1299
+CMD log OK on=1 seq=374 stored=368 blocks=23 dropped=0 errors=0 flushes=23 flush_max_us=13309
+CMD track OK az=70 tilt=70 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=843 missed=0 errors=0
+CMD track OK az=72 tilt=72 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=845 missed=0 errors=0
+CMD track OK az=72 tilt=72 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=845 missed=0 errors=0
+CMD track OK az=72 tilt=72 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=845 missed=0 errors=0
+CMD track OK az=72 tilt=72 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=845 missed=0 errors=0
+CMD track OK az=73 tilt=73 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=846 missed=0 errors=0
+CMD track OK az=73 tilt=73 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=846 missed=0 errors=0
+CMD track OK az=73 tilt=73 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=846 missed=0 errors=0
+CMD track OK az=73 tilt=73 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=846 missed=0 errors=0
+CMD track OK az=74 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=847 missed=0 errors=0
+CMD track OK az=74 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=847 missed=0 errors=0
+CMD track OK az=74 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=847 missed=0 errors=0
+CMD track OK az=74 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=847 missed=0 errors=0
+CMD track OK az=74 tilt=74 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=847 missed=0 errors=0
+CMD track OK az=75 tilt=75 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=848 missed=0 errors=0
+CMD track OK az=75 tilt=75 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=848 missed=0 errors=0
+CMD track OK az=75 tilt=75 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=848 missed=0 errors=0
+CMD track OK az=75 tilt=75 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=848 missed=0 errors=0
+CMD track OK az=76 tilt=76 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=849 missed=0 errors=0
+CMD track OK az=76 tilt=76 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=849 missed=0 errors=0
+CMD track OK az=76 tilt=76 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=849 missed=0 errors=0
+CMD sd-write OK block=16000 us=13231
+CMD sd-write OK block=16000 us=14397
+CMD sd-write OK block=16000 us=14813
+CMD resume OK
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=947 min_us=630 avg_us=636 max_us=5338
+STAT name=track n=947 min_us=877 avg_us=946 max_us=5591
+STAT name=late n=947 min_us=78 avg_us=85 max_us=1906
+STAT name=period n=947 min_us=48175 avg_us=50000 max_us=51825
+STAT name=cmd n=136 min_us=1735 avg_us=11962 max_us=26630
+STAT name=logflush n=29 min_us=13301 avg_us=13309 max_us=13309
+STAT name=stow n=14 min_us=295 avg_us=311 max_us=339
+STAT load window_ms=47357 busy_ms=3336 load_pm=70
+STAT count runs=948 missed=0 rx_bytes=1067 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=114 errors=0 isr_n=1121 isr_avg=207 isr_max=563
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=464 stack_res=1024 stack_free=2880
+CMD stats OK
+CMD log-flush OK stored=480 blocks=30 us=14509
+CMD log OK on=1 seq=481 stored=480 blocks=30 dropped=0 errors=0 flushes=30 flush_max_us=14462
+CMD log-get OK n=0 t_ms=625 raw=2048,3686,2048,2048 az=91 tilt=91 flags=3 ok=1
+CMD log-get OK n=90 t_ms=6646 raw=2048,2048,2048,2048 az=90 tilt=90 flags=8 ok=1
+CMD log-get OK n=180 t_ms=16075 raw=2048,410,2048,2048 az=11 tilt=11 flags=3 ok=1
+CMD button OK edges=1313 accepted=14 ignored=1299

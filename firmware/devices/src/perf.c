@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <string.h>
+#include "fmt.h"
 #include "perf.h"
 
 void perf_stat_init(perf_stat_t *s, const char *name)
@@ -76,7 +76,7 @@ int perf_stat_format(const perf_stat_t *s, uint32_t hz, char *buf, size_t size)
     if (s->count != 0U) {
         avg = (uint32_t)(s->sum / s->count);
     }
-    return snprintf(buf, size, "STAT name=%s n=%lu min_us=%lu avg_us=%lu max_us=%lu",
+    return fmt_snprintf(buf, size, "STAT name=%s n=%lu min_us=%lu avg_us=%lu max_us=%lu",
                     (s->name != NULL) ? s->name : "?", (unsigned long)s->count,
                     (unsigned long)perf_cycles_to_us(s->min, hz),
                     (unsigned long)perf_cycles_to_us(avg, hz),

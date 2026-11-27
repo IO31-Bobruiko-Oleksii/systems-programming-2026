@@ -1,0 +1,51 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=1432 tasks=5
+CMD track OK az=95 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=5 missed=0 errors=0
+STAT task name=event prio=5 run_us=52125 cpu_pm=144 stack=640 peak=132
+STAT task name=track prio=4 run_us=6344 cpu_pm=17 stack=640 peak=240
+STAT task name=cmd prio=3 run_us=3801 cpu_pm=10 stack=1024 peak=608
+STAT task name=logger prio=2 run_us=757 cpu_pm=2 stack=512 peak=156
+STAT task name=load prio=1 run_us=153 cpu_pm=0 stack=768 peak=132
+STAT task name=IDLE prio=0 run_us=289914 cpu_pm=804 stack=256 peak=84
+STAT os tick_hz=1000 ticks=357 switches=23 log_dropped=0
+CMD tasks OK count=6CMD heap OK total=6144 free=1104 used=5040
+EVT stow t_us=420929 lat_us=308
+CMD load OK us=5000 ms=300STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=6 min_us=630 avg_us=630 max_us=630
+STAT name=track n=7 min_us=876 avg_us=881 max_us=883
+STAT name=late n=7 min_us=81 avg_us=81 max_us=81
+STAT name=period n=7 min_us=13901 avg_us=44843 max_us=50000
+STAT name=cmd n=1 min_us=3971 avg_us=3971 max_us=3971
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=313 busy_ms=167 load_pm=535
+STAT count runs=7 missed=0 rx_bytes=0 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=0 errors=0 isr_n=0 isr_avg=0 isr_max=0
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+EVT load done us=5000 ms=363
+STAT name=loop n=0 min_us=0 avg_us=0 max_us=0
+STAT name=sense n=9 min_us=630 avg_us=630 max_us=630
+STAT name=track n=9 min_us=876 avg_us=881 max_us=883
+STAT name=late n=9 min_us=80 avg_us=81 max_us=81
+STAT name=period n=10 min_us=13901 avg_us=46390 max_us=50002
+STAT name=cmd n=1 min_us=3971 avg_us=3971 max_us=3971
+STAT name=logflush n=0 min_us=0 avg_us=0 max_us=0
+STAT name=stow n=0 min_us=0 avg_us=0 max_us=0
+STAT load window_ms=463 busy_ms=268 load_pm=580
+STAT count runs=10 missed=0 rx_bytes=6 rx_errors=0 passes=0
+STAT rx init=0 dropped=0 ring_max=6 errors=0 isr_n=6 isr_avg=252 isr_max=568
+STAT mem ram=12288 static=8944 heap_used=0 heap_res=512 stack_used=456 stack_res=1024 stack_free=2888
+CMD stats OKSTAT task name=event prio=5 run_us=0 cpu_pm=0 stack=640 peak=408
+STAT task name=track prio=4 run_us=11096 cpu_pm=20 stack=640 peak=240
+STAT task name=cmd prio=3 run_us=87749 cpu_pm=165 stack=1024 peak=780
+STAT task name=logger prio=2 run_us=1354 cpu_pm=2 stack=512 peak=180
+STAT task name=load prio=1 run_us=236024 cpu_pm=445 stack=768 peak=568
+STAT task name=IDLE prio=0 run_us=194430 cpu_pm=366 stack=256 peak=84
+STAT os tick_hz=1000 ticks=578 switches=99 log_dropped=0
+CMD tasks OK count=6

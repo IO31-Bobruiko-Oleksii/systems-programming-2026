@@ -1,0 +1,327 @@
+   0.126 Wokwi CLI v0.27.1 (ffde06bde1ae)
+   1.468 Connected to Wokwi Simulation API 1.0.0-20261111-ga74d4d0e
+   7.398 Starting simulation...
+  10.366 Heliostat boot OK
+  10.367 SELFTEST BEGIN version=1
+  10.369 SELFTEST adc OK raw=1025,2050,3074,4095
+  10.370 SELFTEST spi OK
+  10.450 SELFTEST sd OK type=V2HC sig=55AA
+  10.451 SELFTEST servo1 OK pulse_us=1500
+  10.453 SELFTEST servo2 OK pulse_us=1500
+  10.454 SELFTEST END total=5 passed=5 failed=0
+  10.456 [s3-worst: 36 s (LR3)] Expected text matched: "SELFTEST END total=5 passed=5 failed=0"
+  13.788 [s3-worst: 36 s (LR3)] delay 100ms
+  14.487 CMD stow OK az=90 tilt=90
+  14.489 CMD resume OK
+  14.490 CMD log OK on=1
+  15.205 [s3-worst: 36 s (LR3)] delay 50ms
+  15.896 CMD stats-reset OK
+  17.246 [s3-worst: 36 s (LR3)] delay 100ms
+  17.978 CMD track OK az=91 tilt=91 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=3 missed=0 errors=0
+  17.981 CMD adc OK raw=2048,3686,2048,2048
+  17.982 CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+  18.048 CMD button OK edges=0 accepted=0 ignored=0
+  18.744 [s3-worst: 36 s (LR3)] delay 100ms
+  19.653 CMD sd-write OK block=16000 us=13418
+  20.536 [s3-worst: 36 s (LR3)] delay 3ms
+  21.876 [s3-worst: 36 s (LR3)] delay 10ms
+  23.241 [s3-worst: 36 s (LR3)] delay 250ms
+  23.962 CMD sd-write OK block=16000 us=13706
+  23.964 EVT stow t_us=398049 lat_us=18615
+  25.022 [s3-worst: 36 s (LR3)] delay 5ms
+  26.369 [s3-worst: 36 s (LR3)] delay 10ms
+  27.724 [s3-worst: 36 s (LR3)] delay 250ms
+  28.422 CMD sd-write OK block=16000 us=13711
+  28.423 EVT stow t_us=663111 lat_us=16058
+  29.294 [s3-worst: 36 s (LR3)] delay 7ms
+  30.643 [s3-worst: 36 s (LR3)] delay 10ms
+  32.014 [s3-worst: 36 s (LR3)] delay 250ms
+  32.718 CMD sd-write OK block=16000 us=13714
+  32.720 EVT stow t_us=930108 lat_us=14124
+  33.651 [s3-worst: 36 s (LR3)] delay 4000ms
+  34.346 CMD resume OK
+  40.181 [s3-worst: 36 s (LR3)] delay 100ms
+  40.895 CMD log OK on=1 seq=88 stored=80 blocks=5 dropped=0 errors=0 flushes=5 flush_max_us=13496
+  40.897 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=103 missed=0 errors=0
+  40.898 CMD adc OK raw=2048,2048,2048,2048
+  40.950 CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+  40.967 [s3-worst: 36 s (LR3)] delay 121ms
+  42.415 [s3-worst: 36 s (LR3)] delay 10ms
+  43.100 EVT stow t_us=5411609 lat_us=3539
+  43.768 [s3-worst: 36 s (LR3)] delay 250ms
+  45.347 [s3-worst: 36 s (LR3)] delay 9ms
+  46.697 [s3-worst: 36 s (LR3)] delay 10ms
+  48.051 CMD sd-write OK blo
+  48.053 [s3-worst: 36 s (LR3)] delay 250ms
+  48.751 ck=16000 us=13459
+  48.752 EVT stow t_us=5680525 lat_us=11751
+  49.654 [s3-worst: 36 s (LR3)] delay 11ms
+  51.000 [s3-worst: 36 s (LR3)] delay 10ms
+  51.679 CMD sd-write OK block=16000 us=13486
+  52.349 [s3-worst: 36 s (LR3)] delay 250ms
+  53.038 EVT stow t_us=5951545 lat_us=9777
+  53.922 [s3-worst: 36 s (LR3)] delay 13ms
+  55.281 [s3-worst: 36 s (LR3)] delay 10ms
+  55.963 CMD sd-write OK block=16000 us=13770
+  56.627 EVT stow t_
+  56.629 [s3-worst: 36 s (LR3)] delay 250ms
+  57.319 us=6224531 lat_us=8098
+  58.200 [s3-worst: 36 s (LR3)] delay 4000ms
+  58.890 CMD resume OK
+  64.433 [s3-worst: 36 s (LR3)] delay 100ms
+  65.126 CMD button OK edges=603 accepted=7 ignored=596
+  65.127 CMD log OK on=1 seq=92 stored=80 blocks=5 dropped=0 errors=0 flushes=5 flush_max_us=13496
+  65.129 CMD track OK az=89 tilt=89 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=209 missed=0 errors=0
+  65.157 CMD adc OK raw=2048,410,2048,2048
+  65.865 [s3-worst: 36 s (LR3)] delay 300ms
+  66.582 CMD track OK az=88 tilt=88 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=210 missed=0 errors=0
+  66.583 CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+  66.644 CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+  66.646 CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+  66.650 CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+  66.686 CMD track OK az=87 tilt=87 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=211 missed=0 errors=0
+  66.687 CMD track OK az=86 tilt=86 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=212 missed=0 errors=0
+  66.734 CMD track OK az=86 tilt=86 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=212 missed=0 errors=0
+  66.735 CMD track OK az=86 tilt=86 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=212 missed=0 errors=0
+  66.737 CMD track OK az=85 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=213 missed=0 errors=0
+  66.774 CMD track OK az=85 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=213 missed=0 errors=0
+  66.775 CMD track OK az=85 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=213 missed=0 errors=0
+  66.839 CMD track OK az=85 tilt=85 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=213 missed=0 errors=0
+  66.841 CMD track OK az=84 tilt=84 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=214 missed=0 errors=0
+  66.842 CMD track OK az=84 tilt=84 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=214 missed=0 errors=0
+  66.880 CMD track OK az=84 tilt=84 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=214 missed=0 errors=0
+  66.884 CMD track OK az=84 tilt=84 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=214 missed=0 errors=0
+  66.887 CMD track OK az=83 tilt=83 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=215 missed=0 errors=0
+  66.896 CMD track OK az=83 tilt=83 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=215 missed=0 errors=0
+  66.903 CMD track OK az=83 tilt=83 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=215 missed=0 errors=0
+  67.634 [s3-worst: 36 s (LR3)] delay 15ms
+  68.992 [s3-worst: 36 s (LR3)] delay 10ms
+  69.672 CMD sd-write OK block=16000 us=13549
+  70.340 EVT stow t_us=10899923 lat_us=5917
+  70.341 [s3-worst: 36 s (LR3)] delay 250ms
+  72.051 [s3-worst: 36 s (LR3)] delay 17ms
+  73.424 [s3-worst: 36 s (LR3)] delay 10ms
+  74.106 CMD sd-write OK block=16000 us=13405
+  74.107 EVT stow t_us=11176952 lat_us=3752
+  74.774 [s3-worst: 36 s (LR3)] delay 250ms
+  76.351 [s3-worst: 36 s (LR3)] delay 19ms
+  77.712 CMD sd-write OK bloc
+  77.714 [s3-worst: 36 s (LR3)] delay 10ms
+  78.391 k=16000 us=13416
+  78.392 EVT stow t_us=11455995 lat_us=1751
+  79.062 [s3-worst: 36 s (LR3)] delay 250ms
+  80.646 [s3-worst: 36 s (LR3)] delay 4000ms
+  81.338 CMD resume OK
+  86.875 [s3-worst: 36 s (LR3)] delay 100ms
+  87.591 CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+  87.592 CMD button OK edges=919 accepted=10 ignored=909
+  87.594 CMD log OK on=1 seq=183 stored=176 blocks=11 dropped=0 errors=0 flushes=11 flush_max_us=13496
+  87.616 CMD track OK az=10 tilt=10 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=313 missed=0 errors=0
+  88.312 [s3-worst: 36 s (LR3)] delay 100ms
+  89.016 CMD sd-write OK block=16000 us=13416
+  89.737 [s3-worst: 36 s (LR3)] delay 21ms
+  90.432 CMD sd-write OK block=16000 us=13409
+  91.099 [s3-worst: 36 s (LR3)] delay 10ms
+  91.776 EVT stow t_us=15937371 lat_us=4777
+  92.458 [s3-worst: 36 s (LR3)] delay 250ms
+  94.037 [s3-worst: 36 s (LR3)] delay 23ms
+  94.743 CMD sd-write OK block=16000 us=13418
+  95.412 [s3-worst: 36 s (LR3)] delay 10ms
+  96.089 EVT stow t_us=16220383 lat_us=3768
+  96.758 [s3-worst: 36 s (LR3)] delay 250ms
+  98.331 [s3-worst: 36 s (LR3)] delay 25ms
+  99.045 CMD sd-write OK block=16000 us=13416
+  99.712 [s3-worst: 36 s (LR3)] delay 10ms
+ 100.396 EVT stow t_us=16505425 lat_us=1764
+ 101.064 [s3-worst: 36 s (LR3)] delay 250ms
+ 102.637 [s3-worst: 36 s (LR3)] delay 4000ms
+ 103.328 CMD resume OK
+ 108.825 [s3-worst: 36 s (LR3)] delay 100ms
+ 109.519 CMD adc OK raw=2048,3686,2048,2048
+ 109.521 CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+ 109.522 CMD button OK edges=1317 accepted=13 ignored=1304
+ 109.523 CMD log OK on=1 seq=186 stored=176 blocks=11 dropped=0 errors=0 flushes=11 flush_max_us=13496
+ 109.570 [s3-worst: 36 s (LR3)] delay 327ms
+ 111.230 [s3-worst: 36 s (LR3)] delay 10ms
+ 111.905 EVT stow t_us=21192786 lat_us=4362
+ 112.573 [s3-worst: 36 s (LR3)] delay 250ms
+ 114.152 [s3-worst: 36 s (LR3)] delay 27ms
+ 114.839 CMD sd-write OK block=16000 us=13405
+ 115.508 [s3-worst: 36 s (LR3)] delay 10ms
+ 116.182 EVT stow t_us=21479896 lat_us=5258
+ 116.849 [s3-worst: 36 s (LR3)] delay 250ms
+ 118.422 [s3-worst: 36 s (LR3)] delay 3ms
+ 119.760 [s3-worst: 36 s (LR3)] delay 10ms
+ 121.111 [s3-worst: 36 s (LR3)] delay 250ms
+ 121.802 CMD sd-write OK block=16000 us=14047
+ 121.804 EVT stow t_us=21742832 lat_us=18393
+ 122.679 [s3-worst: 36 s (LR3)] delay 5ms
+ 124.027 [s3-worst: 36 s (LR3)] delay 10ms
+ 125.376 [s3-worst: 36 s (LR3)] delay 250ms
+ 126.065 CMD sd-write OK block=16000 us=13569
+ 126.067 EVT stow t_us=22007923 lat_us=15842
+ 126.457 [s3-worst: 36 s (LR3)] delay 4000ms
+ 127.160 CMD resume OK
+ 132.644 [s3-worst: 36 s (LR3)] delay 100ms
+ 133.349 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=524 missed=0 errors=0
+ 133.351 CMD adc OK raw=2048,2048,2048,2048
+ 133.352 CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+ 133.375 CMD button OK edges=1745 accepted=17 ignored=1728
+ 134.063 [s3-worst: 36 s (LR3)] delay 300ms
+ 134.779 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=526 missed=0 errors=0
+ 134.780 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=526 missed=0 errors=0
+ 134.796 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=526 missed=0 errors=0
+ 134.797 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=527 missed=0 errors=0
+ 134.802 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=527 missed=0 errors=0
+ 134.830 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=527 missed=0 errors=0
+ 134.831 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=527 missed=0 errors=0
+ 134.856 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=528 missed=0 errors=0
+ 134.859 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=528 missed=0 errors=0
+ 134.860 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=528 missed=0 errors=0
+ 134.886 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=528 missed=0 errors=0
+ 134.888 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=529 missed=0 errors=0
+ 134.943 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=529 missed=0 errors=0
+ 134.944 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=529 missed=0 errors=0
+ 134.946 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=529 missed=0 errors=0
+ 134.984 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=530 missed=0 errors=0
+ 134.985 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=530 missed=0 errors=0
+ 135.035 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=530 missed=0 errors=0
+ 135.037 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=530 missed=0 errors=0
+ 135.043 CMD track OK az=170 tilt=170 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=531 missed=0 errors=0
+ 135.741 [s3-worst: 36 s (LR3)] delay 7ms
+ 137.085 [s3-worst: 36 s (LR3)] delay 10ms
+ 138.434 [s3-worst: 36 s (LR3)] delay 250ms
+ 139.123 CMD sd-write OK block=16000 us=13765
+ 139.124 EVT stow t_us=26675245 lat_us=14186
+ 140.004 [s3-worst: 36 s (LR3)] delay 9ms
+ 141.385 [s3-worst: 36 s (LR3)] delay 10ms
+ 142.737 CMD sd-write OK b
+ 142.739 [s3-worst: 36 s (LR3)] delay 250ms
+ 143.436 lock=16000 us=13693
+ 143.438 EVT stow t_us=26944271 lat_us=12071
+ 144.308 [s3-worst: 36 s (LR3)] delay 11ms
+ 145.666 [s3-worst: 36 s (LR3)] delay 10ms
+ 146.350 CMD sd-write OK block=16000 us=13602
+ 147.016 [s3-worst: 36 s (LR3)] delay 250ms
+ 147.709 EVT stow t_us=27215281 lat_us=9930
+ 148.586 [s3-worst: 36 s (LR3)] delay 4000ms
+ 149.278 CMD resume OK
+ 154.769 [s3-worst: 36 s (LR3)] delay 100ms
+ 155.465 CMD log OK on=1 seq=281 stored=272 blocks=17 dropped=0 errors=0 flushes=17 flush_max_us=13496
+ 155.467 CMD track OK az=90 tilt=90 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=628 missed=0 errors=0
+ 155.468 CMD adc OK raw=2048,410,2048,2048
+ 155.484 CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+ 156.183 [s3-worst: 36 s (LR3)] delay 100ms
+ 156.881 CMD sd-write OK block=16000 us=13418
+ 157.591 [s3-worst: 36 s (LR3)] delay 13ms
+ 158.946 [s3-worst: 36 s (LR3)] delay 10ms
+ 159.621 CMD sd-write OK block=16000 us=13459
+ 160.289 EVT stow t_us=
+ 160.290 [s3-worst: 36 s (LR3)] delay 250ms
+ 160.976 31688881 lat_us=7558
+ 161.867 [s3-worst: 36 s (LR3)] delay 15ms
+ 163.230 [s3-worst: 36 s (LR3)] delay 10ms
+ 163.905 CMD sd-write OK block=16000 us=13567
+ 164.577 EVT stow t_us=31963681 lat_us=596
+ 164.578 [s3-worst: 36 s (LR3)] delay 250ms
+ 165.266 7
+ 166.147 [s3-worst: 36 s (LR3)] delay 17ms
+ 167.510 [s3-worst: 36 s (LR3)] delay 10ms
+ 168.186 CMD sd-write OK block=16000 us=13419
+ 168.188 EVT stow t_us=32240726 lat_us=3772
+ 168.854 [s3-worst: 36 s (LR3)] delay 250ms
+ 170.421 [s3-worst: 36 s (LR3)] delay 4000ms
+ 171.128 CMD resume OK
+ 176.637 [s3-worst: 36 s (LR3)] delay 100ms
+ 177.338 CMD button OK edges=2404 accepted=23 ignored=2381
+ 177.339 CMD log OK on=1 seq=368 stored=368 blocks=23 dropped=0 errors=0 flushes=23 flush_max_us=13793
+ 177.367 CMD track OK az=10 tilt=10 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=729 missed=0 errors=0
+ 177.369 CMD adc OK raw=2048,2048,2048,2048
+ 177.392 [s3-worst: 36 s (LR3)] delay 514ms
+ 179.253 [s3-worst: 36 s (LR3)] delay 10ms
+ 179.942 EVT stow t_us=37115159 lat_us=4995
+ 180.616 [s3-worst: 36 s (LR3)] delay 250ms
+ 182.196 [s3-worst: 36 s (LR3)] delay 19ms
+ 183.565 CMD sd-write OK bloc
+ 183.567 [s3-worst: 36 s (LR3)] delay 10ms
+ 184.242 k=16000 us=13416
+ 184.245 EVT stow t_us=37394175 lat_us=1730
+ 184.919 [s3-worst: 36 s (LR3)] delay 250ms
+ 186.495 [s3-worst: 36 s (LR3)] delay 21ms
+ 187.195 CMD sd-write OK block=16000 us=13409
+ 187.861 [s3-worst: 36 s (LR3)] delay 10ms
+ 188.538 EVT stow t_us=37675161 lat_us=4987
+ 189.209 [s3-worst: 36 s (LR3)] delay 250ms
+ 190.781 [s3-worst: 36 s (LR3)] delay 23ms
+ 191.471 CMD sd-write OK block=16000 us=13416
+ 192.139 [s3-worst: 36 s (LR3)] delay 10ms
+ 192.816 EVT stow t_us=37958192 lat_us=3961
+ 193.484 [s3-worst: 36 s (LR3)] delay 250ms
+ 195.053 [s3-worst: 36 s (LR3)] delay 4000ms
+ 195.745 CMD resume OK
+ 201.220 [s3-worst: 36 s (LR3)] delay 100ms
+ 201.917 CMD help OK commands=help,selftest,adc,servo,sd,time,track,deadband,zero,stow,resume,button,log,stats,load
+ 201.918 CMD button OK edges=2739 accepted=27 ignored=2712
+ 201.919 CMD log OK on=1 seq=372 stored=368 blocks=23 dropped=0 errors=0 flushes=23 flush_max_us=13793
+ 201.936 CMD track OK az=91 tilt=91 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=844 missed=0 errors=0
+ 202.642 [s3-worst: 36 s (LR3)] delay 300ms
+ 203.358 CMD track OK az=92 tilt=92 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=845 missed=0 errors=0
+ 203.360 CMD track OK az=92 tilt=92 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=845 missed=0 errors=0
+ 203.406 CMD track OK az=92 tilt=92 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=845 missed=0 errors=0
+ 203.407 CMD track OK az=93 tilt=93 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=846 missed=0 errors=0
+ 203.410 CMD track OK az=93 tilt=93 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=846 missed=0 errors=0
+ 203.445 CMD track OK az=93 tilt=93 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=846 missed=0 errors=0
+ 203.450 CMD track OK az=93 tilt=93 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=846 missed=0 errors=0
+ 203.451 CMD track OK az=94 tilt=94 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=847 missed=0 errors=0
+ 203.471 CMD track OK az=94 tilt=94 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=847 missed=0 errors=0
+ 203.472 CMD track OK az=94 tilt=94 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=847 missed=0 errors=0
+ 203.474 CMD track OK az=94 tilt=94 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=847 missed=0 errors=0
+ 203.496 CMD track OK az=95 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=848 missed=0 errors=0
+ 203.498 CMD track OK az=95 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=848 missed=0 errors=0
+ 203.536 CMD track OK az=95 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=848 missed=0 errors=0
+ 203.542 CMD track OK az=95 tilt=95 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=848 missed=0 errors=0
+ 203.566 CMD track OK az=96 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=849 missed=0 errors=0
+ 203.568 CMD track OK az=96 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=849 missed=0 errors=0
+ 203.570 CMD track OK az=96 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=849 missed=0 errors=0
+ 203.627 CMD track OK az=96 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=849 missed=0 errors=0
+ 203.628 CMD track OK az=96 tilt=96 band=100 zero=90,90 parked=0 stowed=0 dark=0 runs=849 missed=0 errors=0
+ 204.329 [s3-worst: 36 s (LR3)] delay 25ms
+ 205.024 CMD sd-write OK block=16000 us=13418
+ 205.693 [s3-worst: 36 s (LR3)] delay 10ms
+ 206.369 EVT stow t_us=42643588 lat_us=1599
+ 207.037 [s3-worst: 36 s (LR3)] delay 250ms
+ 208.612 [s3-worst: 36 s (LR3)] delay 27ms
+ 209.316 CMD sd-write OK block=16000 us=13412
+ 209.572 [s3-worst: 36 s (LR3)] delay 10ms
+ 209.865 EVT stow t_us=42930673 lat_us=5479
+ 210.533 [s3-worst: 36 s (LR3)] delay 250ms
+ 212.109 [s3-worst: 36 s (LR3)] delay 3ms
+ 213.446 [s3-worst: 36 s (LR3)] delay 10ms
+ 214.801 [s3-worst: 36 s (LR3)] delay 250ms
+ 215.494 CMD sd-write OK block=16000 us=13933
+ 215.496 EVT stow t_us=43193612 lat_us=18283
+ 216.375 [s3-worst: 36 s (LR3)] delay 4000ms
+ 217.067 CMD resume OK
+ 222.595 STAT name=loop n=8499 min_us=42 avg_us=5566 max_us=24630
+ 222.597 STAT name=sense n=946 min_us=602 avg_us=603 max_us=738
+ 222.600 STAT name=track n=946 min_us=807 avg_us=891 max_us=1151
+ 222.603 STAT name=late n=946 min_us=2 avg_us=3479 max_us=21214
+ 222.624 STAT name=period n=946 min_us=30321 avg_us=50006 max_us=66679
+ 222.626 STAT name=cmd n=136 min_us=1579 avg_us=11697 max_us=19919
+ 222.627 STAT name=logflush n=28 min_us=13482 avg_us=13509 max_us=13793
+ 222.628 STAT name=stow n=30 min_us=1599 avg_us=8069 max_us=18615
+ 222.629 STAT load window_ms=47308 busy_ms=2813 load_pm=59
+ 222.650 STAT count runs=946 missed=0 rx_bytes=1067 rx_errors=0 passes=8499
+ 222.651 STAT rx init=0 dropped=0 ring_max=114 errors=0 isr_n=1121 isr_avg=143 isr_max=157
+ 222.653 STAT mem ram=12288 static=2296 heap_used=0 heap_res=512 stack_used=940 stack_res=1024 stack_free=9052
+ 222.677 CMD stats OK
+ 222.678 CMD log-flush OK stored=464 blocks=29 us=17
+ 222.732 CMD log OK on=1 seq=464 stored=464 blocks=29 dropped=0 errors=0 flushes=29 flush_max_us=13793
+ 222.780 CMD log-get OK n=0 t_ms=150 raw=2048,3686,2048,2048 az=91 tilt=91 flags=3 ok=1
+ 222.782 CMD log-get OK n=90 t_ms=5916 raw=2048,2048,2048,2048 az=90 tilt=90 flags=8 ok=1
+ 222.829 CMD log-get OK n=180 t_ms=15550 raw=2048,410,2048,2048 az=12 tilt=12 flags=3 ok=1
+ 222.830 CMD button OK edges=
+ 222.831 [s3-worst: 36 s (LR3)] Expected text matched: "CMD button OK edges="
+ 222.833 [s3-worst: 36 s (LR3)] delay 5ms
+ 223.499 3120 accepted=30 ignored=3090
+ 223.501 [s3-worst: 36 s (LR3)] Scenario completed successfully

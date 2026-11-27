@@ -1,0 +1,50 @@
+capture docs/captures/lr4/loop/sweep-uart.vcd: 4753.983 ms, load windows on D4: 11, in the serial log: 11
+bytes sent per window: counted by the receive interrupt (isr_n); bytes lost: counted by the ring (dropped); byte time 86.7 us
+
+UART AND LOAD (P = work of one loop pass outside the UART wait, pin PB6; margin = byte time - largest P)
+    X us   P avg   P max  margin  fw pm  pin pm    rx  lost  err  ok  bad  T2 in burst
+       0    41.0    45.8   +40.8     50    84.8   192     0    0   4    0     0 of 4  
+      17    58.5    63.0   +23.7     65    98.8   192     0    0   4    0     0 of 4  
+      25    77.5    84.8    +1.8     78   113.3   192     0    0   4    0     0 of 4  
+      34    82.5   104.0   -17.3     82   118.8   192     0    0   4    0     0 of 4  
+      42    92.5   115.8   -29.1     88   126.6   192     0    0   4    0     0 of 4  
+      51   100.8   125.2   -38.6     95   132.8   192     0    0   4    0     0 of 4  
+      59   110.9   132.8   -46.2    102   140.8   192     0    0   4    0     0 of 4  
+      68   117.9   139.4   -52.8    109   145.7   192     0    0   4    0     0 of 4  
+      85   136.7   150.9   -64.3    121   158.5   192     0    0   4    0     0 of 4  
+     100   150.5   164.3   -77.7    132   169.2   192     0    0   4    0     0 of 4  
+       1    53.0    66.5   +20.2     59    95.2   192     0    0   4    0     2 of 4    control
+
+RECEIVE BUFFER (STAT rx; arrived = bytes the interrupt took, read = bytes the console took from the ring,
+left = still in the ring at the end of the window; isr times in CPU cycles of the 12 MHz clock)
+    X us  arrived   read  dropped  left  ring max  errors  isr avg  isr max
+       0      192    192        0     0         1       0      107      113
+      17      192    192        0     0         1       0      107      113
+      25      192    192        0     0         1       0      107      114
+      34      192    192        0     0         3       0      107      113
+      42      192    192        0     0         8       0      107      114
+      51      192    192        0     0        12       0      107      115
+      59      192    192        0     0        14       0      107      114
+      68      192    192        0     0        16       0      107      114
+      85      192    192        0     0        21       0      107      115
+     100      192    192        0     0        22       0      107      114
+       1      192    192        0     0        30       0      107      114  control
+
+DEADLINES (T2: late + duration within 25 ms; E1: firmware reaction within 10 ms)
+    X us  period avg  period max  T2 runs  late max  missed      T2  presses  lat fw max  lat pin max      E1
+       0        1258        7330        6      5393       0      ok        0           -            -       -
+      17        1258        7067        6      5244       0      ok        0           -            -       -
+      25        1254        6919        6      5118       0      ok        0           -            -       -
+      34        1238        7671        6      4084       0      ok        0           -            -       -
+      42        1242        7419        6      4312       0      ok        0           -            -       -
+      51        1242        7866        6      5181       0      ok        0           -            -       -
+      59        1242        7100        6      4826       0      ok        0           -            -       -
+      68        1247        7756        6      5823       0      ok        0           -            -       -
+      85        1267        7714        6      4695       0      ok        0           -            -       -
+     100        1271        7951        6      5654       0      ok        0           -            -       -
+       1        1253        7127        6      5834       0      ok        0           -            -       -
+
+BREAKING POINTS (control and named windows left out, rows in order of growing X)
+  bytes dropped by the ring: not reached in this sweep
+  E1 reaction above 10 ms: not reached in this sweep
+  T2 deadline missed: not reached in this sweep

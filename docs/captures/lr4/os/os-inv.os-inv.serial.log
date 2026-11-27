@@ -1,0 +1,22 @@
+Heliostat boot OK
+SELFTEST BEGIN version=1
+SELFTEST adc OK raw=1025,2050,3074,4095
+SELFTEST spi OK
+SELFTEST sd OK type=V2HC sig=55AA
+SELFTEST servo1 OK pulse_us=1500
+SELFTEST servo2 OK pulse_us=1500
+SELFTEST END total=5 passed=5 failed=0RTOS up tick_hz=1000 core_hz=12000000 heap_free=488 tasks=7
+CMD inv OK lock=mutex wait_us=21486
+CMD inv OK lock=binary wait_us=82973
+CMD inv OK lock=mutex wait_us=20305
+CMD inv OK lock=binary wait_us=82684
+STAT task name=event prio=5 run_us=53125 cpu_pm=28 stack=640 peak=132
+STAT task name=track prio=4 run_us=37161 cpu_pm=19 stack=640 peak=240
+STAT task name=cmd prio=3 run_us=19410 cpu_pm=10 stack=1024 peak=624
+STAT task name=logger prio=2 run_us=5380 cpu_pm=2 stack=512 peak=180
+STAT task name=load prio=1 run_us=157 cpu_pm=0 stack=768 peak=132
+STAT task name=inv_low prio=1 run_us=81832 cpu_pm=43 stack=256 peak=148
+STAT task name=inv_mid prio=2 run_us=242576 cpu_pm=129 stack=256 peak=140
+STAT task name=IDLE prio=0 run_us=1432080 cpu_pm=765 stack=256 peak=84
+STAT os tick_hz=1000 ticks=1818 switches=145 log_dropped=0
+CMD tasks OK count=8CMD heap OK total=6144 free=160 used=5984

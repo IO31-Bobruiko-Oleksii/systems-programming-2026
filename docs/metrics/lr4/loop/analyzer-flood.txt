@@ -1,0 +1,41 @@
+capture docs/captures/lr4/loop/flood.vcd: 6310.815 ms, load windows on D4: 8, in the serial log: 8
+bytes sent per window: counted by the receive interrupt (isr_n); bytes lost: counted by the ring (dropped); byte time 86.7 us
+
+UART AND LOAD (P = work of one loop pass outside the UART wait, pin PB6; margin = byte time - largest P)
+    X us   P avg   P max  margin  fw pm  pin pm    rx  lost  err  ok  bad  T2 in burst
+       0    47.8    59.6   +27.0    113   235.1  1440     0    0  30    0     3 of 30 
+       8    57.6    68.3   +18.3    131   255.2  1408    32    0  28    1     3 of 28 
+      17    66.6    77.0    +9.7    162   283.5  1309   131    0  23    5     3 of 23 
+      34    82.6   106.8   -20.2    196   304.1  1193   247    0  18    8     1 of 18 
+      68   119.9   140.2   -53.5    210   302.5   934   506    0  11    7     0 of 11 
+     100   153.4   167.3   -80.6    249   335.7   836   604    0  10    7     0 of 10 
+       1    50.7    56.4   +30.2    142   163.2   262   224    0   5    1     1 of 5    stats-reply
+       2    50.9    56.4   +30.2     76   101.5   255     0    0   5    1     1 of 5    sd-write
+
+RECEIVE BUFFER (STAT rx; arrived = bytes the interrupt took, read = bytes the console took from the ring,
+left = still in the ring at the end of the window; isr times in CPU cycles of the 12 MHz clock)
+    X us  arrived   read  dropped  left  ring max  errors  isr avg  isr max
+       0     1440   1440        0     0       179       0      106      114
+       8     1440   1408       32     0       256       0      106      114
+      17     1440   1309      131     0       256       0      105      114
+      34     1440   1193      247     0       256       0      104      114
+      68     1440    934      506     0       256       0      100      114
+     100     1440    836      604     0       256       0       99      114
+       1      486    262      224     0       256       0       99      114  stats-reply
+       2      255    255        0     0       240       0      111      114  sd-write
+
+DEADLINES (T2: late + duration within 25 ms; E1: firmware reaction within 10 ms)
+    X us  period avg  period max  T2 runs  late max  missed      T2  presses  lat fw max  lat pin max      E1
+       0         393        7724       12      5395       0      ok        0           -            -       -
+       8         400        8649       12      5433       0      ok        0           -            -       -
+      17         432       11072       12      5130       0      ok        0           -            -       -
+      34         469        9943       12      4949       0      ok        0           -            -       -
+      68         590        6170       12      5207       0      ok        0           -            -       -
+     100         658        8776       12      4519       0      ok        0           -            -       -
+       1        2114       87448       15     54989       1  MISSED        0           -            -       -
+       2        1720       20801       12      5554       0      ok        0           -            -       -
+
+BREAKING POINTS (control and named windows left out, rows in order of growing X)
+  bytes dropped by the ring: first at X = 8 us (P avg 57.6 us, max 68.3 us), last good X = 0 us (P avg 47.8 us, max 59.6 us)
+  E1 reaction above 10 ms: not reached in this sweep
+  T2 deadline missed: not reached in this sweep

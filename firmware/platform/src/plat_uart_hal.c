@@ -9,6 +9,7 @@ extern UART_HandleTypeDef huart2;
 #define RX_IRQ         USART2_IRQn
 #define RX_IRQ_PRIO    1U
 #define RX_ERRORS      (UART_FLAG_ORE | UART_FLAG_FE | UART_FLAG_NE)
+#define RX_WAKE_LEVEL  128U
 
 static plat_ring_t rx_ring;
 static volatile uint32_t rx_errors;
@@ -16,6 +17,7 @@ static volatile uint32_t rx_error_pending;
 static volatile uint32_t isr_n;
 static volatile uint32_t isr_sum;
 static volatile uint32_t isr_max;
+static void (*volatile rx_notify)(void);
 
 plat_status_t plat_uart_write(const uint8_t *data, size_t len)
 {
@@ -29,24 +31,47 @@ plat_status_t plat_uart_write(const uint8_t *data, size_t len)
     }
 }
 
+void plat_uart_panic_write(const uint8_t *data, size_t len)
+{
+    size_t i;
+
+    for (i = 0U; i < len; i++) {
+        uint32_t spin = 100000U;
+
+        while (((huart2.Instance->ISR & USART_ISR_TXE_TXFNF) == 0U) && (spin != 0U)) {
+            spin--;
+        }
+        huart2.Instance->TDR = data[i];
+    }
+}
+
 void USART2_IRQHandler(void)
 {
     uint32_t start = SysTick->VAL;
     uint32_t isr = huart2.Instance->ISR;
     uint32_t end;
     uint32_t spent;
+    uint32_t wake = 0U;
 
     if ((isr & UART_FLAG_RXNE) != 0U) {
         uint8_t byte = (uint8_t)huart2.Instance->RDR;
 
         if ((isr & (UART_FLAG_FE | UART_FLAG_NE)) == 0U) {
             (void)plat_ring_put(&rx_ring, byte);
+            if (byte == (uint8_t)'\r' || byte == (uint8_t)'\n' ||
+                plat_ring_count(&rx_ring) >= RX_WAKE_LEVEL) {
+                wake = 1U;
+            }
         }
     }
     if ((isr & RX_ERRORS) != 0U) {
         __HAL_UART_CLEAR_FLAG(&huart2, UART_CLEAR_OREF | UART_CLEAR_FEF | UART_CLEAR_NEF);
         rx_errors++;
         rx_error_pending = 1U;
+        wake = 1U;
+    }
+    if (wake != 0U && rx_notify != NULL) {
+        rx_notify();
     }
     end = SysTick->VAL;
     spent = start - end;
@@ -58,6 +83,11 @@ void USART2_IRQHandler(void)
     if (spent > isr_max) {
         isr_max = spent;
     }
+}
+
+void plat_uart_set_rx_notify(void (*cb)(void))
+{
+    rx_notify = cb;
 }
 
 plat_status_t plat_uart_rx_start(void)
